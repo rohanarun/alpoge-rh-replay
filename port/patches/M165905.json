@@ -1,0 +1,8 @@
+{
+ "module": "GroundTheory.HeightsAndTheta.Heights.FiniteCovolume.StatementsTorusIntegral",
+ "source_sha256": "4c8507ae5d95f6123197e207960dc85d9132d3e9cf8c68492468eaf22d65f1a8",
+ "lean": "leanprover/lean4:v4.36.0",
+ "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+ "notes": "unchanged",
+ "evidence": "port triage port-triage-001: compiled unchanged on Google Cloud (port/triage/results.json)"
+}

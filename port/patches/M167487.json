@@ -1,0 +1,8 @@
+{
+ "module": "GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.StatementsHookFactorBranch",
+ "source_sha256": "97d1a1872ce4c249b454e6a47fe5ceab01ae04af32459c9038e6ae17d80186e6",
+ "lean": "leanprover/lean4:v4.36.0",
+ "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+ "notes": "unchanged",
+ "evidence": "port triage port-triage-001: compiled unchanged on Google Cloud (port/triage/results.json)"
+}

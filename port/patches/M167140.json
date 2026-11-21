@@ -1,0 +1,8 @@
+{
+ "module": "GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPrimeComplexRadical",
+ "source_sha256": "83a078a78f581e0d192083146055f07e7f6f3f5c54ff13cf6f218bbda4613f33",
+ "lean": "leanprover/lean4:v4.36.0",
+ "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+ "notes": "unchanged",
+ "evidence": "port triage port-triage-001: compiled unchanged on Google Cloud (port/triage/results.json)"
+}

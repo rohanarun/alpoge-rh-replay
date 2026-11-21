@@ -1,0 +1,8 @@
+{
+ "module": "GroundTheory.HeightsAndTheta.Heights.HilbertSamuel.StatementsPolyNonvanishDense",
+ "source_sha256": "61ccab22e8e8677041646de8be5ac7f1fd8fb8ebedd44931921ab196e47c8a60",
+ "lean": "leanprover/lean4:v4.36.0",
+ "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+ "notes": "unchanged",
+ "evidence": "port triage port-triage-001: compiled unchanged on Google Cloud (port/triage/results.json)"
+}

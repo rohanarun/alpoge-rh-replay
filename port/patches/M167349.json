@@ -1,0 +1,8 @@
+{
+ "module": "GroundTheory.HeightsAndTheta.Heights.HodgeLowerBound.PFlagIntMuOneDet",
+ "source_sha256": "ea0de06707f0d74ae992c2a10cc695a9214af35f703c24cd6b6a59e92d2d9a92",
+ "lean": "leanprover/lean4:v4.36.0",
+ "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+ "notes": "unchanged",
+ "evidence": "port triage port-triage-001: compiled unchanged on Google Cloud (port/triage/results.json)"
+}
