@@ -170,6 +170,17 @@ class WorkerTests(unittest.TestCase):
         self.assertEqual(self.launch(fail_first), 1)
         self.assertEqual(self.gh.posts, [2])
 
+    def test_lost_races_are_not_failures(self):
+        self.assignments.write_text('M000001 M000002 M000003')
+        self.gh.issues[1] = dict(number=1, title='Claim M000002', state='open', body='', labels=[],
+                                 user={'login': 'another'}, comments=0)
+        self.gh.conflicts.add('M000003')
+        self.assertEqual(self.launch(self.artifacts), 0)
+        self.assertEqual(self.gh.posts, [2])
+        tasks_state = json.loads((self.root / 'state/state.json').read_text())['tasks']
+        self.assertEqual([tasks_state[t].get('error') for t in ('M000002', 'M000003')],
+                         [worker.OCCUPIED, worker.CONFLICT])
+
     def test_reconcile_lost_github_replies(self):
         self.assignments.write_text('M000001')
         for cut in ['claim', 'submit']:

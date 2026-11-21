@@ -16,6 +16,10 @@ import tasks
 from worker_github import GitHub
 
 FILES = ('receipt.json', 'build.log', 'targets.tar.gz')
+OCCUPIED = 'Selection is occupied in the ledger or live claims'
+CONFLICT = 'closed or conflicting claim'
+# Another reservation winning the same work is expected and leaves nothing to repair.
+LOST_RACES = (OCCUPIED, CONFLICT)
 
 
 def save(path, state):
@@ -99,7 +103,7 @@ def inspect_grant(issue, comments, target, owner):
             return 'submitted', c['html_url']
     labels = {label['name'] for label in issue['labels']}
     if issue['state'] != 'open' or 'claim-conflict' in labels:
-        return 'closed or conflicting claim', None
+        return CONFLICT, None
     if 'claim-granted' in labels and any(c['user']['login'] == 'github-actions[bot]'
             and c['body'].startswith(f'Granted `{target}`.') for c in comments):
         return 'granted', None
@@ -115,7 +119,7 @@ def dispatch(state, selected, rows, github, build, persist, jobs, poll, retry):
         while True:
             pending = [t for t, e in entries.items() if not (e.get('submission') or e.get('error'))]
             if not pending:
-                return int(any(e.get('error') for e in entries.values()))
+                return int(any(e.get('error') and e['error'] not in LOST_RACES for e in entries.values()))
             # A failed build can still hold an open grant. It consumes capacity
             # until the operator retries it or the issue is closed.
             failed = [e for e in entries.values() if e.get('error')]
@@ -152,7 +156,7 @@ def dispatch(state, selected, rows, github, build, persist, jobs, poll, retry):
                         active += 1
                     if not number and not entry.get('error'):
                         if any(r['state'] != 'open' or r['id'] in busy or r['packet'] in busy for r in selected[target]):
-                            entry['error'] = 'Selection is occupied in the ledger or live claims'
+                            entry['error'] = OCCUPIED
                         else:
                             entry['intent'] = 'claim'
                             persist()
