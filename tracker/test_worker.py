@@ -33,6 +33,8 @@ class FakeGitHub:
         self.history = {}
         self.posts = []
         self.cut = None
+        self.conflicts = set()
+        self.closed = []
 
     def snapshot(self):
         return list(self.issues.values())
@@ -55,6 +57,9 @@ class FakeGitHub:
                      labels=[{'name': 'claim-granted'}], user={'login': self.owner}, comments=1)
         self.issues[n] = issue
         self.history[n] = [dict(user=dict(login='github-actions[bot]'), body=f'Granted `{target}`.')]
+        if target in self.conflicts:
+            issue['labels'] = [{'name': 'claim-conflict'}]
+            self.history[n] = [dict(user=dict(login='github-actions[bot]'), body='No grant.')]
         if self.cut == 'claim':
             raise LostReply('created claim')
         return issue
@@ -72,6 +77,10 @@ class FakeGitHub:
         if self.cut == 'submit':
             raise LostReply('submitted comment')
         return url
+
+    def close(self, n):
+        self.closed.append(n)
+        self.issues[n]['state'] = 'closed'
 
 
 class WorkerTests(unittest.TestCase):
@@ -182,6 +191,14 @@ class WorkerTests(unittest.TestCase):
             issue['labels'] = [{'name': 'claim-granted'}] if label else []
             state, _ = worker.inspect_grant(issue, [dict(user={'login': author}, body=body)], 'M000001', owner)
             self.assertEqual(state, expected)
+
+    def test_close_own_conflicting_claim_once(self):
+        self.assignments.write_text('M000001 M000002')
+        self.gh.conflicts.add('M000001')
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.launch(self.artifacts)
+            self.launch(self.artifacts)
+        self.assertEqual((self.gh.closed, self.gh.posts), ([1], [2]))
 
     def test_verify_architectures_and_reject_corruption(self):
         row = self.rows[0]

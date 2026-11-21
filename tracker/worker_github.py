@@ -10,9 +10,9 @@ def api(route):
     return json.loads(gh_output(['gh', 'api', route]))
 
 
-def post(route, **fields):
+def post(route, method='POST', **fields):
     return json.loads(subprocess.check_output(
-        ['gh', 'api', '--method', 'POST', route, '--input', '-'], input=json.dumps(fields), text=True))
+        ['gh', 'api', '--method', method, route, '--input', '-'], input=json.dumps(fields), text=True))
 
 
 class GitHub:
@@ -88,3 +88,6 @@ class GitHub:
 
     def submit(self, number, body):
         return post(f'{self.issues}/{number}/comments', body=body)['html_url']
+
+    def close(self, number):
+        post(f'{self.issues}/{number}', method='PATCH', state='closed', state_reason='not_planned')

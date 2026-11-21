@@ -175,6 +175,10 @@ def dispatch(state, selected, rows, github, build, persist, jobs, poll, retry):
                         del running[target]
                     continue
                 elif status != 'granted':
+                    # The bot asks claimants to close a conflicting request. Close before
+                    # journaling the error, because a restart skips errored entries.
+                    if status == 'closed or conflicting claim' and issue['state'] == 'open':
+                        github.close(number)
                     entry['error'] = status
                 elif not future:
                     if len(running) >= jobs:
