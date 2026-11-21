@@ -1,0 +1,8 @@
+{
+ "module": "GroundTheory.HeightsAndTheta.Heights.WeightedHomogeneous.IntDimTrdeg",
+ "source_sha256": "57f188d85befb52db59ed42eddd0dcfcfe4b02a8af190b2dfe8b7261926fd9f0",
+ "lean": "leanprover/lean4:v4.36.0",
+ "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+ "notes": "unchanged",
+ "evidence": "port triage port-triage-001: compiled unchanged on Google Cloud (port/triage/results.json)"
+}

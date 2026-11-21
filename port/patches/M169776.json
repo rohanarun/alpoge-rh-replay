@@ -1,0 +1,8 @@
+{
+ "module": "GroundTheory.HeightsAndTheta.Theta.EisensteinZeta.WeilPolarization.WmSysObjects",
+ "source_sha256": "db72fafa5fbfc1aebd175bdb1c3cf2d75aefe16daf1d2a2484cbdbb8951264e2",
+ "lean": "leanprover/lean4:v4.36.0",
+ "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+ "notes": "unchanged",
+ "evidence": "port triage port-triage-001: compiled unchanged on Google Cloud (port/triage/results.json)"
+}

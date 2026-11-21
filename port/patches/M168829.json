@@ -1,0 +1,8 @@
+{
+ "module": "GroundTheory.HeightsAndTheta.Heights.MultinomialWeights.ExampleLimitPolynomialHypothesis",
+ "source_sha256": "17d260fa5b29d200905d5cdea4987866675fdc8b65317cb132068890c96d941a",
+ "lean": "leanprover/lean4:v4.36.0",
+ "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+ "notes": "unchanged",
+ "evidence": "port triage port-triage-001: compiled unchanged on Google Cloud (port/triage/results.json)"
+}

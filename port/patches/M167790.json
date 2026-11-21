@@ -1,0 +1,8 @@
+{
+ "module": "GroundTheory.HeightsAndTheta.Heights.Intersections.LocQuotCard",
+ "source_sha256": "17ea474d85d457a6d1c2eab9eb8ff1d1f3e86b8305cf94dac74c1ebd5f970427",
+ "lean": "leanprover/lean4:v4.36.0",
+ "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+ "notes": "unchanged",
+ "evidence": "port triage port-triage-001: compiled unchanged on Google Cloud (port/triage/results.json)"
+}

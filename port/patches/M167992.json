@@ -1,0 +1,8 @@
+{
+ "module": "GroundTheory.HeightsAndTheta.Heights.Intersections.StRankFracDegree",
+ "source_sha256": "21066665a2a59a29b064ea3e30ceb4c59ad90fe83940fe2a70790dc707023a86",
+ "lean": "leanprover/lean4:v4.36.0",
+ "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+ "notes": "unchanged",
+ "evidence": "port triage port-triage-001: compiled unchanged on Google Cloud (port/triage/results.json)"
+}

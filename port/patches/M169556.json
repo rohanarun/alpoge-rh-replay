@@ -1,0 +1,8 @@
+{
+ "module": "GroundTheory.HeightsAndTheta.Heights.ThetaKeyFormula.RigSymFormTauINontrivial",
+ "source_sha256": "25d021555f5c316f203c2a758a7c854f9062d838655aafbcd1896ded43649181",
+ "lean": "leanprover/lean4:v4.36.0",
+ "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+ "notes": "unchanged",
+ "evidence": "port triage port-triage-001: compiled unchanged on Google Cloud (port/triage/results.json)"
+}
