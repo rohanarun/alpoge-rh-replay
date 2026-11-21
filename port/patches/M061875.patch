@@ -1,0 +1,20 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/ExistsNormForm.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/ExistsNormForm.lean
+@@ -42,7 +42,7 @@
+     have hcm : c = (F.coeff m0).natDegree :=
+       le_antisymm (Finset.sup_le fun m hm => hmax m hm) (hcle m0 hm0)
+     intro hG'
+-    have h1 := congrArg (MvPolynomial.coeff m0) hG'
++    have h1 := congrArg (fun p : MvPolynomial σ k => p.coeff m0) hG'
+     rw [hG, MvPolynomial.coeff_sum, Finset.sum_eq_single m0] at h1
+     · rw [MvPolynomial.coeff_monomial, if_pos rfl, hcm, MvPolynomial.coeff_zero] at h1
+       exact (MvPolynomial.mem_support_iff.mp hm0) (Polynomial.leadingCoeff_eq_zero.mp h1)
+@@ -64,7 +64,7 @@
+     have := hcle m hm
+     omega
+   · intro d p hp hpl
+-    rw [MvPolynomial.eval_eq, Polynomial.finset_sum_coeff]
++    rw [MvPolynomial.eval_eq, Polynomial.finsetSum_coeff]
+     have hterm : ∀ m ∈ F.support, (F.coeff m * ∏ i ∈ m.support, p i ^ m i).coeff (n * d + c) =
+         (F.coeff m).coeff c * ∏ i ∈ m.support, lam i ^ m i := by
+       intro m hm

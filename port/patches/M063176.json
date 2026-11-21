@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.MonicFactorCoeffNatDegreeLe",
+  "source_sha256": "55a5bf64e081feaef43bbe1a6790f8c69c706073da381d20502b47a99eb95fce",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Rename finset_sum_coeff to finsetSum_coeff."
+}

@@ -1,0 +1,37 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/ExistsRepresentativesQuotientRangeMulVecLin.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/ExistsRepresentativesQuotientRangeMulVecLin.lean
+@@ -103,17 +103,21 @@
+     simp only [F, P, mul_apply, of_apply, Matrix.smul_apply, smul_eq_mul, mul_ite, mul_one, mul_zero]
+     rw [← hsum]
+     refine sum_congr rfl fun y _ => ?_
++    change B x y * B y z = B (x + z) y
+     rw [hsymm x y, hsymm (x + z) y, AddChar.map_add_eq_mul]
+   have hPP : P * P = 1 := by
+     ext x z
+-    simp only [P, mul_apply, of_apply, one_apply, add_eq_zero_iff_neg_eq, ite_mul, one_mul, zero_mul,
+-      sum_ite_eq, mem_univ, if_true, neg_neg]
++    simp only [P, Matrix.mul_apply, Matrix.of_apply, Matrix.one_apply]
++    rw [Finset.sum_eq_single (-x)]
++    · simp [add_eq_zero_iff_eq_neg, eq_comm]
++    · intro y _ hy; simp [add_eq_zero_iff_neg_eq, hy.symm]
++    · simp
+   have hP : P.trace = 1 := by
+     have : ∀ x : A, x + x = 0 ↔ x = 0 := fun x =>
+       ⟨eq_zero_of_add_self_eq_zero_of_odd_card hodd, fun h => by simp [h]⟩
+-    simp [P, trace, this]
++    simp [P, Matrix.trace, this]
+   have hPF : (P * F).trace = ∑ x, B (-x) x := by
+-    simp [P, F, trace, mul_apply, add_eq_zero_iff_neg_eq]
++    simp [P, F, Matrix.trace, Matrix.mul_apply, add_eq_zero_iff_neg_eq]
+   have hF : F.trace = ∑ x, B x x := by simp [F, trace]
+   have hprod : F.trace * (P * F).trace = Fintype.card A := by
+     rw [hF, hPF, sum_mul_sum, ← Fintype.sum_prod_type']
+@@ -327,7 +331,7 @@
+       Matrix.map_one _ (map_zero _) (map_one _)]
+   rw [pairQuadraticForm_mk, ratCircleChar_coe, hinv]
+   congr 1
+-  simp only [dotProduct, mulVec, mul_apply, map_apply, Rat.coe_castHom]
++  simp only [dotProduct, mulVec, Matrix.mul_apply, Matrix.map_apply, Rat.coe_castHom]
+   push_cast
+   ring
+ 

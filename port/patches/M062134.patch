@@ -1,0 +1,37 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/FiniteMaximalSpectrumOfFiniteOfIsLocalRing.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/FiniteMaximalSpectrumOfFiniteOfIsLocalRing.lean
+@@ -31,7 +31,6 @@
+       (⊥ : Ideal B).jacobson := by
+     intro x
+     induction x with
+-    | zero => simp
+     | tmul a b =>
+       have : f (Algebra.TensorProduct.lmul' R (a ⊗ₜ b)) - φ (a ⊗ₜ b) = f a * (f b - g b) := by
+         simp [φ, mul_sub]
+@@ -55,7 +54,7 @@
+     [CommRing S] [Algebra R A] [Algebra R S] [Algebra.Etale R A] [IsLocalRing S] (J : Ideal S)
+     [HenselianRing S J] (φ : A →ₐ[R] S ⧸ J) :
+     ∃ ψ : A →ₐ[R] S, ∀ a, Ideal.Quotient.mk J (ψ a) = φ a := by
+-  have hJ : J ≤ (⊥ : Ideal S).jacobson := HenselianRing.jac
++  have hJ : J ≤ (⊥ : Ideal S).jacobson := HenselianRing.jac.trans_eq Ideal.jacobson_bot.symm
+   have hJtop : J ≠ ⊤ := by
+     rintro rfl
+     rw [IsLocalRing.jacobson_eq_maximalIdeal _ bot_ne_top] at hJ
+@@ -99,7 +98,7 @@
+ theorem comap_eq_maximalIdeal_of_finite {R S : Type*} [CommRing R] [IsLocalRing R] [CommRing S]
+     [Algebra R S] [Module.Finite R S] (n : Ideal S) [n.IsMaximal] :
+     n.comap (algebraMap R S) = maximalIdeal R :=
+-  IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal n)
++  IsLocalRing.eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (algebraMap R S) (Algebra.isIntegral_def.mp inferInstance) n)
+ 
+ theorem map_maximalIdeal_le_jacobson_of_finite (R S : Type*) [CommRing R] [IsLocalRing R]
+     [CommRing S] [Algebra R S] [Module.Finite R S] :
+@@ -219,7 +218,7 @@
+ theorem henselianRing_of_finite (R : Type*) {S : Type*} [CommRing R]
+     [HenselianLocalRing R] [CommRing S] [Algebra R S] [Module.Finite R S] (J : Ideal S)
+     (hJ : J ≤ (⊥ : Ideal S).jacobson) : HenselianRing S J where
+-  jac := hJ
++  jac := hJ.trans_eq Ideal.jacobson_bot
+   is_henselian f hf a₀ h₁ h₂ := by
+     nontriviality S using Subsingleton.elim _ (0 : S)
+     obtain ⟨u, hu⟩ := (isUnit_of_isUnit_mk_of_le_jacobson hJ h₂).exists_left_inv

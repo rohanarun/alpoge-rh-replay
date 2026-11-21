@@ -1,0 +1,35 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/ExistsUniqueAlgEquivOfCompatibleQuotient.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/ExistsUniqueAlgEquivOfCompatibleQuotient.lean
+@@ -12,7 +12,6 @@
+   intro y
+   obtain ⟨t, rfl⟩ := AdicCompletion.ofTensorProduct_surjective_of_finite I M y
+   induction t with
+-  | zero => exact ⟨0, by simp⟩
+   | tmul a m =>
+     obtain ⟨r, rfl⟩ := AdicCompletion.of_surjective I R a
+     refine ⟨r • m, ?_⟩
+@@ -27,7 +26,7 @@
+ theorem isAdicComplete_of_finite {R : Type*} [CommRing R] [IsNoetherianRing R] (I : Ideal R)
+     [IsAdicComplete I R] (M : Type*) [AddCommGroup M] [Module R M] [Module.Finite R M] :
+     IsAdicComplete I M where
+-  toIsHausdorff := IsHausdorff.of_le_jacobson I M (IsAdicComplete.le_jacobson_bot I)
++  toIsHausdorff := IsHausdorff.of_le_jacobson I M (IsAdicComplete.le_jacobson I)
+   toIsPrecomplete := isPrecomplete_of_finite I M
+ 
+ theorem isAdicComplete_map_of_finite {R : Type*} [CommRing R] [IsNoetherianRing R] (I : Ideal R)
+@@ -190,7 +189,6 @@
+       AlgebraTensorModule.distribBaseChange R S A A (1 ⊗ₜ Coalgebra.comul a) := by
+   rw [TensorProduct.comul_tmul]
+   induction (Coalgebra.comul a : A ⊗[R] A) with
+-  | zero => simp
+   | tmul x y => simp
+   | add x y hx hy => simp only [tmul_add, map_add, hx, hy]
+ 
+@@ -218,7 +216,6 @@
+     simp only [AlgHom.comp_apply, Bialgebra.comulAlgHom_apply]
+     rw [← this]
+     induction (Coalgebra.comul a : A ⊗[R] A) with
+-    | zero => simp
+     | tmul x y => simp [hg]
+     | add x y hx hy => simp only [tmul_add, map_add, hx, hy]
+ 

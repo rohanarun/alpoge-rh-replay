@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsRepresentativesQuotientRangeMulVecLin",
+  "source_sha256": "36f248c7c907b3432c9f2492c1a9f154b35ccf5e8f956acafd0addf88f48397c",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use Matrix.mul_apply/Matrix.map_apply/Matrix.of_apply/Matrix.one_apply/Matrix.trace explicitly and close P * P = 1 via Finset.sum_eq_single."
+}

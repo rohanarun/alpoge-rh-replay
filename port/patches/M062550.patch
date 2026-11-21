@@ -1,0 +1,11 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/ImportsAlt.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/ImportsAlt.lean
+@@ -14,7 +14,7 @@
+   by_contra h
+   push_neg at h
+   have h0 : (0 : ℝ) < ‖x‖ := lt_trans one_pos h
+-  rw [hm.as_sum, eval₂_add, eval₂_pow, eval₂_X, eval₂_finset_sum] at hp
++  rw [hm.as_sum, eval₂_add, eval₂_pow, eval₂_X, eval₂_finsetSum] at hp
+   have he : x ^ p.natDegree = -∑ i ∈ Finset.range p.natDegree,
+       eval₂ (algebraMap ℤ_[l] (PadicAlgCl l)) x (C (p.coeff i) * X ^ i) :=
+     eq_neg_of_add_eq_zero_left hp

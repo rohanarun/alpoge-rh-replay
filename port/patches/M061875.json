@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsNormForm",
+  "source_sha256": "8b24b61d671b0f882a8c7020122336d9bf9fbbee78ef9d850159253a343dd17a",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use dot notation p.coeff m0 instead of MvPolynomial.coeff m0 and rename Polynomial.finset_sum_coeff to Polynomial.finsetSum_coeff."
+}

@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsPowSmulMemRangeOfSurjectiveBaseChange",
+  "source_sha256": "fedacdccd733d90ef13100a189e40fb3e6fd42d7f7addaad3e67d819ee85b3cb",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Remove redundant zero branch from TensorProduct induction_on."
+}

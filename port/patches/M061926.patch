@@ -1,0 +1,20 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/ExistsPosFiniteDensityOfAlmostTranslationInvaria.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/ExistsPosFiniteDensityOfAlmostTranslationInvaria.lean
+@@ -86,7 +86,7 @@
+         lintegral_mono fun x => by
+           by_cases hx : x ∈ ball (0 : V) ρ
+           · rw [indicator_of_mem hx]
+-            exact (measure_mono fun y hy => hy.2).trans (hb x hx)
++            exact (measure_mono (show Prod.mk x ⁻¹' {p : V × V | p.1 ∈ ball (0 : V) ρ ∧ p.2 ∈ ball p.1 s} ⊆ ball x s from fun y hy => hy.2)).trans (hb x hx)
+           · rw [indicator_of_notMem hx]
+             have hempty : Prod.mk x ⁻¹'
+                 {p : V × V | p.1 ∈ ball (0 : V) ρ ∧ p.2 ∈ ball p.1 s} = ∅ :=
+@@ -136,7 +136,7 @@
+     have hF : Tendsto (fun η : ℝ => ((1 + η) ^ d) ^ 3 / (1 - η) ^ d) (𝓝 0) (𝓝 1) := by
+       have : ContinuousAt (fun η : ℝ => ((1 + η) ^ d) ^ 3 / (1 - η) ^ d) 0 :=
+         (((continuous_const.add continuous_id).pow d).pow 3).continuousAt.div
+-          ((continuous_const.sub continuous_id).pow d).continuousAt (by simp)
++          ((continuous_const.sub continuous_id).pow d).continuousAt (by change (1 - (0 : ℝ)) ^ d ≠ 0; positivity)
+       simpa using this.tendsto
+     obtain ⟨η, hFη, hη⟩ := (((hF.mono_left nhdsWithin_le_nhds).eventually_lt_const
+       (by linarith : (1 : ℝ) < 1 + ε)).and (Ioo_mem_nhdsGT (by norm_num : (0 : ℝ) < 1 / 2))).exists

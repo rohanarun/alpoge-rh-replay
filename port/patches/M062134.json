@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.FiniteMaximalSpectrumOfFiniteOfIsLocalRing",
+  "source_sha256": "e20efeb1a546368c21303c67e08cea8f1aced4b20e5f24375e120f71b5efd8c2",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Remove redundant zero branch from TensorProduct induction_on, bridge Ring.jacobson via Ideal.jacobson_bot, and pass explicit ring hom and integrality proof to Ideal.isMaximal_comap_of_isIntegral_of_isMaximal."
+}

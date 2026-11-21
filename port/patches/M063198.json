@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.MvPowerSeriesThreeEqZeroOfSubstLines",
+  "source_sha256": "19fc799ab5e44d1eee32ee95aa36c27180b430afea2ee2fcc159984a24178002",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use dot notation p.coeff d instead of MvPolynomial.coeff d."
+}

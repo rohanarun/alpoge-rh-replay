@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.IterateDerivativeFunMulSubstLeibniz",
+  "source_sha256": "556fea7bbff7ebb6d60348f3b8fd03b7120236bb9998d5ac6c39c85211021782",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Pass R := k implicitly to PowerSeries.derivative."
+}

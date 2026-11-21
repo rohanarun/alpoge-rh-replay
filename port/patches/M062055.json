@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsUnitAlgebraMapEqOfValuationEqOne",
+  "source_sha256": "e794175cc50192df626f58c5b717e1a7afb02c6ab315359637ebedb5131c9b38",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Update List.TFAE.out indices from 0-based (0, 4) to 1-based (1, 5)."
+}

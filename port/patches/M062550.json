@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.ImportsAlt",
+  "source_sha256": "8346ab1a2ad969004c73ca534f3803349bf208c5bd35953326c80ab9b2bb8d77",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Rename eval\u2082_finset_sum to eval\u2082_finsetSum."
+}

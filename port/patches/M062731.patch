@@ -1,0 +1,32 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/IsLeftCoactionIffIsCoactionComm.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/IsLeftCoactionIffIsCoactionComm.lean
+@@ -59,14 +59,12 @@
+       (((TensorProduct.comm R C M).toLinearMap ∘ₗ ρ).rTensor C (TensorProduct.comm R C M t)) := by
+     intro t
+     induction t with
+-    | zero => simp
+     | add a b ha hb => simp only [map_add, ha, hb]
+     | tmul c m =>
+       simp only [LinearMap.lTensor_tmul, comm_tmul, LinearMap.rTensor_tmul, LinearMap.comp_apply,
+         LinearEquiv.coe_coe]
+       generalize ρ m = s
+       induction s with
+-      | zero => simp
+       | add a b ha hb => simp only [map_add, tmul_add, add_tmul, ha, hb]
+       | tmul c' m' => simp [e]
+   have h2 : ∀ t : C ⊗[R] M,
+@@ -74,14 +72,12 @@
+       (comul : C →ₗ[R] C ⊗[R] C).lTensor M (TensorProduct.comm R C M t) := by
+     intro t
+     induction t with
+-    | zero => simp
+     | add a b ha hb => simp only [map_add, ha, hb]
+     | tmul c m => simp [e]
+   have h3 : ∀ t : C ⊗[R] M, TensorProduct.comm R R M ((Coalgebra.counit : C →ₗ[R] R).rTensor M t) =
+       (Coalgebra.counit : C →ₗ[R] R).lTensor M (TensorProduct.comm R C M t) := by
+     intro t
+     induction t with
+-    | zero => simp
+     | add a b ha hb => simp only [map_add, ha, hb]
+     | tmul c m => simp
+   constructor

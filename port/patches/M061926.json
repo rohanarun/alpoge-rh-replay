@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsPosFiniteDensityOfAlmostTranslationInvaria",
+  "source_sha256": "33ddbe1579b4931f36d57393f3b7d0edbfaabd1688836e5cb390ef8f2baf263e",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Annotate subset proof in measure_mono and close nonzero denominator (1 - 0)^d != 0 via positivity."
+}

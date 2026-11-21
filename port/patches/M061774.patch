@@ -1,0 +1,58 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/ExistsIsDiscreteValuationRingOfMaximalIdealEqSpa.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/ExistsIsDiscreteValuationRingOfMaximalIdealEqSpa.lean
+@@ -23,7 +23,7 @@
+     (hπ : Function.Surjective π) (hI : ∀ b, b ∈ I ↔ π b = 0) {b : B} (hb : IsUnit (π b)) :
+     IsUnit b :=
+   isUnit_of_isUnit_map_of_ker_le_jacobson π hπ
+-    (fun x hx => HenselianRing.jac (I := I) ((hI x).mpr hx)) hb
++    (fun x hx => Ideal.jacobson_bot (R := B) ▸ HenselianRing.jac (I := I) ((hI x).mpr hx)) hb
+ 
+ theorem isLocalRing_of_surjective_of_henselian [IsLocalRing B] (I : Ideal B) [HenselianRing B I]
+     (π : B →+* C) (hπ : Function.Surjective π) (hI : ∀ b, b ∈ I ↔ π b = 0) : IsLocalRing C := by
+@@ -111,7 +111,7 @@
+       (Ideal.mem_of_dvd _ hd (Ideal.pow_mem_of_pow_mem _ hn Nat.lt_two_pow_self.le)) (hu.map _)
+     refine ⟨b, hb, ?_⟩
+     have hle : I ≤ maximalIdeal B :=
+-      (HenselianRing.jac (I := I)).trans (jacobson_eq_maximalIdeal ⊥ bot_ne_top).le
++      (HenselianRing.jac (I := I)).trans (Ideal.jacobson_bot.symm.trans (jacobson_eq_maximalIdeal ⊥ bot_ne_top)).le
+     simpa using add_mem (hle hba) ha
+ 
+ end Lift
+@@ -152,7 +152,16 @@
+     IsLocalization.isPrime_of_isPrime_disjoint (.powers f) _ _ ‹_› hdisj⟩
+   have hp' : p'.asIdeal.comap (algebraMap R S) = RingHom.ker (algebraMap R K) := by
+     rw [IsScalarTower.algebraMap_eq R A S, ← Ideal.comap_comap, ← hp]
+-    exact congrArg _ (IsLocalization.comap_map_of_isPrime_disjoint (.powers f) _ ‹_› hdisj)
++    congr 1
++    refine le_antisymm (fun x hx => ?_) Ideal.le_comap_map
++    obtain ⟨⟨a, s⟩, h⟩ := (IsLocalization.mem_map_algebraMap_iff (.powers f) S).1 hx
++    obtain ⟨c, hc⟩ := (IsLocalization.eq_iff_exists (.powers f) S).1 (by
++      rw [map_mul, ← h, mul_comm] : algebraMap A S (s.1 * x) = algebraMap A S a.1)
++    have hmem : (c.1 * s.1) * x ∈ p := by
++      have : (c.1 * s.1) * x = c.1 * a.1 := by linear_combination hc
++      exact this ▸ p.mul_mem_left c.1 a.2
++    exact (‹p.IsPrime›.mem_or_mem hmem).resolve_left fun hcs =>
++      Set.disjoint_left.1 hdisj (mul_mem c.2 s.2) hcs
+   have hopen := (PrimeSpectrum.isOpenMap_comap_of_hasGoingDown_of_finitePresentation
+     (R := P) (S := S)).isOpen_range
+   obtain ⟨_, ⟨_, ⟨h, rfl⟩, rfl⟩, hh, hsub⟩ := PrimeSpectrum.isBasis_basic_opens
+@@ -168,8 +177,8 @@
+     rw [MvPolynomial.monomial_eq]
+     refine Ideal.mul_mem_right _ _ ?_
+     change algebraMap P S (algebraMap R P _) ∈ p'.asIdeal
+-    rw [← IsScalarTower.algebraMap_apply, ← Ideal.mem_comap, hp', RingHom.mem_ker,
+-      ← MvPolynomial.coeff_map, h₀, MvPolynomial.coeff_zero]
++    rw [← IsScalarTower.algebraMap_apply, ← Ideal.mem_comap, hp', RingHom.mem_ker]
++    simpa [← MvPolynomial.coeff_map, h₀]
+   letI := (MvPolynomial.aeval (R := R) b).toAlgebra
+   have : IsScalarTower R P K :=
+     .of_algebraMap_eq fun r => ((MvPolynomial.aeval (R := R) b).commutes r).symm
+@@ -284,7 +293,7 @@
+   by_contra hn
+   obtain ⟨M, hM, hgM⟩ := exists_max_ideal_of_mem_nonunits hn
+   have hM' : M.comap (algebraMap B (AdjoinRoot μ)) = maximalIdeal B :=
+-    eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal M)
++    eq_maximalIdeal (Ideal.isMaximal_comap_of_isIntegral_of_isMaximal (algebraMap B (AdjoinRoot μ)) (Algebra.isIntegral_def.mp inferInstance) M)
+   have hco : IsCoprime (minpoly (ResidueField B) θ) (g.map (residue B)) := by
+     rw [(minpoly.irreducible hθ).coprime_iff_not_dvd, minpoly.dvd_iff]
+     rwa [← aeval_map_algebraMap (ResidueField B)] at hg

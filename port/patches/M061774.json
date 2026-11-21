@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.ExistsIsDiscreteValuationRingOfMaximalIdealEqSpa",
+  "source_sha256": "414b0f611bf829a2dbcf6163acdbd1854d5cb14c25aeb4d9e967dfbc04cb3b12",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use Ideal.jacobson_bot to bridge Ring.jacobson and bottom jacobson, pass explicit ring hom and integrality proof to Ideal.isMaximal_comap_of_isIntegral_of_isMaximal, prove comap_map directly via IsLocalization.mem_map_algebraMap_iff, and simplify coeff_map."
+}
