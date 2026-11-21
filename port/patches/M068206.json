@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.DetOneAddSmulBlkMem",
+  "source_sha256": "ea37816c1dd4accc0f7b7f4300e59ecf06cef80073846ab67706be58a06e1a3e",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use the underlying monoid-algebra coefficient projection with the same polynomial and monomial index. This is definitionally the same coefficient, including in statements. Apply congruence to the coefficient and determinant explicitly before proving the same entrywise matrix equality."
+}

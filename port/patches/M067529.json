@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CoeffZeroSmulMemMap",
+  "source_sha256": "737d85d8c9e914cb2b9cc3f14278167e950e0c8f28eeed2b0851a9702e26ba8c",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use the underlying monoid-algebra coefficient projection with the same polynomial and monomial index. This is definitionally the same coefficient, including in statements."
+}
