@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsInvariantPosDefHermitianStatement",
+  "source_sha256": "573eb09df774a29045ee5c0949eb86f4cdaaf9e8c9b03c298f138d68655197af",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0104-issue-34021"
+}

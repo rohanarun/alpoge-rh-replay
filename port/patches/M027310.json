@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsLocalHomAdicCompletionExtendStatement",
+  "source_sha256": "a4109a21d99666bd0333b65d155776f11485d412d41bbdc39ea25a5ffab3fe74",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0104-issue-34021"
+}

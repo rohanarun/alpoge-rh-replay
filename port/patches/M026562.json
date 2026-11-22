@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIsAlgebraicRatFuncFractionRingDedekindStatement",
+  "source_sha256": "651d4a3b777b57fa6c017be588ebf5954e4e743498ee99b17e8b6a8ee9287701",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0104-issue-34021"
+}

@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsPolyAnnihilatesCommutingLinearCombinationStatement",
+  "source_sha256": "d65858a550e32dc2cff8abf1a3b11b4e46f50a62c9c7ed2b6497baf2cd11db56",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0104-issue-34021"
+}

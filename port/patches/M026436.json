@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsIntegralInvOneAddPrimeMulPadicStatement",
+  "source_sha256": "11d86179a8561e2b0ebc6e379e1c0b5a30e8db90c4412ad42c6ab4049a38d285",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0104-issue-34021"
+}
