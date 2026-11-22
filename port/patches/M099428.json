@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.UnitaryExistence.DetCharacterReductionInvariantStatement",
+  "source_sha256": "80dd191a3981b0191e6c5e9341cf214cd274c5c5122044095baa4eac8084cfa9",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "Compiled unchanged on leanprover/lean4:v4.36.0 with Mathlib fc4f59e577feb1a4956671bc04ac18aaaf8cd842 in the P0196 packet build transcript linked from the PR."
+}

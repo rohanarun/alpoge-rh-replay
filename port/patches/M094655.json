@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.TwistedOperators.HasSumTupleProdOfSummableNormComplex",
+  "source_sha256": "145895bdcf7cf670338ac489e692b9db1fae2f781e37ac9d0da1f0071705806f",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use the renamed tendsto_finsetProd. Proof-only change; no statements, definitions or instances changed."
+}

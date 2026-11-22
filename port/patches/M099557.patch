@@ -1,0 +1,11 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/UnitaryExistence/ExistsIntegralUnitRootNormOneAdele.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/UnitaryExistence/ExistsIntegralUnitRootNormOneAdele.lean
+@@ -38,7 +38,7 @@
+     rcases eq_one_or c h2 hc f with rfl | rfl
+     · rfl
+     · exact hfix)
+-  exact ⟨y, ⟨⟨y, (isIntegral_algebraMap_iff (algebraMap F E).injective).1 hx⟩, rfl⟩, rfl⟩
++  exact ⟨y, ⟨⟨y, isIntegral_algebraMap_iff.1 hx⟩, rfl⟩, rfl⟩
+ 
+ end quad
+ 

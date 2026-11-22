@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.TwistedOperators.HarmonicColumnOperatorEndMemOfUnitaryStable",
+  "source_sha256": "556456cb0b5cc16a027f0aa383542724dbc4bf9dabbba13c984692d231194f92",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use the renamed Polynomial.eval_finsetSum; qualify the now-protected Matrix.mul_apply in two simp calls; write the removed index-first coefficient call coeff m w (inside a proof) as w.coeff m. Proof-only changes; no statements, definitions or instances changed."
+}

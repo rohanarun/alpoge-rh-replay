@@ -1,0 +1,40 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/UnramifiedDepth/ConstantCoeffSubst.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/UnramifiedDepth/ConstantCoeffSubst.lean
+@@ -15,7 +15,7 @@
+ 
+ def wt (R : Type*) [CommRing R] (A : κ →₀ ℕ) : R := A.prod fun _ e => (e.factorial : R)
+ 
+-def pair (P Q : MvPolynomial κ R) : R := ∑ A ∈ P.support, coeff A P * wt R A * coeff A Q
++def pair (P Q : MvPolynomial κ R) : R := ∑ A ∈ P.support, P.coeff A * wt R A * Q.coeff A
+ 
+ theorem wt_add_single (B : κ →₀ ℕ) (v : κ) :
+     wt R (B + Finsupp.single v 1) = wt R B * ((B v : R) + 1) := by
+@@ -47,7 +47,7 @@
+   ring
+ 
+ theorem pair_eq_sum (P Q : MvPolynomial κ R) (S : Finset (κ →₀ ℕ)) (hS : P.support ⊆ S) :
+-    pair P Q = ∑ A ∈ S, coeff A P * wt R A * coeff A Q := by
++    pair P Q = ∑ A ∈ S, P.coeff A * wt R A * Q.coeff A := by
+   unfold pair
+   apply Finset.sum_subset hS
+   intro A _ hA
+@@ -62,7 +62,7 @@
+     ← Finset.sum_add_distrib]
+   apply Finset.sum_congr rfl
+   intro A _
+-  simp only [coeff_add]
++  simp only [MvPolynomial.coeff_add]
+   ring
+ 
+ theorem pair_C_mul_left (c : R) (P Q : MvPolynomial κ R) : pair (C c * P) Q = c * pair P Q := by
+@@ -176,8 +176,8 @@
+ 
+ theorem main :
+   (∀ (C : Type) [Field C] [CharZero C] (κ : Type) [Fintype κ] [DecidableEq κ] (g : Matrix κ κ C) (P Q : MvPolynomial κ C),
+-    (∑ A ∈ (P).support, MvPolynomial.coeff A (P) * (A.prod fun _ e => (e.factorial : C)) * MvPolynomial.coeff A (MvPolynomial.aeval (fun i => ∑ j, MvPolynomial.C (g i j) * MvPolynomial.X j) Q)) =
+-    (∑ A ∈ (MvPolynomial.aeval (fun i => ∑ j, (MvPolynomial.C (g j i) * MvPolynomial.X j : MvPolynomial κ C)) P).support, MvPolynomial.coeff A (MvPolynomial.aeval (fun i => ∑ j, (MvPolynomial.C (g j i) * MvPolynomial.X j : MvPolynomial κ C)) P) * (A.prod fun _ e => (e.factorial : C)) * MvPolynomial.coeff A (Q))) := by
++    (∑ A ∈ (P).support, (P).coeff A * (A.prod fun _ e => (e.factorial : C)) * (MvPolynomial.aeval (fun i => ∑ j, MvPolynomial.C (g i j) * MvPolynomial.X j) Q).coeff A) =
++    (∑ A ∈ (MvPolynomial.aeval (fun i => ∑ j, (MvPolynomial.C (g j i) * MvPolynomial.X j : MvPolynomial κ C)) P).support, (MvPolynomial.aeval (fun i => ∑ j, (MvPolynomial.C (g j i) * MvPolynomial.X j : MvPolynomial κ C)) P).coeff A * (A.prod fun _ e => (e.factorial : C)) * (Q).coeff A)) := by
+   intro C _ _ κ _ _ g P Q
+   exact pair_subst (fun i j => g i j) P Q
+ 

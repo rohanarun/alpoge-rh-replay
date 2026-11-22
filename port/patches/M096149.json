@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.TwistedOperators.MultilinearZeroOfKillsTranslatesTensor",
+  "source_sha256": "d993c6e2b4c5ebdd0862685c2f88508d699e04d165349123bca02ae21d30347c",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Equivalent multilinear-map type adaptation: the target MultilinearMap takes a scalar ring homomorphism, and MultilinearMap (RingHom.id ℂ) specializes it to the original complex multilinear maps in the statement of multilinear_translates_zero. Domains, codomain, quantifiers, hypotheses and the conclusion are unchanged."
+}

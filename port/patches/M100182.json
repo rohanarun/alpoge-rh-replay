@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.DetFrobeniusSubPowSupport",
+  "source_sha256": "469c4352312700ebe49ea9a1a2a4837a9da7fc2564515aa229321bdfff5dc645",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Replace the removed index-first MvPolynomial.coeff m p by the polynomial-first p.coeff m in the definition Good, in the carrier of freeIdeal and in theorem statements (including (ψ ^ s).coeff m), and qualify MvPolynomial.coeff_add. In the pinned Mathlib, MvPolynomial.coeff m p is defined as (AddMonoidAlgebra.coeff p) m, and the target exposes the same coefficient map as p.coeff m, so each changed definition and statement is the same term: no hypotheses or conclusions are added or removed."
+}

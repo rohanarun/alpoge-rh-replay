@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.TwistedOperators.MultilinearSumEqOfProdFunEq",
+  "source_sha256": "107564de52eb7965d1bdc6155bcc42b1623613d7de92952a9c2b7ddb2a461ac8",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Equivalent multilinear-map type adaptation: the target MultilinearMap takes a scalar ring homomorphism, and MultilinearMap (RingHom.id ℂ) specializes it to the original complex multilinear maps, so the hypothesis type of Φ is unchanged in meaning. Add simp only [RingHom.id_apply] after map_smul_univ in the proof. Domains, codomain, quantifiers and the conclusion are unchanged."
+}

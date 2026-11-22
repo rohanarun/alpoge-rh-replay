@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.UnitaryExistence.ExistsIntegralUnitRootNormOneAdele",
+  "source_sha256": "53ef4b920bb0fd9e5a8da3418f95d31f576799795f3f8291c033d3154af65d97",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "isIntegral_algebraMap_iff now takes FaithfulSMul as an instance instead of an injectivity argument; drop the argument. Proof-only change; no statements, definitions or instances changed."
+}

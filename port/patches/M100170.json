@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.UnramifiedDepth.ConstantCoeffSubst",
+  "source_sha256": "f1ce0bafd1635b722c0b446748591085e9f402ed7c7395b0f84315d796045d76",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Replace the removed index-first MvPolynomial.coeff A P by the polynomial-first P.coeff A in the definition of pair, in the statement of its sum lemma and in the statement of main; qualify MvPolynomial.coeff_add. In the pinned Mathlib, MvPolynomial.coeff m p is defined as (AddMonoidAlgebra.coeff p) m, and the target exposes the same coefficient map as p.coeff m, so each changed definition body and statement is the same term: no hypotheses or conclusions are added or removed."
+}
