@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.PowNormMulSeminormSliceRLe",
+  "source_sha256": "38c459f2b8072a8be699c6d25cb2301c707b561d0d713f33888dbe916822d698",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Finset.prod_le_one with a nonnegativity hypothesis is now Finset.prod_le_one₀. Proof-only change; no statements, definitions or instances changed."
+}
