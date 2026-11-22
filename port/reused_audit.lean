@@ -28,7 +28,29 @@ def audited : List (Name × String) := [
   (`multiplicity, "pinned value is 1 when the multiplicity is infinite, target value is 0"),
   (`MeasureTheory.Measure.map, "pinned value is 0 when the map is not a.e. measurable, target value is a Dirac measure (for a nonzero measure)"),
   (`MeasureTheory.Measure.prod, "target value is 0 when the second measure is not s-finite, pinned value is the bind formula"),
-  (`ModularForm.L, "target redefines the value at s = 0")]
+  (`ModularForm.L, "target redefines the value at s = 0"),
+  -- Mathlib wrappers that reach `Measure.map` without naming it (#33373). The archive writes these,
+  -- not `map`, so the entry for `Measure.map` alone does not see them.
+  (`MeasureTheory.Measure.IsMulLeftInvariant, transl "g * ·" "MeasurableMul"),
+  (`MeasureTheory.Measure.IsMulRightInvariant, transl "· * g" "MeasurableMul"),
+  (`MeasureTheory.Measure.IsAddLeftInvariant, transl "g + ·" "MeasurableAdd"),
+  (`MeasureTheory.Measure.IsAddRightInvariant, transl "· + g" "MeasurableAdd"),
+  (`MeasureTheory.Measure.IsHaarMeasure, transl "g * ·" "MeasurableMul"),
+  (`MeasureTheory.Measure.IsAddHaarMeasure, transl "g + ·" "MeasurableAdd"),
+  (`MeasureTheory.Measure.IsInvInvariant, inv "Measure.inv" "MeasurableInv"),
+  (`MeasureTheory.Measure.IsNegInvariant, inv "Measure.neg" "MeasurableNeg"),
+  (`MeasureTheory.Measure.inv, "is Measure.map Inv.inv; see Measure.map (side condition: MeasurableInv)"),
+  (`MeasureTheory.Measure.neg, "is Measure.map Neg.neg; see Measure.map (side condition: MeasurableNeg)"),
+  (`MeasureTheory.Measure.bind, "is join (map f m); see Measure.map (side condition: f is a.e. measurable)"),
+  (`MeasureTheory.QuotientMeasureEqMeasurePreimage, quot),
+  (`MeasureTheory.AddQuotientMeasureEqMeasurePreimage, quot)]
+where
+  transl (t c : String) : String :=
+    s!"states map ({t}) μ = μ, so it reaches Measure.map: a target measure may satisfy it with a Dirac mass when the translations are not a.e. measurable. Unchanged when they are ({c}, or from the hypotheses) or when the carrier has MeasurableSingletonClass. A theorem that only assumes the class, with a conclusion that does not depend on map, implies its pinned statement (the pinned class implies the target class) but is not equivalent to it"
+  inv (d c : String) : String :=
+    s!"states {d} μ = μ, which reaches Measure.map. Unchanged when inversion is a.e. measurable ({c}) or when the carrier has MeasurableSingletonClass. A theorem that only assumes the class, with a conclusion that does not depend on map, implies its pinned statement but is not equivalent to it"
+  quot : String :=
+    "states μ = (ν.restrict t).map π for the quotient map π, which reaches Measure.map. Unchanged when π is measurable, e.g. for the quotient σ-algebra"
 
 def auxComponent (s : String) : Bool :=
   s.startsWith "_" || s.startsWith "match_" || s.startsWith "proof_"
@@ -37,6 +59,13 @@ def isAuxName : Name → Bool
   | .anonymous => false
   | .num _ _ => true
   | .str p s => auxComponent s || isAuxName p
+
+/-- Auxiliary declarations Lean generates for a structure or inductive; they repeat its fields, so a
+hit on one of them duplicates the hit on the structure itself. -/
+def isArtefact : Name → Bool
+  | .str _ s => s ∈ ["rec", "recOn", "casesOn", "noConfusion", "noConfusionType", "injEq", "inj",
+      "sizeOf_spec", "_sizeOf_1", "_sizeOf_inst", "ctorIdx", "_flat_ctor", "brecOn", "below"]
+  | _ => false
 
 unsafe def audit (mods : List String) : IO UInt32 := do
   initSearchPath (← findSysroot)
@@ -49,6 +78,7 @@ unsafe def audit (mods : List String) : IO UInt32 := do
     for n in env.header.moduleData[idx.toNat]!.constNames do
       let some ci := env.find? n | continue
       if (ci matches .thmInfo _) && isAuxName n then continue
+      if (ci matches .recInfo _) || isArtefact n then continue
       let tyUsed := ci.type.getUsedConstants
       let bodyUsed := match ci with
         | .defnInfo d => d.value.getUsedConstants

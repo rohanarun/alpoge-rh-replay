@@ -143,6 +143,21 @@ lake env lean --run /path/to/port/reused_audit.lean Module.One Module.Two ...
 
 Unlike an `IsLattice` hit, most hits are review prompts, not errors. `NoAtoms` must become `NullSingletonClass`. For the others, the meaning is unchanged whenever the side condition holds in the declaration's own hypotheses: the map is measurable, the second factor is s-finite, the multiplicity is finite, the function is a.e. strongly measurable, the monoid is commutative. When it holds, say so in the record's notes. When it does not, the statement changed meaning: restore the pinned meaning and explain the change.
 
+Mathlib also uses `Measure.map` inside its own definitions, so a declaration can reach it without naming it. #33373 is an example: `SelfDual` used only `IsAddHaarMeasure`, and the audit originally reported nothing. The audit therefore also lists the wrappers the archive uses whose meaning depends on `map`'s junk value:
+- the translation classes `Is{Mul,Add}{Left,Right}Invariant`;
+- `IsHaarMeasure` and `IsAddHaarMeasure`;
+- `IsInvInvariant` and `IsNegInvariant`, with `Measure.inv` and `Measure.neg`;
+- `Measure.bind`;
+- `{Add}QuotientMeasureEqMeasurePreimage`.
+
+For the classes, the meaning is unchanged in two cases:
+- the relevant translations (or the inversion) are a.e. measurable, for example from `MeasurableMul`;
+- the carrier has `MeasurableSingletonClass`, since then every map is a.e. measurable for a Dirac mass.
+
+A theorem that only assumes such a class, and whose conclusion does not depend on `map`, still implies its pinned statement, because the pinned class implies the target class. Say so in the notes; it is not an equivalence. A definition that uses one of these classes, on a carrier where neither condition holds, may have changed meaning (#33373): check it, or restore the pinned meaning.
+
+Wrappers that only map along continuous maps under a Borel σ-algebra, such as `distribHaarChar`, `modularCharacter`, `mulEquivHaarChar` and `MeasurePreserving` (which carries its own measurability), are not listed.
+
 `tracker/port_build.py` also lists `NoAtoms` and `multiplicity` in `REUSED_NAMES` for its text check. `Measure.map` and `Measure.prod` are usually written `μ.map f` and `μ.prod ν`, which the text check cannot see, so use the audit for them.
 
 ## When the port is complete
