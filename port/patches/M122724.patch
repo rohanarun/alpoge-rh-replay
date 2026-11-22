@@ -1,0 +1,11 @@
+--- a/src/Development/AutomorphicSpectrum/Proofs/BlockDecomposition/ExistsContinuousSectionQuotient.lean
++++ b/src/Development/AutomorphicSpectrum/Proofs/BlockDecomposition/ExistsContinuousSectionQuotient.lean
+@@ -58,7 +58,7 @@
+   let V : ℕ → Set (G ⧸ H) := fun n =>
+     (t ⁻¹' {g | g⁻¹ * e n ∈ K}) ∩ cosetImage H L (e n)
+   have hV : ∀ n, IsClopen (V n) := fun n =>
+-    IsClopen.inter ⟨isOpen_compl_iff.1 (ht _ᶜ), ht _⟩ (isClopen_cosetImage H L hLo hLc (e n))
++    IsClopen.inter ⟨isOpen_compl_iff.1 (ht {g | g⁻¹ * e n ∈ K}ᶜ), ht _⟩ (isClopen_cosetImage H L hLo hLc (e n))
+   have hcov : ∀ x, ∃ n, x ∈ V n := by
+     intro x
+     obtain ⟨k, hk, hkx⟩ := h x

@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.BlockDecomposition.ExistsContinuousSectionQuotient",
+  "source_sha256": "48e7711aafa019f9c89e244f01b38e3b4b7b72610cf4710f417abec9f09d198c",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Proof-only: in exists_refine, pass the complemented preimage set explicitly to ht (ht {g | g⁻¹ * e n ∈ K}ᶜ) because Lean 4.36 no longer infers ?m from t ⁻¹' ?mᶜ =?= (t ⁻¹' S)ᶜ. No declaration statements, definitions or instances changed. Reused-name audit: 0 hits.",
+  "evidence": "https://github.com/Sheape/alpoge-rh-replay/releases/download/port-P0138-lean436-20261122/P0138-receipt.json"
+}
