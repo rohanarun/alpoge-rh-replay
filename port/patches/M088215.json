@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.SatakeParameters.IsIndEtaleOverEtaleOfIsIndEtale",
+  "source_sha256": "c6a634244059fd638578a2cef6e39406ab6bd7f7193f010ce4dcf7d0d0cacdcf",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "Compiled unchanged on leanprover/lean4:v4.36.0 with Mathlib fc4f59e577feb1a4956671bc04ac18aaaf8cd842 in the P0195 packet build transcript linked from the PR."
+}

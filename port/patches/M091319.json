@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.ThetaShiftProofs.SumReCmTypeEqHalfTrace",
+  "source_sha256": "4859b5ead68fda77c3999701f41a25635c020c2de2efe0b3e1e8720952d06521",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "Compiled unchanged on leanprover/lean4:v4.36.0 with Mathlib fc4f59e577feb1a4956671bc04ac18aaaf8cd842 in the P0195 packet build transcript linked from the PR."
+}

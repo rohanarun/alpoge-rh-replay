@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.TwistedOperators.DiagPartMulDiagPart",
+  "source_sha256": "d24d99d37bfb5d142be3894c95ae930b94631be199401334226a88e0af43f437",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "Compiled unchanged on leanprover/lean4:v4.36.0 with Mathlib fc4f59e577feb1a4956671bc04ac18aaaf8cd842 in the P0195 packet build transcript linked from the PR."
+}

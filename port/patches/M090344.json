@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.SiegelThetaTransformation.SchwartzBruhatInnerProductSelfNonnegBounds",
+  "source_sha256": "32b557e49e6e178773dfe8814da47eb676bb77d966d4911b182beb6abf54ff62",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Rename DistribMulAction.toAddMonoidHom to DistribSMul.toAddMonoidHom (inside the proof of classes_finite_card). Proof-only change; no statements, definitions or instances changed."
+}
