@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.MetricProofs.AbsCoeffProdXLeOne",
+  "source_sha256": "32e7c67e040ebf09fb4670a2fb2d75b9a837de7dc01edf3699b4e1eac15861c3",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "MvPolynomial.coeff was removed, so the statements of abs_coeff_prod_X_le_one and formPoly_sub_bound and the proof write p.coeff m for coeff m p; the polynomials are ascribed MvPolynomial σ ℝ or are formPoly values of that type, and p.coeff m elaborates to the term the old MvPolynomial.coeff m p unfolded to, so the propositions are unchanged.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0143-issue-34695"
+}

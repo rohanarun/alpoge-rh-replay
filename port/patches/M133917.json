@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.MetricProofs.KillNoneFormPoly",
+  "source_sha256": "9fc89a7796867e176da3e3ac424892c8e8a8a3c65198e6d4b21ce2359f674bc2",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0143-issue-34695"
+}

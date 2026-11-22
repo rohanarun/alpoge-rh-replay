@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.MetricProofs.EtaleAwayOfIsEtaleAtOffSubmonoid",
+  "source_sha256": "946b7282156f5fe7872f6b79985fd5b9305163d6bdd4938287b761a78d6602ba",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0143-issue-34695"
+}
