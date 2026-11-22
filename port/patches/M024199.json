@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.ExistsCompactOpenAddSubgroup",
+  "source_sha256": "f08f21c3c0cb7149d6c64a6c1604257452b96ce18bab770197ef4c13b5772129",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use the renamed integral_finsetSum. Proof-only change; no statements, definitions or instances changed."
+}
