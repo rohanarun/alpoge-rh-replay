@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.DivisorProofs.AevalFibPowExplicit",
+  "source_sha256": "724a9d98770a2fafe37e6b749d9a41492a8a2809b9eb137aa4ddd563c8a1bb84",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use the renamed integral_finsetSum. Proof-only change; no statements, definitions or instances changed."
+}

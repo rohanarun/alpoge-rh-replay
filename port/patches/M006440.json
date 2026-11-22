@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.CovolumeBounds.FormalLogEqSumOfMultiplicativeParam",
+  "source_sha256": "9474f13df3cd73ccc32a268d572efc97a032e50a9ed1b9d26cbceee576a81c55",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "The target MvPowerSeries.pderiv takes the coefficient ring implicitly, so pderiv A i becomes pderiv (R := A) i throughout, including in theorem statements. The definition of pderiv is otherwise identical in the pinned and target Mathlib (only `variable (R) in` was dropped), so these are the same terms and the statements are unchanged in meaning. In one proof, IsAddTorsionFree.of_module_rat now produces HasUniqueDiv (the pinned meaning of IsAddTorsionFree), so the local instance is stated as HasUniqueDiv A. The statements keep [IsAddTorsionFree A]; since A is a CommRing, the target IsAddTorsionFree is equivalent to the pinned one (n • · injective for n ≠ 0)."
+}

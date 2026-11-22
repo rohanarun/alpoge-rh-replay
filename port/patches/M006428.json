@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.CovolumeBounds.ExistsNeZeroNormSqLeMulCovolumeRpow",
+  "source_sha256": "02d873625f9cc45c8a9f17dd10298f82f78118f8ed3574f2ca59f1ebbe8ae0f3",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Finset.prod_le_prod with a nonnegativity hypothesis is now Finset.prod_le_prod₀. Proof-only change; no statements, definitions or instances changed."
+}

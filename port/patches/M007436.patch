@@ -1,0 +1,20 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/CuspFormEvaluations/PolyDerivVanishesOfTranslationInvariance.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/CuspFormEvaluations/PolyDerivVanishesOfTranslationInvariance.lean
+@@ -42,7 +42,7 @@
+     simp [Finsupp.single_eq_of_ne (Finset.ne_of_mem_erase hj)]
+ 
+ theorem apolar_X_mul (i : σ) (P : MvPolynomial σ ℂ) (F : MvPowerSeries σ ℂ) :
+-    apolar (MvPolynomial.X i * P) F = apolar P (MvPowerSeries.pderiv ℂ i F) := by
++    apolar (MvPolynomial.X i * P) F = apolar P (MvPowerSeries.pderiv (R := ℂ) i F) := by
+   classical
+   induction P using MvPolynomial.induction_on' with
+   | monomial m c =>
+@@ -87,7 +87,7 @@
+   simp only [Finset.sum_mul, map_sum, smul_mul_assoc, map_smul, mul_assoc, apolar_mul_X]
+ 
+ theorem apolar_eq_zero_of_mem_span {ι : Type*} (v : ι → σ → ℂ) (F : MvPowerSeries σ ℂ)
+-    (hF : ∀ k, ∑ s, v k s • MvPowerSeries.pderiv ℂ s F = 0) {P : MvPolynomial σ ℂ}
++    (hF : ∀ k, ∑ s, v k s • MvPowerSeries.pderiv (R := ℂ) s F = 0) {P : MvPolynomial σ ℂ}
+     (hP : P ∈ Ideal.span (Set.range fun k => ∑ s, v k s • (MvPolynomial.X s : MvPolynomial σ ℂ))) :
+     apolar P F = 0 := by
+   suffices h : ∀ Q, apolar (P * Q) F = 0 by simpa using h 1
