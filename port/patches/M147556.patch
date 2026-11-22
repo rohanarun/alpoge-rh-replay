@@ -1,0 +1,15 @@
+--- a/src/Formalism/LocalRingCardinality/SpanPowerMembership/ExistsOmegaLeb.lean
++++ b/src/Formalism/LocalRingCardinality/SpanPowerMembership/ExistsOmegaLeb.lean
+@@ -163,10 +163,11 @@
+   rw [Measure.prod_smul_left, Measure.prod_smul_right, Measure.map_smul, Measure.map_smul]
+   show t • t • m = volume
+   rw [hs, smul_smul, smul_smul, hts, one_smul]
++  all_goals exact (psiE P Q).continuous.aemeasurable
+ 
+ theorem isOpen_ballU (r : ℝ) : IsOpen (ballU P Q r) := by
+   have : Continuous (fun X : lieU P Q => ∑ i, ∑ j, ‖(X : MM P Q) i j‖) :=
+-    continuous_finset_sum _ fun i _ => continuous_finset_sum _ fun j _ =>
++    continuous_finsetSum _ fun i _ => continuous_finsetSum _ fun j _ =>
+       (continuous_subtype_val.matrix_elem i j).norm
+   exact isOpen_lt this continuous_const
+ 

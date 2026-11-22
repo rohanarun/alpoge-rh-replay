@@ -1,0 +1,8 @@
+{
+  "module": "Formalism.LocalRingCardinality.SpanPowerMembership.ExistsOmegaLeb",
+  "source_sha256": "0a05a27fc9110adea88608c57e7abf52d5f7459a03e13479a529ddcf5eb8664d",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Measure.map_smul now takes the a.e. measurability of the map as a hypothesis; psiE P Q is a continuous linear equivalence, so the two side goals are closed by (psiE P Q).continuous.aemeasurable. continuous_finset_sum is now continuous_finsetSum. The pushforward measure is local to the proof of exists_omegaLeb, whose statement does not mention Measure.map. Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0213-issue-34849"
+}
