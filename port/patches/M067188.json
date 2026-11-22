@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.InertiaEigenvalues.CMemCoeffSub",
+  "source_sha256": "cf2f4d64d67d9b873d45b9bd137b192f55fe446002b04027be0e39ccc3129353",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "MvPolynomial.coeff was removed, so the definition coeffSub, the statement of main and the proofs write p.coeff d for MvPolynomial.coeff d p. Where p is a determinant whose type field notation cannot infer, it is ascribed with the polynomial type the old MvPolynomial.coeff fixed, taken from the X k ascription already in the term (MvPolynomial (Fin m) O, MvPolynomial (Fin (Fintype.card J)) O, MvPolynomial (Fin m') (MvPolynomial (Fin m) O)). p.coeff d elaborates to the term the old MvPolynomial.coeff d p unfolded to, so the definition and propositions are unchanged.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0121-issue-34529"
+}
