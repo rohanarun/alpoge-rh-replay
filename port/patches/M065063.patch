@@ -1,0 +1,9 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/GlobalInterpolation/IsAlgClosureAlgebraicClosureRat.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/GlobalInterpolation/IsAlgClosureAlgebraicClosureRat.lean
+@@ -10,6 +10,5 @@
+   let i : Algebra ℚ (AlgebraicClosure ℚ) := AlgebraicClosure.instAlgebra ℚ (R := ℚ)
+   have h : IsAlgClosure ℚ (AlgebraicClosure ℚ) := inferInstance
+   convert h
+-  exact Subsingleton.elim _ _
+ 
+ end GlobalTheory.V.FrobQ

@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.IsAlgClosureAlgebraicClosureRat",
+  "source_sha256": "a4468cbca37b8f59980e4686fded3b922cd1b7915d26aeeb28970381e688520c",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "convert h now closes the goal itself, so the following exact Subsingleton.elim _ _ is removed. IsAlgClosure is a Prop, so the instance is unchanged. Proof-only change; no statements, definitions or instances changed."
+}
