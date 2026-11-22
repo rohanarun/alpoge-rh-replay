@@ -1,0 +1,26 @@
+--- a/src/Development/AutomorphicArithmetic/IntegralCasts/CrystallinePeriods/CrisTheta.lean
++++ b/src/Development/AutomorphicArithmetic/IntegralCasts/CrystallinePeriods/CrisTheta.lean
+@@ -188,6 +188,7 @@
+   algebraMap_away_injective (p := p) (by
+     rw [algebraMap_theta, coe_map, AinfInv.theta_map, ← algebraMap_theta, awayMap_algebraMap])
+ 
++set_option synthInstance.maxHeartbeats 100000 in
+ theorem theta_eq_zero_iff (y : AcrisZero p R) : theta p R y = 0 ↔ y ∈ pdIdeal p R := by
+   have key : ∀ y ∈ pdIdeal p R, theta p R y = 0 := fun y hy =>
+     algebraMap_away_injective (p := p) (by
+@@ -235,6 +236,7 @@
+   obtain ⟨a, rfl⟩ := hθ r
+   exact ⟨_, theta_algebraMap a⟩
+ 
++set_option synthInstance.maxHeartbeats 100000 in
+ @[simp] theorem theta_log (u : Ainf p R) (hu : Ainf.theta p R u = 1) : theta p R (log u hu) = 0 := by
+   refine IsHausdorff.haus (I := span {(p : R)}) inferInstance _ fun n => ?_
+   obtain ⟨y, hy⟩ := (eval_eq_zero_iff n (log u hu - algebraMap _ _ (logPartial (p ^ n) u hu))).1
+@@ -257,6 +259,7 @@
+   rw [map_mul, map_pow, map_natCast, map_natCast] at this
+   exact ⟨_, this.symm⟩
+ 
++set_option synthInstance.maxHeartbeats 100000 in
+ theorem factorial_dvd_pow (hθ : Function.Surjective (Ainf.theta p R)) {x : Acris p R}
+     (hx : theta p R x = 0) (n : ℕ) : (n ! : Acris p R) ∣ x ^ n := by
+   obtain ⟨a, z, rfl⟩ := exists_eq_add n x

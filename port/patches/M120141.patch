@@ -1,0 +1,11 @@
+--- a/src/Development/AutomorphicSpectrum/Proofs/AlgebraProofs/ExistsTotallyRealEvenNegPlacesLocalNorm.lean
++++ b/src/Development/AutomorphicSpectrum/Proofs/AlgebraProofs/ExistsTotallyRealEvenNegPlacesLocalNorm.lean
+@@ -36,7 +36,7 @@
+     · exact ⟨1, one_ne_zero, by simp [hd]⟩
+     · exact ⟨a / d, div_ne_zero ha hd, by rw [smul_smul, div_mul_cancel₀ _ hd]; exact hx⟩
+ 
+-theorem latIn_isLattice : ∀ (C : Type) [Field C] (v : Valuation C NNReal) (O : Type) [CommRing O] [Algebra O C] (hv : v.Integers O) (V : Type) [AddCommGroup V] [Module C V] [Module O V] [IsScalarTower O C V] (L : Submodule O V) (U : Submodule C V), L.FG → U ≤ Submodule.span C (L : Set V) → (latIn L U).IsLattice C := by
++theorem latIn_isLattice : ∀ (C : Type) [Field C] (v : Valuation C NNReal) (O : Type) [CommRing O] [Algebra O C] (hv : v.Integers O) (V : Type) [AddCommGroup V] [Module C V] [Module O V] [IsScalarTower O C V] (L : Submodule O V) (U : Submodule C V), L.FG → U ≤ Submodule.span C (L : Set V) → (latIn L U).FG ∧ Submodule.span C ((latIn L U : Submodule O U) : Set U) = ⊤ := by
+   intro C _ v O _ _ hv V _ _ _ _ L U hL hU
+   have hfg := GlobalTheory.CompanionTheory.Ar.HT.fg_inf_restrictScalars_of_integers C v O hv V L U hL
+   refine ⟨?_, ?_⟩

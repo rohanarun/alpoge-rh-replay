@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Definitions.GlobalGeometry.NotIsGenericFlagSelf",
+  "source_sha256": "7ef06dbe41c847507e5bf4a00e90e4ec3a457f47e128a96aefce401d3090d139",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0318-issue-33344"
+}

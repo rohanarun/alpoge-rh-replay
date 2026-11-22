@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicArithmetic.IntegralCasts.CrystallinePeriods.CrisTheta",
+  "source_sha256": "4e5c8a3347dd167ab10dfd21e7c3315eb85e835a43eec5362cfb9d7227ab288d",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Instance search for the AddMonoidHomClass and AddHomClass instances of AcrisZero p R →+* R now needs more than the default 20000 synthInstance heartbeats under Mathlib v4.36 (it succeeds with a higher budget), so theta_eq_zero_iff, theta_log and factorial_dvd_pow are prefixed with set_option synthInstance.maxHeartbeats 100000 in. Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0318-issue-33344"
+}

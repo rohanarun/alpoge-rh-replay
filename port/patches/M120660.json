@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.AlgebraProofs.SubAndQuotientBundlesStatement",
+  "source_sha256": "6aaa167c3466dc6e86ad0bf7bc3f2cd032a57d21157b63ba99bd9a9b40b133ec",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0318-issue-33344"
+}

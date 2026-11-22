@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Definitions.MetricPeriods.HasMultiplier",
+  "source_sha256": "6dbef6817ba7f06239276fe3c54f07a3809a011303c37fc91a7ccf3f0a1682a9",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0318-issue-33344"
+}

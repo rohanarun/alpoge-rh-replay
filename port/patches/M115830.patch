@@ -1,0 +1,11 @@
+--- a/src/Development/AutomorphicArithmetic/IntegralCasts/CrystallinePeriods/DeRhamLog.lean
++++ b/src/Development/AutomorphicArithmetic/IntegralCasts/CrystallinePeriods/DeRhamLog.lean
+@@ -54,7 +54,7 @@
+       ← mul_assoc, d2]
+     simp
+     ring
+-  haveI : IsAddTorsionFree B := IsAddTorsionFree.of_module_rat B
++  haveI : HasUniqueDiv B := IsAddTorsionFree.of_module_rat B
+   have hC := eq_C_of_derivative_eq_zero hD
+   have e1 := congrArg (evalRingHom 1) hC
+   have e0 := congrArg (evalRingHom 0) hC

@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicArithmetic.ThickFrames.expectationSpec",
+  "source_sha256": "56fe14e04bca910406624546366d4f4a476bd05f59c7891be3b44d9b050bdb30",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0318-issue-33344"
+}

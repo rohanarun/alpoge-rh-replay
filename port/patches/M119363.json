@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicArithmetic.ThickFrames.select",
+  "source_sha256": "498d03b21842694689c0460dc3fc8942ad88b9087a60ee46a870a62b7d490462",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0318-issue-33344"
+}

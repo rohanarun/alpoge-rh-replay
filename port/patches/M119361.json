@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicArithmetic.ThickFrames.orbitSum",
+  "source_sha256": "d341d057a8e1a8cfee5fbdd65a62b91e81a000c056fcb8d81f877b96699b2aec",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0318-issue-33344"
+}

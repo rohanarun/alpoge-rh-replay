@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.AlgebraProofs.DualLatticeDegreeNegStatement",
+  "source_sha256": "8986606ba1b5b0bcb51ef42baf22e2ae5c090f129c32e1904c81ab0cf3c43bf3",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0318-issue-33344"
+}

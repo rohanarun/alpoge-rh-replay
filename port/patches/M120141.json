@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.AlgebraProofs.ExistsTotallyRealEvenNegPlacesLocalNorm",
+  "source_sha256": "d5b4321e1d5e59b39030c3aafe8954383928f34f0634af30c95ac1bddc49074d",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Mathlib v4.36 renamed the pinned Submodule.IsLattice (fields fg and span_eq_top) to Submodule.IsFullLattice and reused IsLattice for a different notion (fg plus a linear-independence condition), so the statement of latIn_isLattice, written (latIn L U).IsLattice C, would silently change meaning. The scalars here are a field C with v.Integers O and no IsFractionRing O C hypothesis, so IsFullLattice (which also requires the new linear-independence field) would be strictly stronger than the pinned notion. As PORTING.md prescribes for that case, the conclusion now states the pinned fields explicitly: (latIn L U).FG ∧ Submodule.span C ((latIn L U : Submodule O U) : Set U) = ⊤, which is exactly the pinned Submodule.IsLattice C (latIn L U). The proof, which already built these two components with refine ⟨?_, ?_⟩, is unchanged.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0318-issue-33344"
+}

@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.CoeffSyGauge",
+  "source_sha256": "5804f497ac50dac2fb845431f1e812d96d2e080479582e70dbd7181551767d3a",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0318-issue-33344"
+}
