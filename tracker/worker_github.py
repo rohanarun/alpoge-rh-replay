@@ -67,6 +67,10 @@ class GitHub:
         issues = pages(tasks.repo, 'issues?state=all&per_page=100&creator=' + self.owner)
         return next((i for i in issues if marker in (i.get('body') or '') and 'pull_request' not in i), None)
 
+    def fresh(self):
+        """'ok', 'stale' or 'unknown': whether the local tracker files match main (see tasks.tracker_status)."""
+        return tasks.tracker_status()
+
     def claim(self, target, marker):
         return post(self.issues, title='Claim ' + target,
                     body=f'I will attach the replay receipt and log or close this reservation.\n\n{marker}')

@@ -113,10 +113,15 @@ def inspect_grant(issue, comments, target, owner):
 def dispatch(state, selected, rows, github, build, persist, jobs, poll, retry):
     entries = state['tasks']
     running = {}
+    # Set once main's tracker files differ from this checkout's. This process never pulls, so it
+    # stays set: no new claims, but outstanding grants still build and submit, then the run exits 1.
+    # Unclaimed entries keep no error, so a restart after pulling resumes them without --retry.
+    block_admits = False
     # Only Docker work runs concurrently. One coordinator owns claim creation,
     # the journal, grant decisions and publication.
     with ThreadPoolExecutor(max_workers=jobs) as pool:
         while True:
+            unverified = False
             pending = [t for t, e in entries.items() if not (e.get('submission') or e.get('error'))]
             if not pending:
                 return int(any(e.get('error') and e['error'] not in LOST_RACES for e in entries.values()))
@@ -132,7 +137,7 @@ def dispatch(state, selected, rows, github, build, persist, jobs, poll, retry):
                 print('Failed reservations occupy all slots. Inspect the journal before resuming.', file=sys.stderr)
                 return 1
             active = outstanding + held
-            can_admit = active < jobs and any(not entries[t].get('issue') for t in pending)
+            can_admit = not block_admits and active < jobs and any(not entries[t].get('issue') for t in pending)
             watch = [entries[t]['issue'] for t in pending if entries[t].get('issue')
                      and (t not in running or running[t].done())]
             retrying_claim = any(t in retry and entries[t].get('intent') == 'claim' for t in pending)
@@ -150,13 +155,22 @@ def dispatch(state, selected, rows, github, build, persist, jobs, poll, retry):
                             number = existing['number']
                         elif target not in retry:
                             entry['error'] = 'Unconfirmed claim creation. Check GitHub before using --retry.'
-                    elif active >= jobs:
+                    elif block_admits or active >= jobs:
                         continue
                     else:
                         active += 1
                     if not number and not entry.get('error'):
                         if any(r['state'] != 'open' or r['id'] in busy or r['packet'] in busy for r in selected[target]):
                             entry['error'] = OCCUPIED
+                        elif (fresh := github.fresh()) != 'ok':
+                            # Nothing is journaled: the entry stays unclaimed and error-free.
+                            if fresh == 'stale':
+                                block_admits = True
+                                print(tasks.STALE_INDEX, 'Finishing outstanding grants without new claims.',
+                                      file=sys.stderr)
+                            else:
+                                unverified = True
+                            continue
                         else:
                             entry['intent'] = 'claim'
                             persist()
@@ -228,8 +242,14 @@ def dispatch(state, selected, rows, github, build, persist, jobs, poll, retry):
                 persist()
             if any(not (e.get('submission') or e.get('error')) for e in entries.values()):
                 remaining = [e for e in entries.values() if not (e.get('error') or e.get('submission'))]
-                if any(not e.get('issue') and not e.get('intent') for e in remaining) and sum(
-                        bool(e.get('issue') or e.get('intent')) for e in remaining) + held < jobs:
+                in_flight = sum(bool(e.get('issue') or e.get('intent')) for e in remaining)
+                if block_admits and not in_flight and not running:
+                    print('Claims stopped because the tracker checkout is behind main. Pull on the controller '
+                          'and the builder, then restart with the same command.', file=sys.stderr)
+                    return 1
+                if (not block_admits and not unverified
+                        and any(not e.get('issue') and not e.get('intent') for e in remaining)
+                        and in_flight + held < jobs):
                     continue
                 futures = list(running.values())
                 if futures:

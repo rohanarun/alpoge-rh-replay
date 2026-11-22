@@ -36,6 +36,12 @@ class FakeGitHub:
         self.cut = None
         self.conflicts = set()
         self.closed = []
+        self.freshness = []
+        self.fresh_calls = 0
+
+    def fresh(self):
+        self.fresh_calls += 1
+        return self.freshness.pop(0) if self.freshness else 'ok'
 
     def snapshot(self):
         return list(self.issues.values())
@@ -193,6 +199,36 @@ class WorkerTests(unittest.TestCase):
         self.assertIn(message, tasks_state[failed]['error'])
         self.assertEqual(tasks_state[peer]['submission'], 'https://example.test/issues/2#comment')
         self.assertEqual(self.gh.posts, [2])
+
+    def test_stale_tracker_creates_no_claims_and_journals_no_error(self):
+        self.assignments.write_text('M000001 M000002')
+        self.gh.freshness = ['stale']
+        with contextlib.redirect_stderr(io.StringIO()) as err:
+            self.assertEqual(self.launch(self.artifacts), 1)
+        self.assertEqual((self.gh.issues, self.gh.fresh_calls), ({}, 1))
+        self.assertIn('behind main', err.getvalue())
+        tasks_state = json.loads((self.root / 'state/state.json').read_text())['tasks']
+        self.assertEqual(tasks_state, {'M000001': {}, 'M000002': {}})
+        # After pulling, the same command resumes both without --retry.
+        self.assertEqual(self.launch(self.artifacts), 0)
+        self.assertEqual(self.gh.posts, [1, 2])
+
+    def test_stale_tracker_mid_run_finishes_outstanding_grants(self):
+        self.assignments.write_text('M000001 M000002')
+        self.gh.freshness = ['ok', 'stale']
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(self.launch(self.artifacts), 1)
+        self.assertEqual((len(self.gh.issues), self.gh.posts), (1, [1]))
+        tasks_state = json.loads((self.root / 'state/state.json').read_text())['tasks']
+        self.assertEqual(tasks_state['M000002'], {})
+        self.assertEqual(self.launch(self.artifacts), 0)
+        self.assertEqual(self.gh.posts, [1, 2])
+
+    def test_unverified_tracker_waits_and_retries(self):
+        self.assignments.write_text('M000001')
+        self.gh.freshness = ['unknown']
+        self.assertEqual(self.launch(self.artifacts), 0)
+        self.assertEqual((self.gh.fresh_calls, self.gh.posts), (2, [1]))
 
     def test_lost_races_are_not_failures(self):
         self.assignments.write_text('M000001 M000002 M000003')
