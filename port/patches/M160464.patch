@@ -1,0 +1,11 @@
+--- a/src/Formalism/SharpRestriction/LevelLetterCocycles/CyclotomicPowerSeries/MapEvalRingHomOfPiFamily.lean
++++ b/src/Formalism/SharpRestriction/LevelLetterCocycles/CyclotomicPowerSeries/MapEvalRingHomOfPiFamily.lean
+@@ -73,7 +73,7 @@
+   rw [← hback, hc, Polynomial.mul_comp]
+ 
+ private theorem derivative_exp_eq_exp' (A : Type) [Field A] [CharZero A] :
+-    derivative A (PowerSeries.exp A) = PowerSeries.exp A := by
++    derivative (R := A) (PowerSeries.exp A) = PowerSeries.exp A := by
+   ext n
+   have key : (1 / ((n + 1).factorial : ℚ)) * ((n : ℚ) + 1) = 1 / (n.factorial : ℚ) := by
+     have h0 : (n.factorial : ℚ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero n

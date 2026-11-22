@@ -1,0 +1,8 @@
+{
+  "module": "Formalism.SharpRestriction.LevelLetterCocycles.CyclotomicPowerSeries.MapEvalRingHomOfPiFamily",
+  "source_sha256": "01fa7ace87fb686191d01244316c0148dd61bf3434752ea23eee9bc39b18735f",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "PowerSeries.derivative now takes its coefficient ring implicitly, so the statement of the private lemma derivative_exp_eq_exp' and its proof pass it by name as (R := A); the term is the same, so the proposition is unchanged.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0222-issue-34819"
+}

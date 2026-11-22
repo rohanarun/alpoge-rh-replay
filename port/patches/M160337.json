@@ -1,0 +1,8 @@
+{
+  "module": "Formalism.SharpRestriction.GrowthBounds.TwistedSubstitution.TwistedMonomialFiltration.AlmostEverywhereSpherical",
+  "source_sha256": "868f941a844b91633526eed5448f3c0c15e938d187479b52ca6e55ee08f6a458",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0222-issue-34819"
+}
