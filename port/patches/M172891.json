@@ -1,0 +1,7 @@
+{
+  "module": "ReciprocityTheory.ReductiveGroups.ArithmeticGeometry.ExtensionDescent.ChartPullbacks.WeightedChartPullback.TorusInj",
+  "source_sha256": "22dabf9943df1c30e319c7defc5d8ebbf8c0690118a6b7f896ecee7b274b9cfc",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use the renamed Finsupp.finsetSum_apply in the simp alternatives of the proof of coeff_sum_single. Proof-only change; no statements, definitions or instances changed."
+}

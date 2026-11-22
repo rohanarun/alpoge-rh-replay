@@ -1,0 +1,13 @@
+--- a/src/ReciprocityTheory/ReductiveGroups/ArithmeticGeometry/ExtensionDescent/ChartPullbacks/WeightedChartPullback/TorusInj.lean
++++ b/src/ReciprocityTheory/ReductiveGroups/ArithmeticGeometry/ExtensionDescent/ChartPullbacks/WeightedChartPullback/TorusInj.lean
+@@ -155,8 +155,8 @@
+     (∑ c ∈ s, AddMonoidAlgebra.single c (g c)).coeff χ₀ = g χ₀ := by
+   classical
+   first
+-  | simp [AddMonoidAlgebra.coeff, Finsupp.finset_sum_apply, Finsupp.single_apply, h]
+-  | simp [Finsupp.finset_sum_apply, Finsupp.single_apply, h]
++  | simp [AddMonoidAlgebra.coeff, Finsupp.finsetSum_apply, Finsupp.single_apply, h]
++  | simp [Finsupp.finsetSum_apply, Finsupp.single_apply, h]
+   | simp [AddMonoidAlgebra.coeff_sum, AddMonoidAlgebra.coeff_single, h]
+ 
+ theorem eq_zero_of_sum {V : Y.left.Opens} (s : Finset X) (h : X → Γ(Y.left, V))
