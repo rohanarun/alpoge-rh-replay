@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.CuspFormEvaluations.L1NormRowBlockLeadingMinorProductLe",
+  "source_sha256": "29cf4db77d0b48ff9983cc753e121760fa861fa442963d95534ac266145b807b",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "The nonnegative-factor form of Finset.prod_le_prod is now Finset.prod_le_prod₀ with the same arguments. Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0099-issue-34643"
+}
