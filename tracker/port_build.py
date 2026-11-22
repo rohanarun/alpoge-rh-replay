@@ -373,6 +373,21 @@ def cmd_diff(args):
     return int(bool(problems))
 
 
+def link_tree(src, dst):
+    """Copy a directory tree, hardlinking regular files where the filesystem allows it.
+
+    The Lake packages (Mathlib and its dependencies, about 7 GB of build outputs) are only read
+    while a packet is rebuilt, so the fresh tree can share them with the work tree. Separate
+    copies cost the disk space and, when several packets are rebuilt at once, let the page cache
+    hold one copy of Mathlib per tree, which thrashes on machines with less memory than that."""
+    def link_or_copy(source, target):
+        try:
+            os.link(source, target)
+        except OSError:
+            shutil.copy2(source, target)
+    shutil.copytree(src, dst, symlinks=True, copy_function=link_or_copy)
+
+
 def cmd_reproduce(args):
     work, pins, rows = args.work.resolve(), target(), tasks.load()
     out, patches = args.out.resolve(), (args.patches or PATCHES).resolve()
@@ -405,7 +420,7 @@ def cmd_reproduce(args):
             + ' '.join(sorted(args.exclude)))
     retarget(tree, pins)
     shutil.copyfile(work / 'lean/lake-manifest.json', tree / 'lake-manifest.json')
-    shutil.copytree(work / 'lean/.lake/packages', tree / '.lake/packages', symlinks=True)
+    link_tree(work / 'lean/.lake/packages', tree / '.lake/packages')
     version, mathlib = toolchain(tree, env, pins)
     say(f'== toolchain: {version}; Mathlib {mathlib}')
     applied = []

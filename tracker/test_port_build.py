@@ -268,6 +268,29 @@ class PortBuildTest(unittest.TestCase):
             self.records('M000002', {})
         self.assertIn('has no patch', str(refused.exception))
 
+    def test_link_tree_shares_files_and_keeps_symlinks(self):
+        src = self.root / 'packages'
+        (src / 'mathlib/.lake/build').mkdir(parents=True)
+        olean = src / 'mathlib/.lake/build/Mathlib.olean'
+        olean.write_bytes(b'olean')
+        (src / 'link').symlink_to('mathlib')
+        dst = self.root / 'fresh/packages'
+        port_build.link_tree(src, dst)
+        copied = dst / 'mathlib/.lake/build/Mathlib.olean'
+        self.assertEqual(copied.read_bytes(), b'olean')
+        self.assertTrue(copied.samefile(olean))
+        self.assertTrue((dst / 'link').is_symlink())
+
+    def test_link_tree_copies_when_hardlinks_fail(self):
+        src = self.root / 'packages'
+        src.mkdir()
+        (src / 'a.olean').write_bytes(b'olean')
+        dst = self.root / 'fresh/packages'
+        with patch.object(port_build.os, 'link', side_effect=OSError('cross-device link')):
+            port_build.link_tree(src, dst)
+        self.assertEqual((dst / 'a.olean').read_bytes(), b'olean')
+        self.assertFalse((dst / 'a.olean').samefile(src / 'a.olean'))
+
     def test_ready_selection_splits_ready_and_remaining_members(self):
         self.rows[2]['packet'] = 'P0002'
         members = port_build.packet(self.rows, 'P0002')
