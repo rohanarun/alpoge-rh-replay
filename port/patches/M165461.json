@@ -1,0 +1,8 @@
+{
+  "module": "GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PAntisymDivisible",
+  "source_sha256": "1d885cfb24f1da613098d7fef1e5fc4d760912c811706cd89daafce78d983cbf",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "MvPolynomial.coeff was removed, so the proof writes the coefficient of the linear combination as (∑ w, c w • X (g w)).coeff (Finsupp.single u 1), and takes the coefficient equation with MvPolynomial.ext_iff in place of congrArg (coeff (Finsupp.single (τ, a) 1)). Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0163-issue-33604"
+}

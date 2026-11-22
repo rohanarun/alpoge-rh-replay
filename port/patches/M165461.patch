@@ -1,0 +1,20 @@
+--- a/src/GroundTheory/HeightsAndTheta/Heights/ElementarySymmetric/PAntisymDivisible.lean
++++ b/src/GroundTheory/HeightsAndTheta/Heights/ElementarySymmetric/PAntisymDivisible.lean
+@@ -331,7 +331,7 @@
+   rw [homogeneousSubmodule_one_eq_span_X, Submodule.mem_span_range_iff_exists_fun] at hl₁h
+   obtain ⟨c, hc⟩ := hl₁h
+   have coeff_lin : ∀ (g : T × Fin N → T × Fin N) (u : T × Fin N),
+-      coeff (Finsupp.single u 1) (∑ w, c w • (X (g w) : MvPolynomial (T × Fin N) ℝ)) =
++      (∑ w, c w • (X (g w) : MvPolynomial (T × Fin N) ℝ)).coeff (Finsupp.single u 1) =
+         ∑ w, if g w = u then c w else 0 := by
+     intro g u
+     simp only [coeff_sum, coeff_smul, coeff_X, Finsupp.single_left_inj one_ne_zero, smul_eq_mul,
+@@ -339,7 +339,7 @@
+   have const : ∀ (τ : T) (a b : Fin N), a.val < b.val → (b.val < j ∨ j ≤ a.val) →
+       c (τ, a) = c (τ, b) := by
+     intro τ a b hab hbl
+-    have h := congrArg (coeff (Finsupp.single (τ, a) 1)) (inv τ a b hab hbl)
++    have h := MvPolynomial.ext_iff.mp (inv τ a b hab hbl) (Finsupp.single (τ, a) 1)
+     rw [← hc, map_sum] at h
+     simp only [map_smul, rename_X] at h
+     rw [coeff_lin, coeff_lin] at h

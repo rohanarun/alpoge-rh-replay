@@ -1,0 +1,8 @@
+{
+  "module": "GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PAntisymStability",
+  "source_sha256": "bae83c492ca5f5b9519e637a48869892607e84113564fc6bfe21804f16c17574",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "MvPolynomial.coeff was removed, so the statements of abs_coeff_le_sum_abs_coeff and exists_uniform_coeff_bound and the proofs write p.coeff m (and (G y).coeff m, (G (b i)).coeff m) for coeff m p; the polynomials' types are fixed by the hypotheses, and p.coeff m elaborates to the term the old MvPolynomial.coeff m p unfolded to, so the propositions are unchanged.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0163-issue-33604"
+}

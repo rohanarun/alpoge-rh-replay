@@ -1,0 +1,8 @@
+{
+  "module": "GroundTheory.HeightsAndTheta.Heights.ElementarySymmetric.PAntisymPerturbation",
+  "source_sha256": "6ff42cfa4dbd450e38dac18716a1e779a5dc369f797a2f1b0409692985851e26",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0163-issue-33604"
+}
