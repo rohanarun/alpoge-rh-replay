@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.SiegelFunctionNeZero",
+  "source_sha256": "894a1c8e328c2ddd41c2c6b169ff0e6767e6e8c7e1928d5fc6d61e4583d0c1d2",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "Compiled unchanged on leanprover/lean4:v4.36.0 with Mathlib fc4f59e577feb1a4956671bc04ac18aaaf8cd842 in the P0189 packet build transcript linked from the PR."
+}

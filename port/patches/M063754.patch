@@ -1,0 +1,15 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/SmoothedSiegelUnitQExpansionCoeffsIntegral.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/FoundationProofs/SmoothedSiegelUnitQExpansionCoeffsIntegral.lean
+@@ -310,10 +310,8 @@
+       ((mem_ball_zero_iff.mp (hKr hz)).le.trans (le_max_left _ _)) hr1 m)
+     (fun m => by fun_prop)
+   convert h using 1
+-  · funext m z
+-    ring
+-  · funext z
+-    simp [_root_.GlobalTheory.SiegQ.ep, sub_eq_add_neg]
++  funext z
++  simp [_root_.GlobalTheory.SiegQ.ep, sub_eq_add_neg]
+ 
+ open scoped UpperHalfPlane MatrixGroups Manifold Topology in
+ open Filter in

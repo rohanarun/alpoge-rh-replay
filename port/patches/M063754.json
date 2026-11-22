@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.FoundationProofs.SmoothedSiegelUnitQExpansionCoeffsIntegral",
+  "source_sha256": "0b1b05fc9708922af58d5a38969af3d9ad7a9dc1c1e3bab51bf9aa0be1a2c45c",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "In ep_locUnif, convert h using 1 now closes the factor-sequence goal itself, leaving only the ep = fun x => ∏' ... goal; drop the bullet for the closed goal (funext m z; ring) and keep the remaining funext z; simp step. Proof-only change; no statements, definitions or instances changed."
+}
