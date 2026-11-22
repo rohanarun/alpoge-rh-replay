@@ -1,0 +1,11 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/TwistedOperators/IsClosedEmbeddingAffPtUncurry.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/TwistedOperators/IsClosedEmbeddingAffPtUncurry.lean
+@@ -118,7 +118,7 @@
+     (continuous_affPt_uncurry p).comp (Continuous.prodMk_right x₀)
+   refine Continuous.integrable_of_hasCompactSupport ?_ ?_
+   · refine (hΦ.1.continuous.comp hc).mul (continuous_subtype_val.comp (hψ.comp (Continuous.neg ?_)))
+-    exact continuous_finset_sum _ fun i _ => hc.matrix_elem _ _
++    exact continuous_finsetSum _ fun i _ => hc.matrix_elem _ _
+   · refine HasCompactSupport.mul_right ?_
+     have h2 := (comp_affPt_mem_SB p hΦ).2
+     refine HasCompactSupport.intro (h2.isCompact.image continuous_snd) fun e he => ?_

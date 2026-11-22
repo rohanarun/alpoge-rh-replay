@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.TwistedOperators.LeftMulMatrixTransfer",
+  "source_sha256": "d970010bdf8c1a22be2696e3e89b53b443b72a02d717f583317fc8ee02a68b91",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use the renamed Polynomial.finsetSum_coeff, Finsupp.finsetSum_apply and AddSubmonoidClass.coe_finsetSum. Add Finsupp.single_apply to one simpa, because coeff_monomial now leaves a Finsupp.single term. Proof-only changes; no statements, definitions or instances changed."
+}
