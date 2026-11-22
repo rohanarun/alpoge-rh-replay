@@ -1,0 +1,8 @@
+{
+  "module": "GroundTheory.AutomorphicForms.AdelicDixmierMalliavinLie",
+  "source_sha256": "88ef9fd324f4199b2299bdcc11de307674506d6041fd94aa61efe2c02b32ac4a",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0159-issue-33915"
+}
