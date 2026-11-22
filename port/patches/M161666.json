@@ -1,0 +1,8 @@
+{
+  "module": "Formalism.ThetaLogCoordinates.UniformThetaSubstitution.FrobeniusLiftNorms.GaussElementarySymmetric",
+  "source_sha256": "0b28efa22f28c877ae9ee9ee2060f5ec924c2bf5dc479b17be28ea3d5033924c",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0223-issue-34864"
+}
