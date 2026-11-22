@@ -1,0 +1,12 @@
+--- a/src/Development/AbelianVarietyTheory/Definitions/NonGaloisDescent/IsTestRep.lean
++++ b/src/Development/AbelianVarietyTheory/Definitions/NonGaloisDescent/IsTestRep.lean
+@@ -12,7 +12,8 @@
+ 
+ def SelfDual {V : Type} [AddCommGroup V] [TopologicalSpace V] [MeasurableSpace V] (μ : Measure V)
+     (B : V → V → ℂ) : Prop :=
+-  μ.IsAddHaarMeasure ∧ ∀ f : V → ℂ, IsTest f → ∀ y, fourB μ B (fourB μ B f) y = f (-y)
++  (μ.IsAddHaarMeasure ∧ ∀ g : V, AEMeasurable (fun v => g + v) μ) ∧
++    ∀ f : V → ℂ, IsTest f → ∀ y, fourB μ B (fourB μ B f) y = f (-y)
+ 
+ def IsTestRep {G X : Type} [Group G] [TopologicalSpace X] (W : G → (X → ℂ) → X → ℂ) : Prop :=
+   (∀ g f, IsTest f → IsTest (W g f)) ∧ (∀ f, IsTest f → W 1 f = f) ∧

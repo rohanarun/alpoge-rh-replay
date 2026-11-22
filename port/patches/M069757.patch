@@ -9,3 +9,12 @@
    calc _root_.GlobalTheory.JR.fourB μ B (_root_.GlobalTheory.JR.fourB μ B f) z
        = ∫ y, _root_.GlobalTheory.JR.fourB μ B f y * B y z ∂μ := rfl
      _ = ∫ y, ∫ x, P x y ∂μ ∂μ := integral_congr_ae (Eventually.of_forall fun y => (hPy y).symm)
+@@ -273,7 +273,7 @@
+       _ = 1 := by rw [hrr, div_self hpos.ne']
+   refine ⟨c • ν, ?_⟩
+   unfold _root_.GlobalTheory.JR.SelfDual
+-  refine ⟨inferInstance, ?_⟩
++  refine ⟨⟨inferInstance, fun g => (measurable_const_add g).aemeasurable⟩, ?_⟩
+   intro f hf y
+   have hf' : IsLocallyConstant f ∧ HasCompactSupport f := hf
+   obtain ⟨U, hU, hUinv⟩ := _root_.GlobalTheory.JR.AbsInv.exists_nhds_invariant hf

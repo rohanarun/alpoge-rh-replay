@@ -1,6 +1,6 @@
 --- a/src/Development/AbelianVarietyTheory/Proofs/InertiaEigenvalues/TransportSelfDualHaarMeasureKernelAddEquiv.lean
 +++ b/src/Development/AbelianVarietyTheory/Proofs/InertiaEigenvalues/TransportSelfDualHaarMeasureKernelAddEquiv.lean
-@@ -9,23 +9,19 @@
+@@ -9,18 +9,14 @@
    by_cases hg : AEMeasurable g (μ.map e)
    · exact AEMeasurable.map_map_of_aemeasurable hg e.measurable.aemeasurable
    · have hg' : ¬ AEMeasurable (g ∘ e) μ := by rwa [← aemeasurable_map_equiv_iff e]
@@ -25,19 +25,14 @@
  
  end GlobalTheory.TransportSD
  
- open GlobalTheory.TransportSD in
--theorem GlobalTheory.transport_selfDual_fourB : ∀ {V V' : Type} [AddCommGroup V] [TopologicalSpace V] [MeasurableSpace V] [BorelSpace V] [AddCommGroup V'] [TopologicalSpace V'] [MeasurableSpace V'] [BorelSpace V'] (h : V' ≃+ V), Continuous h → Continuous h.symm → ∀ (μ : Measure V) (B : V → V → ℂ), (SelfDual μ B → SelfDual (Measure.map h.symm μ) (fun x y => B (h x) (h y))) ∧ ∀ (f : V' → ℂ) (y : V'), fourB (Measure.map h.symm μ) (fun x y => B (h x) (h y)) f y = fourB μ B (fun v => f (h.symm v)) (h y) := by
-+theorem GlobalTheory.transport_selfDual_fourB : ∀ {V V' : Type} [AddCommGroup V] [TopologicalSpace V] [MeasurableSpace V] [BorelSpace V] [AddCommGroup V'] [TopologicalSpace V'] [MeasurableSpace V'] [BorelSpace V'] (h : V' ≃+ V), Continuous h → Continuous h.symm → ∀ (μ : Measure V) (B : V → V → ℂ), ((SelfDual μ B ∧ ∀ g : V, AEMeasurable (fun v => g + v) μ) → SelfDual (Measure.map h.symm μ) (fun x y => B (h x) (h y)) ∧ ∀ g : V', AEMeasurable (fun v => g + v) (Measure.map h.symm μ)) ∧ ∀ (f : V' → ℂ) (y : V'), fourB (Measure.map h.symm μ) (fun x y => B (h x) (h y)) f y = fourB μ B (fun v => f (h.symm v)) (h y) := by
-   intro V V' _ _ _ _ _ _ _ _ h hc hs μ B
-   let he : V ≃ₜ V' := { toEquiv := h.symm.toEquiv, continuous_toFun := hs, continuous_invFun := hc }
-   let e : V ≃ᵐ V' := he.toMeasurableEquiv
-@@ -39,7 +35,16 @@
+@@ -39,8 +35,17 @@
      funext v
      rw [he_eq]
      simp
 -  refine ⟨fun hsd => ⟨?_, ?_⟩, four⟩
-+  refine ⟨fun hsdA => ?_, four⟩
-+  obtain ⟨hsd, hA⟩ := hsdA
+-  · obtain ⟨hH, -⟩ := hsd
++  refine ⟨fun hsd => ?_, four⟩
++  have hA : ∀ g : V, AEMeasurable (fun v => g + v) μ := hsd.1.2
 +  have hA' : ∀ g : V', AEMeasurable (fun v => g + v) (Measure.map e μ) := by
 +    intro g
 +    rw [aemeasurable_map_equiv_iff e]
@@ -45,10 +40,11 @@
 +      funext v; rw [he_eq]; simp
 +    rw [hcomp]
 +    exact e.measurable.comp_aemeasurable (hA (h g))
-+  refine ⟨⟨?_, ?_⟩, by rw [hμ]; exact hA'⟩
-   · obtain ⟨hH, -⟩ := hsd
++  refine ⟨⟨?_, by rw [hμ]; exact hA'⟩, ?_⟩
++  · obtain ⟨⟨hH, -⟩, -⟩ := hsd
      rw [hμ]
      have h1 : IsFiniteMeasureOnCompacts (Measure.map e μ) := by
+       refine ⟨fun K hK => ?_⟩
 @@ -57,7 +62,7 @@
        rw [map_map_equiv_left]
        have hcomp : (fun y' => x' + y') ∘ (e : V → V') = (e : V → V') ∘ (fun v => h x' + v) := by

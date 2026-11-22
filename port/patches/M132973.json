@@ -3,6 +3,5 @@
   "source_sha256": "d96ac52a138abb38b56aa19cfc8e61870e5ef9f560c4462dc499324309bd7c1f",
   "lean": "leanprover/lean4:v4.36.0",
   "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
-  "notes": "unchanged",
-  "evidence": "https://github.com/jasonyandell/alpoge-rh-replay/releases/download/port-P0267-lean436-20261122-b/P0267-receipt.json"
+  "notes": "Proof-only: the obtain pattern for exists_selfDual takes apart the new first conjunct of SelfDual. SelfDual (M004788) now states the a.e. measurability of translations as an explicit conjunct, restoring its pinned meaning (#33373, option 1). No exported declaration statements, definitions or instances changed."
 }

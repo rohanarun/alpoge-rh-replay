@@ -3,6 +3,5 @@
   "source_sha256": "39870aa3b32dc5517bf29624f2fc902ae03abc7f2e51009d793c5f7a4dbd102c",
   "lean": "leanprover/lean4:v4.36.0",
   "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
-  "notes": "Use continuity of right addition. No exported declaration statements, definitions or instances changed.",
-  "evidence": "https://github.com/emsi/alpoge-rh-replay/releases/download/port-P0191-lean436-20261121/packet-result.json"
+  "notes": "Use continuity of right addition. The proof of exists_selfDual also supplies the new translation conjunct: SelfDual (M004788) now states the a.e. measurability of translations as an explicit conjunct, restoring its pinned meaning (#33373, option 1), and here it follows from measurable_const_add, since V is a topological additive group with BorelSpace V. No exported declaration statements, definitions or instances changed."
 }
