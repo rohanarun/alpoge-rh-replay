@@ -1,0 +1,8 @@
+{
+  "module": "CompanionTheory.AutomorphicTheory.HeckeStandardModules.HeckeA",
+  "source_sha256": "430cdb4927b62e29f1258910c15e83df65567cea51cee593958336bcd59db1b5",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0172-issue-34822"
+}
