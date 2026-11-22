@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsTwoPlacesOverOfIsSquareLocal",
+  "source_sha256": "6ce9188fdd859c07c18748874916f480057d1acab7a0b247078fdeaffcfe27f0",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Valued.isOpen_ball is now stated with Valuation.restrict into ValueGroup₀; bridge it inside the proof with Valuation.restrict_lt_one_iff (v.restrict x < 1 ↔ v x < 1). Proof-only change; no statements, definitions or instances changed."
+}

@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Definitions.ThetaMetrics.AevalEqZeroOfHomogeneousComponent",
+  "source_sha256": "bc6904dceffe89057038a94fc3a026090bbd43ac4850b910a5ba0b2fd28f40b6",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Write the removed index-first coefficient call coeff a.1 g (inside a proof) as g.coeff a.1, the same coefficient. Proof-only change; no statements, definitions or instances changed."
+}

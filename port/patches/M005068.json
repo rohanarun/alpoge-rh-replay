@@ -1,0 +1,7 @@
+{
+  "module": "Development.AbelianVarietyTheory.Definitions.ThetaMetrics.SmulOneLeAndLeSmulOneIffEigenvalues",
+  "source_sha256": "361966ec1c5b0c0c6f16560c7a50fde202968981a0744486e534eca5b7d67093",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Use the renamed continuous_finsetProd. Proof-only change; no statements, definitions or instances changed."
+}

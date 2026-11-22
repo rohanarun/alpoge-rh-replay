@@ -1,0 +1,13 @@
+--- a/src/Development/AbelianVarietyTheory/Definitions/ThetaMetrics/AevalEqZeroOfHomogeneousComponent.lean
++++ b/src/Development/AbelianVarietyTheory/Definitions/ThetaMetrics/AevalEqZeroOfHomogeneousComponent.lean
+@@ -75,8 +75,8 @@
+   let T := Submodule.span Ω ((fun v : n → R => φ ∘ v) '' S)
+   have h1 : ∀ g ∈ I, π (map φ g) ∈ T := by
+     intro g hg
+-    refine Submodule.subset_span ⟨fun a => coeff a.1 g, ?_, ?_⟩
+-    · have : L (fun a => coeff a.1 g) = homogeneousComponent d g := by
++    refine Submodule.subset_span ⟨fun a => g.coeff a.1, ?_, ?_⟩
++    · have : L (fun a => g.coeff a.1) = homogeneousComponent d g := by
+         ext c
+         rw [hL, coeff_sum, coeff_homogeneousComponent]
+         split_ifs with hc
