@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.MetricProofs.TwistIsPrime",
+  "source_sha256": "46157872b7fa1cb9cf9cda1835fbd8b890143270976ee6f7cd1048f26538a4ef",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Polynomial coefficients are read with t.coeff n in place of the removed Polynomial.coeff t n, with t ascribed as a polynomial, and twist_isPrime is prefixed with set_option synthInstance.maxHeartbeats 100000 in because the AddMonoidHomClass instance search for ring homs out of a polynomial ring over a quotient now needs more than the default budget. Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0321-issue-33346"
+}

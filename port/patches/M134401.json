@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.MetricProofs.SmoothInCompatibleChart",
+  "source_sha256": "e12e83ecf8d137d8b7b6cc044421b2987f3f7538b99b7d7da59ccc7752f2b035",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0321-issue-33346"
+}

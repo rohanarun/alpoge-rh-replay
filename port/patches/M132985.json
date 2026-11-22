@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.MembershipProofs.BigCellLocal",
+  "source_sha256": "8ec657d40319c8ef3c70cbe25c021bb91ab3ebb63b8265af7b6693786e1f2173",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0321-issue-33346"
+}

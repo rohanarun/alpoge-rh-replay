@@ -1,0 +1,11 @@
+--- a/src/Development/AutomorphicSpectrum/Proofs/MetricProofs/TwistIsMultiHomogIdeal.lean
++++ b/src/Development/AutomorphicSpectrum/Proofs/MetricProofs/TwistIsMultiHomogIdeal.lean
+@@ -36,7 +36,7 @@
+     simp only [Option.elim_some]
+     refine (Fintype.sum_equiv (show Tb ι (some k) ≃ ι k from Equiv.refl _) _
+       (fun i => m' ⟨k, i⟩) (fun i => ?_)).trans (hf m' hm' k)
+-    exact Finsupp.mapDomain_apply hinj m' ⟨k, i⟩
++    exact Finsupp.mapDomain_apply_of_injective hinj m' ⟨k, i⟩
+ 
+ theorem sum_single_none {K : Type} {ι : K → Type} [∀ k, Fintype (ι k)] (j : Fin 2) (o : Option K) :
+     ∑ i, (Finsupp.single (⟨none, j⟩ : Σ o, Tb ι o) 2) ⟨o, i⟩ = o.elim 2 (fun _ => 0) := by

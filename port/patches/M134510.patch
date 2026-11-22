@@ -1,0 +1,25 @@
+--- a/src/Development/AutomorphicSpectrum/Proofs/MetricProofs/TwLineSmoothConjInvariantGlue.lean
++++ b/src/Development/AutomorphicSpectrum/Proofs/MetricProofs/TwLineSmoothConjInvariantGlue.lean
+@@ -11,18 +11,18 @@
+ 
+ theorem conj_contDiff {T : Type} [Fintype T] :
+     ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun z : T → ℂ => fun q => starRingEnd ℂ (z q)) :=
+-  contDiff_pi.2 fun q => Complex.conjCLE.contDiff.comp (contDiff_apply ℝ ℂ q)
++  contDiff_pi.2 fun q => Complex.conjCLE.contDiff.comp (contDiff_apply ℝ (fun _ => ℂ) q)
+ 
+ theorem oldPart_contDiff :
+     ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (basePart₂ : ((Σ o, Tb ι o) → ℂ) → (Σ k, ι k) → ℂ) :=
+-  contDiff_pi.2 fun _ => contDiff_apply ℝ ℂ _
++  contDiff_pi.2 fun _ => contDiff_apply ℝ (fun _ => ℂ) _
+ 
+ theorem chi_contDiffOn (p : ℕ) :
+     ContDiffOn ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (chi (ι := ι) p) {u | ∀ o, ∃ i, u ⟨o, i⟩ ≠ 0} := by
+   have hx : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞)
+-      (fun u : (Σ o, Tb ι o) → ℂ => u ⟨none, (0 : Fin 2)⟩) := contDiff_apply ℝ ℂ _
++      (fun u : (Σ o, Tb ι o) → ℂ => u ⟨none, (0 : Fin 2)⟩) := contDiff_apply ℝ (fun _ => ℂ) _
+   have hy : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞)
+-      (fun u : (Σ o, Tb ι o) → ℂ => u ⟨none, (1 : Fin 2)⟩) := contDiff_apply ℝ ℂ _
++      (fun u : (Σ o, Tb ι o) → ℂ => u ⟨none, (1 : Fin 2)⟩) := contDiff_apply ℝ (fun _ => ℂ) _
+   have hnum : ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun u : (Σ o, Tb ι o) → ℂ =>
+       (u ⟨none, (0 : Fin 2)⟩ * (starRingEnd ℂ) (u ⟨none, (1 : Fin 2)⟩)).im) :=
+     Complex.imCLM.contDiff.comp (hx.mul (Complex.conjCLE.contDiff.comp hy))

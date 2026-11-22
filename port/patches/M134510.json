@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.MetricProofs.TwLineSmoothConjInvariantGlue",
+  "source_sha256": "1b20c77775e3cf091f73ec0e40f6e5afa9671435ca5ea6fc32b533ad192030d9",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "contDiff_apply now takes the codomain as a type family, so the explicit argument ℂ becomes (fun _ => ℂ). Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0321-issue-33346"
+}

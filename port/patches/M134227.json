@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.MetricProofs.PolydiscPoissonReproducesHarmonic",
+  "source_sha256": "c364d841ef7f5a286f7dc86a983febe9a812795b1de448762017526662d94b5c",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "positivity no longer proves ‖circleMap 0 ρ t - w‖ ^ 2 ≠ 0 from the hypothesis h2 : 0 < ‖circleMap 0 ρ t - w‖, so it is proved as (pow_pos h2 2).ne', and the nonnegative-factor form of Finset.prod_le_prod is now Finset.prod_le_prod₀ with the same arguments. Proof-only change. The statement of integral_pi_cons uses Measure.prod, whose target value differs from the pinned one only when the second measure is not s-finite; here the second measure is Measure.pi of the probability measure angMeas, which is finite, so the statement keeps its pinned meaning.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0321-issue-33346"
+}

@@ -1,0 +1,18 @@
+--- a/src/Development/AutomorphicSpectrum/Proofs/MetricProofs/RingKrullDimTwistSucc.lean
++++ b/src/Development/AutomorphicSpectrum/Proofs/MetricProofs/RingKrullDimTwistSucc.lean
+@@ -54,6 +54,7 @@
+   simp only [toA, yN, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, aeval_X]
+   rfl
+ 
++set_option synthInstance.maxHeartbeats 100000 in
+ theorem toA_quad (p : ℕ) (W : Ideal (MRing ι)) : toA p W (quad p) = 0 := by
+   have h : AdjoinRoot.mk (quadP p W) (Polynomial.X ^ 2 +
+       Polynomial.C (Polynomial.C ((p : ℤ) : MRing ι ⧸ W) * Polynomial.X ^ 2)) = 0 :=
+@@ -104,6 +105,7 @@
+     · rw [RingHom.comp_apply, baseP_X, quotA_mk, toA_yN]
+   exact RingHom.congr_fun h g
+ 
++set_option synthInstance.maxHeartbeats 100000 in
+ theorem baseMap_injective (p : ℕ) (W : Ideal (MRing ι)) [Nontrivial (MRing ι ⧸ W)] :
+     Function.Injective (baseP p W) := by
+   rw [injective_iff_map_eq_zero]

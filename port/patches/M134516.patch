@@ -1,0 +1,35 @@
+--- a/src/Development/AutomorphicSpectrum/Proofs/MetricProofs/TwistIsPrime.lean
++++ b/src/Development/AutomorphicSpectrum/Proofs/MetricProofs/TwistIsPrime.lean
+@@ -48,11 +48,12 @@
+       rw [Polynomial.degree_eq_natDegree hmonic.ne_zero, hdeg]
+       compute_degree
+       exact_mod_cast (by norm_num : 1 < 2))
+-    have hu := congrArg (fun t => Polynomial.coeff t 0) h2
+-    have hv := congrArg (fun t => Polynomial.coeff t 1) h2
++    have hu := congrArg (fun t : Polynomial _ => t.coeff 0) h2
++    have hv := congrArg (fun t : Polynomial _ => t.coeff 1) h2
+     simp at hu hv
+     exact ⟨hu, hv⟩
+ 
++set_option synthInstance.maxHeartbeats 100000 in
+ theorem twist_isPrime (K : Type) [Fintype K] (ι : K → Type) [∀ k, Fintype (ι k)] (p : ℕ)
+     (W : Ideal (MRing ι)) (hW : W.IsPrime) (hN : NoRoot p W) : (twist p W).IsPrime := by
+   classical
+@@ -182,7 +183,7 @@
+     rw [map_add, map_mul, hσ, hσ, hφx] at hq
+     have hcoef : ∀ n, (a.coeff (n + 1) = 0 ∧ b.coeff n = 0) := by
+       intro n
+-      have := congrArg (fun t => Polynomial.coeff t (n + 1)) hq
++      have := congrArg (fun t : Polynomial _ => t.coeff (n + 1)) hq
+       simp only [Polynomial.coeff_add, Polynomial.coeff_map, Polynomial.coeff_zero] at this
+       have e : (Polynomial.map i b * (Polynomial.C s * Polynomial.X)).coeff (n + 1) =
+           i (b.coeff n) * s := by
+@@ -191,7 +192,7 @@
+       rw [e] at this
+       exact hind _ _ this
+     have ha0 : a.coeff 0 = 0 := by
+-      have := congrArg (fun t => Polynomial.coeff t 0) hq
++      have := congrArg (fun t : Polynomial _ => t.coeff 0) hq
+       simp only [Polynomial.coeff_add, Polynomial.coeff_map, Polynomial.coeff_zero] at this
+       have e : (Polynomial.map i b * (Polynomial.C s * Polynomial.X)).coeff 0 = 0 := by
+         rw [← mul_assoc, Polynomial.coeff_mul_X_zero]

@@ -1,0 +1,11 @@
+--- a/src/Development/AutomorphicSpectrum/Proofs/GlobalProofs/HasDerivAtLpOfDominated.lean
++++ b/src/Development/AutomorphicSpectrum/Proofs/GlobalProofs/HasDerivAtLpOfDominated.lean
+@@ -68,7 +68,7 @@
+           _ ≤ 2 * b x := by linarith [hbd x t₀ h0]
+       rw [Real.norm_of_nonneg (by positivity)]
+       exact pow_le_pow_left₀ (norm_nonneg _) hdn 2
+-    · have := (memLp_two_iff_integrable_sq hb.1).1 hb
++    · have := (memLp_two_iff_integrable_sq hb.aestronglyMeasurable).1 hb
+       simpa [mul_pow] using this.const_mul (2 ^ 2)
+     · refine Eventually.of_forall fun x => ?_
+       have h1 := hasDerivAt_iff_tendsto_slope_zero.1 (hd x t₀ (Metric.mem_ball_self hδ))

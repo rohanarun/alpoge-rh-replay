@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.MembershipProofs.LocallyCompactOfGoodChar",
+  "source_sha256": "e8e6f267dd6f3369ac3a7aa2b77866b00bc16eafa97be3f898ae97fa7a3b4532",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0321-issue-33346"
+}

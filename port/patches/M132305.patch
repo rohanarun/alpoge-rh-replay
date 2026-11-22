@@ -1,0 +1,11 @@
+--- a/src/Development/AutomorphicSpectrum/Proofs/GeometryProofs/TranslateIntoSmallerOpen.lean
++++ b/src/Development/AutomorphicSpectrum/Proofs/GeometryProofs/TranslateIntoSmallerOpen.lean
+@@ -13,7 +13,7 @@
+   intro R _ _ _ T _ _ Γ U U' hU hU' _ g hg
+   haveI := Γ.flat
+   haveI := Γ.separated
+-  let p0 : Spec (CommRingCat.of R) := ⟨⊥, Ideal.bot_prime⟩
++  let p0 : Spec (CommRingCat.of R) := ⟨⊥, Ideal.isPrime_bot⟩
+   have hp0 : p0 ⤳ Γ.G.hom g := (PrimeSpectrum.le_iff_specializes _ _).1 bot_le
+   obtain ⟨g', hg'g, hg'⟩ := Flat.generalizingMap Γ.G.hom hp0
+   obtain ⟨s, x, hx⟩ := Γ.pt_onto g' (by rw [hg'])

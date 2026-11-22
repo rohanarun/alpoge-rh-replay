@@ -1,0 +1,8 @@
+{
+  "module": "Development.DiscreteGroups.GlobalIrreducibility.DzStickValMain",
+  "source_sha256": "0b002fe1ba7eac93d1df8f29c2d46e7a9b6c7f6ef6e9a0f7d59ce625d25f0dba",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0321-issue-33346"
+}

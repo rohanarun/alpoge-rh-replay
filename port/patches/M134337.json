@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.MetricProofs.RingKrullDimTwistSucc",
+  "source_sha256": "35bdf9149ce57e8d4863f33f32b1d41744d843e479890240541295d40c2d1db0",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Instance search for the AddMonoidHomClass instances of ring homs out of polynomial rings over MRing ι ⧸ W now needs more than the default 20000 synthInstance heartbeats under Mathlib v4.36 (it succeeds with a higher budget), so toA_quad and baseMap_injective are prefixed with set_option synthInstance.maxHeartbeats 100000 in. Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0321-issue-33346"
+}

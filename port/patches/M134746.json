@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Statements.AlgebraStatements.PolarisedFlagStatement",
+  "source_sha256": "e2c520eda0867eb8379aa0738118a3e60d24fb3927b06d40befcb3f90880ab14",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0321-issue-33346"
+}

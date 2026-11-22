@@ -1,0 +1,8 @@
+{
+  "module": "Development.EtaleCohomology.DivisorCycles.ChainPf",
+  "source_sha256": "819a768ded9423b17d7e15a51adbbca877cb081d54d196e393fa55c610adcee2",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0321-issue-33346"
+}

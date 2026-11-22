@@ -1,0 +1,8 @@
+{
+  "module": "Development.EtaleCohomology.DivisorCycles.CoeMulInv",
+  "source_sha256": "d11bdd9fcafde2f6d76dd641ee09c0e8d20b2f8d9281bd99f730f31f30bdaf69",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0321-issue-33346"
+}

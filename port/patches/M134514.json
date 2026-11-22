@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Proofs.MetricProofs.TwistIsMultiHomogIdeal",
+  "source_sha256": "f886912a1791b0391619426deff22561be154336fdaa24d804a90cb45bd3438d",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Finsupp.mapDomain_apply for an injective map is now Finsupp.mapDomain_apply_of_injective. Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0321-issue-33346"
+}
