@@ -1,0 +1,20 @@
+--- a/src/Formalism/LocalToGlobal/SiegelLatticeTheory/SiegelMassRatios/ColsDim.lean
++++ b/src/Formalism/LocalToGlobal/SiegelLatticeTheory/SiegelMassRatios/ColsDim.lean
+@@ -157,7 +157,7 @@
+ 
+ theorem exists_dec (s : Classes ιf K → Gf) (hs : ∀ c, DoubleCoset.mk ιf.range K (s c) = c)
+     (g : Gf) : ∃ p : Γ × K, g = ιf p.1 * s (DoubleCoset.mk ιf.range K g) * (p.2 : Gf) := by
+-  obtain ⟨h, hh, κ, hκ, e⟩ := (DoubleCoset.eq _ _ _ _).1 (hs (DoubleCoset.mk ιf.range K g))
++  obtain ⟨h, hh, κ, hκ, e⟩ := DoubleCoset.eq.1 (hs (DoubleCoset.mk ιf.range K g))
+   obtain ⟨γ, rfl⟩ := MonoidHom.mem_range.1 hh
+   exact ⟨(γ, ⟨κ, hκ⟩), e⟩
+ 
+@@ -188,7 +188,7 @@
+     (e : g = ιf γ * s c * κ) : extF ιf K s hs ρ χ w g = ((χ κ : kˣ) : k) • ρ γ (w c) := by
+   have hc : DoubleCoset.mk ιf.range K g = c := by
+     rw [e]
+-    exact ((DoubleCoset.eq _ _ _ _).2 ⟨(ιf γ)⁻¹, ιf.range.inv_mem (MonoidHom.mem_range.2 ⟨γ, rfl⟩),
++    exact (DoubleCoset.eq.2 ⟨(ιf γ)⁻¹, ιf.range.inv_mem (MonoidHom.mem_range.2 ⟨γ, rfl⟩),
+       ((κ : K) : Gf)⁻¹, K.inv_mem κ.2, by group⟩).trans (hs c)
+   have spec := Classical.choose_spec (exists_dec ιf K s hs g)
+   unfold extF

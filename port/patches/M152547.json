@@ -1,0 +1,8 @@
+{
+  "module": "Formalism.LocalToGlobal.SiegelLatticeTheory.SiegelMassRatios.ColsDim",
+  "source_sha256": "51033a560e7b43d615dc40c32049caedc6be52c4674fc2f35d6a8b919f6da0bf",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "DoubleCoset.eq now takes its subgroups and elements implicitly, so the two uses drop the four placeholder arguments. Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0214-issue-34857"
+}
