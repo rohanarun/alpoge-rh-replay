@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Definitions.AutomorphicMembership.IsClosedFlagsIff",
+  "source_sha256": "378d5656e5c9d5434d32b16b069453f0534a2a4f23bf59b2fa90ee71b14a72de",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0095-issue-34629"
+}
