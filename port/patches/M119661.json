@@ -1,0 +1,8 @@
+{
+  "module": "Development.AutomorphicSpectrum.Definitions.CommutativeAlgebra.IntStable",
+  "source_sha256": "8bb8bec54ca848dd00b32047c745e61d104dfae4bf9c9263cbefd3b802b9950f",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0137-issue-33959"
+}
