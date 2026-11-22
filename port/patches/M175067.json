@@ -1,0 +1,8 @@
+{
+  "module": "ReciprocityTheory.SemistableReduction.BWPolyC",
+  "source_sha256": "9745711038d05b8fb076cc945e0f57e4746565ece0d323927f613ada4512327a",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0171-issue-34746"
+}

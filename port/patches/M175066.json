@@ -1,0 +1,8 @@
+{
+  "module": "ReciprocityTheory.SemistableReduction.BWPolyB",
+  "source_sha256": "d0aa198a2a5c31de0ed07e3ef813c765ca7c5201c927a898dce0e2ce81f0fa7b",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Polynomial.eval_finset_sum is now Polynomial.eval_finsetSum. Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0171-issue-34746"
+}

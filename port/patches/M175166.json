@@ -1,0 +1,8 @@
+{
+  "module": "ReciprocityTheory.SemistableReduction.TorusMeanB",
+  "source_sha256": "a151b24ca82d17130a486206c1745dafb975ba822377f61f20b144ce69da3058",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Polynomial.finset_sum_coeff and Polynomial.eval_finset_sum are now finsetSum_coeff and eval_finsetSum; Polynomial.coeff_monomial now produces a Finsupp.single, so the closing simp also uses Finsupp.single_apply; and the removed alias MvPolynomial.mem_vars is mem_vars_iff_mem_support. Proof-only change. The statements of measurePreserving_tmUpd, tm_integrable_comp and tm_integral_comp use Measure.prod, whose target value differs from the pinned one only when the second measure is not s-finite; here it is unitIntervalMeasure = volume.restrict (Set.Ioc 0 1), a finite measure, so the statements keep their pinned meaning.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0171-issue-34746"
+}

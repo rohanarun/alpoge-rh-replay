@@ -1,0 +1,29 @@
+--- a/src/ReciprocityTheory/SemistableReduction/TorusMeanB.lean
++++ b/src/ReciprocityTheory/SemistableReduction/TorusMeanB.lean
+@@ -81,15 +81,15 @@
+ 
+ lemma tmSlice_coeff (i : ι) (x : ι → ℂ) (f : MvPolynomial ι ℂ) (k : ℕ) :
+     (tmSlice i x f).coeff k = MvPolynomial.eval x (coeffIn i k f) := by
+-  simp only [tmSlice, coeffIn, Polynomial.finset_sum_coeff, Polynomial.coeff_monomial, map_sum,
++  simp only [tmSlice, coeffIn, Polynomial.finsetSum_coeff, Polynomial.coeff_monomial, map_sum,
+     Finset.sum_filter]
+   refine Finset.sum_congr rfl fun s _ => ?_
+-  split_ifs <;> simp
++  split_ifs <;> simp [Finsupp.single_apply, *]
+ 
+ lemma tm_eval_update (i : ι) (x : ι → ℂ) (z : ℂ) (f : MvPolynomial ι ℂ) :
+     MvPolynomial.eval (update x i z) f = (tmSlice i x f).eval z := by
+   conv_lhs => rw [f.as_sum]
+-  simp only [tmSlice, map_sum, Polynomial.eval_finset_sum, Polynomial.eval_monomial,
++  simp only [tmSlice, map_sum, Polynomial.eval_finsetSum, Polynomial.eval_monomial,
+     MvPolynomial.eval_monomial]
+   refine Finset.sum_congr rfl fun s _ => ?_
+   rw [Finsupp.prod_fintype _ _ (fun _ => pow_zero _), Finsupp.prod_fintype _ _ (fun _ => pow_zero _),
+@@ -136,6 +136,6 @@
+   have hsf : s ∈ f.support := (Finset.mem_filter.mp hs).1
+   rw [MvPolynomial.vars_monomial (MvPolynomial.mem_support_iff.mp hsf), Finsupp.support_erase,
+     Finset.mem_erase] at hjs
+-  exact Finset.mem_erase.mpr ⟨hjs.1, (MvPolynomial.mem_vars j).mpr ⟨s, hsf, hjs.2⟩⟩
++  exact Finset.mem_erase.mpr ⟨hjs.1, (MvPolynomial.mem_vars_iff_mem_support j).mpr ⟨s, hsf, hjs.2⟩⟩
+ 
+ end ReciprocityTheory.MultiplicativeHeights

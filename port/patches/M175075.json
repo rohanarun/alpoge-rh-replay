@@ -1,0 +1,8 @@
+{
+  "module": "ReciprocityTheory.SemistableReduction.ExistsDualDerivations",
+  "source_sha256": "eb113744bf500f53c692ca82a1fea76de838e2c63b0a10ae6754c12989e2c883",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "MvPolynomial.coeff was removed, so the definition coeffMap, the statement of coeff_coeffMap and the proofs write P.coeff n for coeff n P, and the now-protected MvPolynomial.coeff_add is named; the polynomials are of type MvPolynomial σ Ω and p.coeff n elaborates to the term the old MvPolynomial.coeff n p unfolded to, so the definition and proposition are unchanged.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0171-issue-34746"
+}
