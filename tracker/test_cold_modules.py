@@ -1,6 +1,8 @@
 import io
 import json
+from pathlib import Path
 import subprocess
+import tempfile
 import unittest
 from contextlib import redirect_stdout
 from unittest.mock import patch
@@ -21,11 +23,78 @@ class ClaimCommandTests(unittest.TestCase):
                                  ('P0001', 'P0001')]:
             with self.subTest(target=target), patch.object(tasks, 'load', return_value=[first, second]), \
                  patch.object(tasks, 'claims', return_value=set()), \
+                 patch.object(tasks, 'tracker_status', return_value='ok'), \
                  patch('sys.argv', ['tasks.py', 'claim', target]), \
                  patch.object(tasks.subprocess, 'run') as create:
                 self.assertEqual(tasks.main(), 0)
                 command = create.call_args.args[0]
                 self.assertEqual(command[command.index('--title') + 1], 'Claim ' + claim_id)
+
+    def test_stale_or_unverified_tracker_creates_no_claim(self):
+        for status, message in [('stale', tasks.STALE_INDEX), ('unknown', tasks.UNVERIFIED_INDEX)]:
+            with self.subTest(status=status), patch.object(tasks, 'load', return_value=[row('M000001', 'P0001')]), \
+                 patch.object(tasks, 'claims', return_value=set()), \
+                 patch.object(tasks, 'tracker_status', return_value=status), \
+                 patch('sys.argv', ['tasks.py', 'claim', 'M000001']), \
+                 patch.object(tasks.subprocess, 'run') as create:
+                with self.assertRaises(SystemExit) as stopped:
+                    tasks.main()
+                self.assertEqual(str(stopped.exception), message)
+                create.assert_not_called()
+
+
+class TrackerStatusTests(unittest.TestCase):
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.base = Path(tmp.name)
+        for name in tasks.TRACKED:
+            (self.base / name).write_text(name)
+        change = patch.object(tasks, 'base', self.base)
+        change.start()
+        self.addCleanup(change.stop)
+
+    def status(self, remote, hashed=('a1', 'b2'), hash_error=None):
+        hashes = iter(hashed)
+
+        def hash_object(command, **kwargs):
+            self.assertEqual(command[:4], ['git', '-C', str(self.base), 'hash-object'])
+            self.assertNotIn('--no-filters', command)
+            if hash_error:
+                raise hash_error
+            return subprocess.CompletedProcess(command, 0, next(hashes) + '\n', '')
+
+        def graphql(command, **kwargs):
+            if isinstance(remote, Exception):
+                raise remote
+            return json.dumps({'data': {'repository': remote}})
+
+        with patch.object(tasks.subprocess, 'run', side_effect=hash_object), \
+             patch.object(tasks.subprocess, 'check_output', side_effect=graphql):
+            return tasks.tracker_status()
+
+    def test_matching_blobs_are_ok(self):
+        self.assertEqual(self.status({'f0': {'oid': 'a1'}, 'f1': {'oid': 'b2'}}), 'ok')
+
+    def test_a_differing_blob_is_stale(self):
+        self.assertEqual(self.status({'f0': {'oid': 'a1'}, 'f1': {'oid': 'c3'}}), 'stale')
+
+    def test_a_file_missing_on_main_is_stale(self):
+        self.assertEqual(self.status({'f0': {'oid': 'a1'}, 'f1': None}), 'stale')
+
+    def test_a_file_absent_on_both_sides_matches(self):
+        (self.base / 'completed.tsv').unlink()
+        self.assertEqual(self.status({'f0': {'oid': 'a1'}, 'f1': None}, hashed=('a1',)), 'ok')
+
+    def test_git_failure_is_stale(self):
+        self.assertEqual(self.status({'f0': {'oid': 'a1'}, 'f1': {'oid': 'b2'}},
+                                     hash_error=subprocess.CalledProcessError(128, 'git')), 'stale')
+
+    def test_github_failure_is_unknown(self):
+        for failure in (subprocess.CalledProcessError(1, 'gh'), OSError('no gh')):
+            with self.subTest(failure=type(failure).__name__):
+                self.assertEqual(self.status(failure), 'unknown')
+        self.assertEqual(self.status({}), 'unknown')
 
 
 class OpenIssueTests(unittest.TestCase):

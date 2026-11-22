@@ -164,6 +164,47 @@ def claims():
         titles = (issue['title'] for issue in open_issues() if 'pull_request' not in issue)
     return {match[1] for title in titles if (match := re.fullmatch(r'Claim (M\d{6}|P\d{4})', title))}
 
+TRACKED = ('modules.jsonl.gz', 'completed.tsv')
+STALE_INDEX = ('tracker/modules.jsonl.gz or tracker/completed.tsv differs from main. '
+               'Update the checkout (git pull --ff-only), then choose work again.')
+UNVERIFIED_INDEX = 'Could not compare the tracker with main on GitHub. No claim was created; try again.'
+
+
+def tracker_status():
+    """Whether the local tracker files that decide claimability match main: 'ok', 'stale' or 'unknown'.
+
+    The grant bot decides "already completed" from these two files on main, so a claim made from
+    different copies is likely to conflict. The local id comes from `git hash-object`, which applies
+    the checkout's line-ending conversion, so an unchanged file in a CRLF checkout matches its
+    committed blob. A file that is absent both locally and on main matches. GitHub failures are
+    'unknown' rather than 'stale'.
+    """
+    local = []
+    for name in TRACKED:
+        path = base / name
+        if not path.exists():
+            local.append(None)
+            continue
+        try:
+            result = subprocess.run(['git', '-C', str(base), 'hash-object', '--', name],
+                                    capture_output=True, text=True, check=True)
+        except (OSError, subprocess.CalledProcessError):
+            return 'stale'
+        local.append(result.stdout.strip())
+    owner, name = repo.split('/')
+    fields = ' '.join(f'f{i}: object(expression: "main:tracker/{n}") {{ oid }}' for i, n in enumerate(TRACKED))
+    query = 'query($owner: String!, $name: String!) { repository(owner: $owner, name: $name) { ' + fields + ' } }'
+    try:
+        data = json.loads(subprocess.check_output(
+            ['gh', 'api', 'graphql', '--hostname', 'github.com',
+             '-f', f'owner={owner}', '-f', f'name={name}', '-f', f'query={query}'],
+            text=True, stderr=subprocess.DEVNULL))['data']['repository']
+        remote = [(data[f'f{i}'] or {}).get('oid') for i in range(len(TRACKED))]
+    except (OSError, subprocess.CalledProcessError, ValueError, KeyError, TypeError):
+        return 'unknown'
+    return 'ok' if remote == local else 'stale'
+
+
 def run(targets,checkout,out,bundle,fast_bundle=False,*,project_modules=None):
  project=checkout.resolve();output=out.resolve()
  if output.exists():raise SystemExit('Output directory already exists: '+str(output))
@@ -261,6 +302,9 @@ def main():
  elif a.action=='claim':
   busy=claims()
   if any(r['id'] in busy or r['packet'] in busy or r['state']!='open' for r in sel):raise SystemExit('One or more modules are already claimed, observed, or assigned.')
+  status = tracker_status()
+  if status != 'ok':
+   raise SystemExit(STALE_INDEX if status == 'stale' else UNVERIFIED_INDEX)
   claim_id = a.target if a.target == sel[0]['packet'] else sel[0]['id']
   body = f'I am working on {claim_id}. I will attach the input hashes, build transcript and receipt, or close this claim if I stop.'
   subprocess.run(['gh', 'issue', 'create', '--repo', repo, '--title', 'Claim ' + claim_id,
