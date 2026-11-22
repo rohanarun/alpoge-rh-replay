@@ -1,0 +1,14 @@
+--- a/src/Development/AbelianVarietyTheory/Definitions/NonGaloisDescent/ProjectionSurjective.lean
++++ b/src/Development/AbelianVarietyTheory/Definitions/NonGaloisDescent/ProjectionSurjective.lean
+@@ -170,9 +170,8 @@
+ 
+ def splitIdeal {B : Type} [CommRing B] {q n : ℕ} (P : Fin q → Polynomial B) (ut : Fin q → Fin n → B) :
+     Ideal (MvPowerSeries (Fin q × Fin n) B) :=
+-  Ideal.span {c | ∃ (j : Fin q) (e : ℕ), c = Polynomial.coeff
+-    ((∏ i : Fin n, (Polynomial.X - Polynomial.C (MvPowerSeries.C (ut j i) + MvPowerSeries.X (j, i)))) -
+-      (P j).map (MvPowerSeries.C : B →+* MvPowerSeries (Fin q × Fin n) B)) e}
++  Ideal.span {c | ∃ (j : Fin q) (e : ℕ), c = ((∏ i : Fin n, (Polynomial.X - Polynomial.C (MvPowerSeries.C (ut j i) + MvPowerSeries.X (j, i)))) -
++      (P j).map (MvPowerSeries.C : B →+* MvPowerSeries (Fin q × Fin n) B)).coeff e}
+ 
+ abbrev SplitLoc {B : Type} [CommRing B] {q n : ℕ} (P : Fin q → Polynomial B) (ut : Fin q → Fin n → B) :
+     Type := MvPowerSeries (Fin q × Fin n) B ⧸ splitIdeal P ut

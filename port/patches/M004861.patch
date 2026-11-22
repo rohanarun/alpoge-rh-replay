@@ -1,0 +1,24 @@
+--- a/src/Development/AbelianVarietyTheory/Definitions/NonGaloisDescent/SndDualLiftAlgebraMap.lean
++++ b/src/Development/AbelianVarietyTheory/Definitions/NonGaloisDescent/SndDualLiftAlgebraMap.lean
+@@ -404,16 +404,16 @@
+ 
+ def derAl : Derivation K (invL l (A O K)) (invL l (A O K)) :=
+   Derivation.mk'
+-    { toFun := fun f => ⟨PowerSeries.derivative K f,
++    { toFun := fun f => ⟨PowerSeries.derivative (R := K) f,
+         derivative_mem_away _ (fun _ => derivative_mem_A) f.2⟩
+-      map_add' := fun f g => Subtype.ext (map_add (PowerSeries.derivative K) _ _)
++      map_add' := fun f g => Subtype.ext (map_add (PowerSeries.derivative (R := K)) _ _)
+       map_smul' := fun c f => Subtype.ext (by
+-        change PowerSeries.derivative K (C c * (f : K⟦X⟧)) = C c * PowerSeries.derivative K f
++        change PowerSeries.derivative (R := K) (C c * (f : K⟦X⟧)) = C c * PowerSeries.derivative (R := K) f
+         simp) }
+-    fun f g => Subtype.ext ((PowerSeries.derivative K).leibniz f g)
++    fun f g => Subtype.ext ((PowerSeries.derivative (R := K)).leibniz f g)
+ 
+ @[simp] theorem coe_derAl (f : invL l (A O K)) :
+-    (derAl O K l f : K⟦X⟧) = PowerSeries.derivative K f := rfl
++    (derAl O K l f : K⟦X⟧) = PowerSeries.derivative (R := K) f := rfl
+ 
+ def dHat : Derivation K (Ahat O K l e) (Ahat O K l e) := complDer _ (derAl O K l)
+ 

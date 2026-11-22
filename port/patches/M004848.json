@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.ProjectionSurjective",
+  "source_sha256": "941648cf37c32754c0601b7aab298a727c494388680378dccf1fe5f23aefb79b",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Polynomial.coeff is no longer a function constant, so the definition splitIdeal writes (... ).coeff e for Polynomial.coeff (...) e on the same polynomial; the term is the same, so the definition is unchanged.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0096-issue-34566"
+}

@@ -1,0 +1,12 @@
+--- a/src/Development/AbelianVarietyTheory/Definitions/NonGaloisDescent/MatMapTmul.lean
++++ b/src/Development/AbelianVarietyTheory/Definitions/NonGaloisDescent/MatMapTmul.lean
+@@ -93,7 +93,7 @@
+   MonoidAlgebra.lift R R Γ ((Units.coeHom R).comp ψ)
+ 
+ def GDet.coef {n : ℕ} {A G : Type} [CommRing A] [Group G] (D : GDet n A G) (α : G →₀ ℕ) : A :=
+-  MvPolynomial.coeff α (D.D (MvPolynomial G A)
+-    (∑ g ∈ α.support, MonoidAlgebra.single g (MvPolynomial.X g)))
++  (D.D (MvPolynomial G A)
++    (∑ g ∈ α.support, MonoidAlgebra.single g (MvPolynomial.X g))).coeff α
+ 
+ end GlobalTheory.Pat

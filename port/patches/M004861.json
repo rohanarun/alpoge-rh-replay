@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.SndDualLiftAlgebraMap",
+  "source_sha256": "6738b5c97b6012242aaf3761ad5fd3e12daba3ec23c968067254b36e8c03b1d8",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "PowerSeries.derivative now takes its coefficient ring implicitly, so the derivation derAl passes it by name as (R := K); the term is the same, so the definition is unchanged.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0096-issue-34566"
+}

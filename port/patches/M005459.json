@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Proofs.AdelicLatticeProofs.ExistsEqTransposeMulMapOfIdempotent",
+  "source_sha256": "350c65888434d0df1b2293a0753e5350a2f2d65988a7eb51c9bb3b783488fbf9",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Ideal.mem_jacobson_bot is deprecated in favour of Ring.mem_jacobson_iff, whose numeral argument then elaborated in ℕ; it is now applied as Ring.mem_jacobson_iff. In the closing example, simp now unfolds the ℤ_[2] coefficient goals to ℚ_[2], where norm_num needs the numeral coercions ((2 : ℤ_[2]) : ℚ_[2]) = 2 and ((3 : ℤ_[2]) : ℚ_[2]) = 3, both rfl. Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0096-issue-34566"
+}

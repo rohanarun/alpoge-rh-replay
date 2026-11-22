@@ -1,0 +1,20 @@
+--- a/src/Development/AbelianVarietyTheory/Proofs/AdelicLatticeProofs/ExistsEqTransposeMulMapOfIdempotent.lean
++++ b/src/Development/AbelianVarietyTheory/Proofs/AdelicLatticeProofs/ExistsEqTransposeMulMapOfIdempotent.lean
+@@ -256,7 +256,7 @@
+       simp only [derivative_sub, derivative_X_pow, derivative_X, derivative_C]
+       norm_num)
+   have hu : IsUnit z := by
+-    simpa using Ideal.mem_jacobson_bot.1 (HenselianRing.jac hz1) 1
++    simpa using Ring.mem_jacobson_iff.1 (HenselianRing.jac hz1) 1
+   obtain ⟨y, hy⟩ := hu.exists_right_inv
+   simp only [IsRoot.def, eval_sub, eval_pow, eval_X, eval_C] at hz
+   refine ⟨e * y, ?_⟩
+@@ -339,7 +339,7 @@
+       exact_mod_cast PadicInt.norm_natCast_eq_one_iff (p := 2) (n := 3) |>.2 (by norm_num)
+     refine isUnit_of_mul_isUnit_left (y := ⟨1, -2⟩) ?_
+     convert h3.map (algebraMap ℤ_[2] (QuadraticAlgebra ℤ_[2] (-1) 1)) using 1
+-    ext <;> simp [starRingEnd_apply] <;> norm_num
++    ext <;> simp [starRingEnd_apply] <;> norm_num [show ((2 : ℤ_[2]) : ℚ_[2]) = 2 from rfl, show ((3 : ℤ_[2]) : ℚ_[2]) = 3 from rfl]
+   · intro a b
+     fin_cases a <;> fin_cases b <;> simp
+ 

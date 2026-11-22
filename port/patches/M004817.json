@@ -1,0 +1,8 @@
+{
+  "module": "Development.AbelianVarietyTheory.Definitions.NonGaloisDescent.MatMapTmul",
+  "source_sha256": "e6f21ba6cdd59806feda0048200ff7157a41a92f3320b889383ff27c5e216b2d",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "MvPolynomial.coeff was removed, so the definition GDet.coef writes (D.D (MvPolynomial G A) (...)).coeff α for MvPolynomial.coeff α (D.D (MvPolynomial G A) (...)); p.coeff α elaborates to the term the old MvPolynomial.coeff α p unfolded to, so the definition is unchanged.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0096-issue-34566"
+}
