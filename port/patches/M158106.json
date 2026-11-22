@@ -1,0 +1,8 @@
+{
+  "module": "Formalism.SatakeDualWeyl.AdelicIwasawaHecke.FSatakeA",
+  "source_sha256": "a6c9dc261f38b5ce5a7ed76218c9f8c5c6cb5431feaa507e286cd7adacb43047",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "Valuation.valuationSubring_isDiscreteValuationRing now asks for Nontrivial v.valueGroup stated on the valuation itself, which instance search no longer matches with the local instance stated on (MonoidWithZeroHom.ofClass v).valueGroup; the local instance and the congrArg that unpacks it are restated on (Valued.v : Valuation L (WithZero (Multiplicative ℤ))).valueGroup, the same subgroup. Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0221-issue-34725"
+}

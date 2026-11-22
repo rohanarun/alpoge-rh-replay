@@ -1,0 +1,17 @@
+--- a/src/Formalism/SatakeDualWeyl/AdelicIwasawaHecke/FSatakeA.lean
++++ b/src/Formalism/SatakeDualWeyl/AdelicIwasawaHecke/FSatakeA.lean
+@@ -27,12 +27,10 @@
+     isCyclic_of_surjective (WithZero.unitsWithZeroEquiv (α := Multiplicative ℤ)).symm.toMonoidHom
+       (MulEquiv.surjective _)
+   have h0 : Valued.v ϖ ≠ 0 := by rw [hvϖ]; exact WithZero.coe_ne_zero
+-  haveI : Nontrivial ↥(MonoidWithZeroHom.ofClass
+-      (Valued.v : Valuation L (WithZero (Multiplicative ℤ)))).valueGroup := by
++  haveI : Nontrivial ↥(Valued.v : Valuation L (WithZero (Multiplicative ℤ))).valueGroup := by
+     refine ⟨⟨1, ⟨Units.mk0 (Valued.v ϖ) h0, MonoidWithZeroHom.mem_valueGroup _ ⟨ϖ, rfl⟩⟩, ?_⟩⟩
+     intro h
+-    have h1 := congrArg (fun u : ↥(MonoidWithZeroHom.ofClass
+-      (Valued.v : Valuation L (WithZero (Multiplicative ℤ)))).valueGroup =>
++    have h1 := congrArg (fun u : ↥(Valued.v : Valuation L (WithZero (Multiplicative ℤ))).valueGroup =>
+         ((u : (WithZero (Multiplicative ℤ))ˣ) : WithZero (Multiplicative ℤ))) h
+     simp only [OneMemClass.coe_one, Units.val_one, Units.val_mk0, hvϖ] at h1
+     have h2 := WithZero.coe_injective (h1.symm.trans WithZero.coe_one.symm)

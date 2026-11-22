@@ -1,0 +1,8 @@
+{
+  "module": "Formalism.SatakeDualWeyl.AdelicIwasawaHecke.Levelaf",
+  "source_sha256": "450aa5ca432b7aceb017e51e0b2e9a7507a9b9dd5626393e8cf2678e11695fd9",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0221-issue-34725"
+}
