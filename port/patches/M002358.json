@@ -3,6 +3,6 @@
   "source_sha256": "9771146ea92dc3d2e8a38c03449430f76f4d14c37e13b21e4948f1853f4a1f97",
   "lean": "leanprover/lean4:v4.36.0",
   "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
-  "notes": "Supply finite multiplicity using the prime ideal and the already proved nonzero principal ideal. No exported declaration statements, definitions or instances changed.",
+  "notes": "Supply finite multiplicity using the prime ideal and the already proved nonzero principal ideal. The definition ord_vw la I := multiplicity la.asIdeal I compiles unchanged, but the target Mathlib defines multiplicity a b as (emultiplicity a b).toNat, where the pinned Mathlib used (emultiplicity a b).untopD 1. The two differ only when the multiplicity is infinite. Since la.asIdeal is a nonzero prime, that happens only for I = ⊥, where ord_vw la ⊥ is now 0 instead of 1; for every nonzero ideal the value is unchanged. Every use of ord_vw in the archive applies it to a nonzero ideal (conjDifferent σ, nonzero by conjDifferent_ne_bot; Ideal.span {(n' : 𝓞 K)} with n' : ℕ+; or under an explicit I ≠ ⊥ hypothesis), so no statement that uses it changes meaning. No other exported declaration statements, definitions or instances changed.",
   "evidence": "https://github.com/emsi/alpoge-rh-replay/releases/download/port-P0001-lean436-20261121/packet-result.json"
 }
