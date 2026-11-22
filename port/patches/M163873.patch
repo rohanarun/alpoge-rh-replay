@@ -1,0 +1,13 @@
+--- a/src/GroundTheory/HeightsAndTheta/Heights/ChowForms/Statements.lean
++++ b/src/GroundTheory/HeightsAndTheta/Heights/ChowForms/Statements.lean
+@@ -136,8 +136,8 @@
+     ringKrullDim (MvPolynomial (Fin n) F ⧸ (⊥ : Ideal (MvPolynomial (Fin n) F))) =
+       ((n : ℕ) : WithBot ℕ∞) := by
+   rw [ringKrullDim_eq_of_ringEquiv (RingEquiv.quotientBot (MvPolynomial (Fin n) F)),
+-    MvPolynomial.ringKrullDim_of_isNoetherianRing, ringKrullDim_eq_zero_of_field, zero_add,
+-    Nat.card_eq_fintype_card, Fintype.card_fin]
++    MvPolynomial.ringKrullDim_of_isNoetherianRing, ringKrullDim_eq_zero_of_field, zero_add]
++  simp
+ 
+ theorem span_X_zero_mem_relComps (F : Type*) [Field F] :
+     Ideal.span {X 0} ∈ relComps ((⊥ : Ideal (MvPolynomial (Fin 2) F)) ⊔

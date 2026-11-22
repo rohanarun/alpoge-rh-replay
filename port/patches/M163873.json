@@ -1,0 +1,8 @@
+{
+  "module": "GroundTheory.HeightsAndTheta.Heights.ChowForms.Statements",
+  "source_sha256": "dd3c904dac2d38dbc48a4b254b0c1e97d93306cd34fc0484ebdc35acfbad91fe",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "MvPolynomial.ringKrullDim_of_isNoetherianRing now states the dimension with ENat.card, so the closing Nat.card rewrites no longer apply; the remaining goal ↑(ENat.card (Fin n)) = ↑n is closed by simp. Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0161-issue-34724"
+}

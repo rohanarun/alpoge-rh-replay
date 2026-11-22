@@ -1,0 +1,8 @@
+{
+  "module": "GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.StatementsProjDegreeChow",
+  "source_sha256": "26924dd6ce323a9b3346c2bbfb88592940484dbfee78ccd96a32e7e8ef4b160e",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "unchanged",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0161-issue-34724"
+}

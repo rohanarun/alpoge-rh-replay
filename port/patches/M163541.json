@@ -1,0 +1,8 @@
+{
+  "module": "GroundTheory.HeightsAndTheta.Heights.ArithmeticBezout.LogGaussNormSupportFinite",
+  "source_sha256": "252c0599efb7fe55635eccafa2dcd2f1c156669ce8b9a0d36de663dc5dc4df5a",
+  "lean": "leanprover/lean4:v4.36.0",
+  "mathlib": "fc4f59e577feb1a4956671bc04ac18aaaf8cd842",
+  "notes": "IsNonarchimedean.apply_sum_eq_of_lt now takes the summand function explicitly and states its symmetry hypothesis as f (-a) = f a, so the call passes _ for the summand and w.map_neg a directly (no longer its symm). Proof-only change.",
+  "evidence": "https://github.com/zediir/alpoge-rh-replay/releases/tag/port-P0161-issue-34724"
+}
