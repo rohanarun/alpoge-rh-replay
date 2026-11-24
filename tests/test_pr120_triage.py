@@ -38,6 +38,11 @@ class ReportTests(unittest.TestCase):
     def test_zero_open_failures(self):
         self.assertEqual(triage.parse_report(report(rows=[]))[1], [])
 
+    def test_lookahead_rows_are_not_attributed_to_normal_build_head(self):
+        text = report() + ("\n## Look-ahead: all known errors (preview)\n"
+                           "| `Development/Hidden.lean:10` | 7 | error | timeout |\n")
+        self.assertEqual(len(triage.parse_report(text)[1]), 1)
+
     def test_unrecognized_format_fails_instead_of_hiding_rows(self):
         for text in [report().replace("## Open (1)", "## Failures (1)"),
                      report().replace("Foo.lean:12", "Foo.lean (12)"),
@@ -139,6 +144,15 @@ class CheckoutTests(unittest.TestCase):
         _, _, _, changed, warning = triage.inspect_checkout(self.root, "1" * 40)
         self.assertIsNone(changed)
         self.assertIn("unavailable locally", warning)
+
+    def test_older_checkout_is_not_treated_as_changes_since_report(self):
+        self.write("src/Development/Foo.lean", "-- newer build source\n")
+        self.commit()
+        newer_build = self.git("rev-parse", "HEAD").strip()
+        self.git("checkout", "--quiet", "--detach", self.base)
+        _, _, _, changed, warning = triage.inspect_checkout(self.root, newer_build)
+        self.assertIsNone(changed)
+        self.assertIn("not a verified descendant", warning)
 
     def test_offline_json_cli_does_not_call_github(self):
         report_path = self.root / "report.md"

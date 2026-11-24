@@ -8,6 +8,10 @@ This read-only helper compares the report with your local checkout and live PRs:
 python3 scripts/pr120-triage.py --checkout /path/to/riemann-hypothesis
 ```
 
+It reads the normal build's **Open** table. The separate look-ahead table can
+combine scratch sessions at different commits, so it is excluded from this
+comparison rather than being attributed to the normal build's head.
+
 Run it from this replay repository after updating both repositories. It uses
 Python's standard library, Git, and an authenticated `gh` CLI. The target checkout
 should be on `opt/collapse-and-consolidate-4.36`, or a branch based on it. The tool
@@ -18,6 +22,8 @@ files unchanged since that commit, local edits, and paths absent from the curren
 Git tree. Sparse checkout exclusions are not treated as deleted files. If a
 shallow checkout lacks the reported commit, the comparison is explicitly unknown;
 fetch its full SHA or use a checkout containing that history.
+An older or unrelated checkout also produces unknown comparisons instead of
+presenting reversed differences as fixes made since the report.
 
 The claim column reports PRs that currently change each module and retains claims
 recorded in the report. Larger PR file lists are fetched with pagination. If GitHub

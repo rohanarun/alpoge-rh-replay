@@ -63,12 +63,19 @@ def inspect_checkout(checkout, reported_head):
     local = nul_paths(run(prefix + ["diff", "--name-only", "-z", "HEAD", "--", "src"]))
     local |= nul_paths(run(prefix + ["ls-files", "--others", "--exclude-standard", "-z", "--", "src"]))
     try:
-        changed = nul_paths(run(prefix + ["diff", "--name-only", "-z", reported_head, current, "--", "src"]))
-        warning = None
+        run(prefix + ["rev-parse", "--verify", f"{reported_head}^{{commit}}"])
     except RuntimeError:
-        changed = None
         warning = (f"Build commit {reported_head} is unavailable locally. Source comparisons are unknown; "
                    "fetch the report's full commit SHA or use a checkout containing its history.")
+        return current, tracked, local, None, warning
+    try:
+        run(prefix + ["merge-base", "--is-ancestor", reported_head, current])
+    except RuntimeError:
+        warning = (f"Checkout HEAD is not a verified descendant of build commit {reported_head}. "
+                   "Update the checkout/history before comparing; source comparisons are unknown.")
+        return current, tracked, local, None, warning
+    changed = nul_paths(run(prefix + ["diff", "--name-only", "-z", reported_head, current, "--", "src"]))
+    warning = None
     return current, tracked, local, changed, warning
 
 
