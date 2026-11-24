@@ -2,11 +2,11 @@
 
 > **Priority right now:** help get [PR #120](https://github.com/leanprover-community/riemann-hypothesis/pull/120) to a clean build. It consolidates the Lean `v4.36.0` RH proof from ~149k to **47,884 modules (−67.9% files)**. The remaining work is a list of compile failures introduced by bundling. Each is small and self-contained. Do **not** claim legacy packets (`Claim P####` / `Claim M######`) or open 4.33 → 4.36 porting PRs here.
 
-> **Build status (Nov 24, 2026):** the branch does **not** build cleanly yet. About **83% of modules compile** (39,723 of 47,885); the rest sit behind open errors. **Where to work:** [PR120-BUGS.md](PR120-BUGS.md) has two lists. The **Open** table is the current layer from the normal build. The **Look-ahead: all known errors** table comes from a scratch build that stubs failing proofs so it can check everything after them; it lists errors several layers down that the normal build can't reach yet. **Prefer look-ahead rows from round 2+**: nobody else sees them yet, so they're the least likely to be duplicated. Always pull the branch and compile the file first; rows can be minutes stale.
+> **Build status:** see [PR120-BUGS.md](PR120-BUGS.md) for the latest published counts and root failures. The **Open** table lists failures from the normal build. When the **Look-ahead** table is present, it lists failures from a scratch build that can check later modules. Prefer unclaimed round 2+ rows when available.
 
 ## Read these first
 
-1. **[PR120-BUGS.md](PR120-BUGS.md):** the live list of open root failures, refreshed every cycle (~25 minutes) by a 4-shard, 512-vCPU build, including the look-ahead list. Rows marked `claimed: #N @you` are taken.
+1. **[PR120-BUGS.md](PR120-BUGS.md):** the periodically refreshed list of root failures from the four build shards. Rows marked `claimed: #N @you` are taken.
 2. **[PR120-PLAYBOOK.md](PR120-PLAYBOOK.md):** every failure pattern found so far, with the fix that worked. **Most open rows match one of its patterns**: namespace-prefix shadowing, a table of ambiguous-name pairs, instance-search culprits such as the `IsCD`/`IsCO` instances, and Lean 4.36 elaboration changes such as `maxSynthPendingDepth`.
 
 ## Where the work is
@@ -17,7 +17,7 @@
 
 ## How to take a bug
 
-1. Check [open PRs against the branch](https://github.com/rohanarun/riemann-hypothesis/pulls) so you don't duplicate someone else's work.
+1. Pull the latest branch and check [open PRs against it](https://github.com/rohanarun/riemann-hypothesis/pulls). Compare the reported diagnostic with the current source and check the file's recent commits with `git log -p -- src/<path>.lean`. A diagnostic can outlive its fix even when the file is unchanged since the report's listed head. For example, the Open table still listed the invalid `open` in `ChartDensityIntegrable` at `7e4ed7d840`, which already contained [the fix in #790](https://github.com/rohanarun/riemann-hypothesis/pull/790). Reproduce the error with a module build when possible.
 2. Open a **draft PR early** against `rohanarun/riemann-hypothesis:opt/collapse-and-consolidate-4.36`, titled `Fix <Module>`. That's your claim.
 3. One module (or one family, such as all `JetR` files) per PR.
 4. **Claim before you start.** Every ~15 minutes a coordinator script fixes unclaimed rows it can resolve mechanically (name collisions), pushes them to the branch, and republishes [PR120-BUGS.md](PR120-BUGS.md). It never touches a file that an open PR against the branch modifies. Before you push, pull the branch so you're working on the latest fixes.
