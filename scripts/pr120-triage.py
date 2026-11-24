@@ -19,7 +19,7 @@ DEFAULT_REPORT = Path(__file__).resolve().parents[1] / "PR120-BUGS.md"
 
 
 def run(args):
-    result = subprocess.run(args, capture_output=True, text=True)
+    result = subprocess.run(args, capture_output=True, text=True, encoding="utf-8")
     if result.returncode:
         raise RuntimeError(result.stderr.strip() or result.stdout.strip())
     return result.stdout
@@ -60,7 +60,7 @@ def inspect_checkout(checkout, reported_head):
     current = run(prefix + ["rev-parse", "--verify", "HEAD^{commit}"]).strip()
     tracked = nul_paths(run(prefix + ["ls-tree", "-r", "--name-only", "-z", "HEAD", "--", "src"]))
     # Include staged, unstaged, and untracked source edits without changing the checkout.
-    local = nul_paths(run(prefix + ["diff", "--name-only", "-z", "HEAD", "--", "src"]))
+    local = nul_paths(run(prefix + ["diff", "--no-renames", "--name-only", "-z", "HEAD", "--", "src"]))
     local |= nul_paths(run(prefix + ["ls-files", "--others", "--exclude-standard", "-z", "--", "src"]))
     try:
         run(prefix + ["rev-parse", "--verify", f"{reported_head}^{{commit}}"])
@@ -74,33 +74,41 @@ def inspect_checkout(checkout, reported_head):
         warning = (f"Checkout HEAD is not a verified descendant of build commit {reported_head}. "
                    "Update the checkout/history before comparing; source comparisons are unknown.")
         return current, tracked, local, None, warning
-    changed = nul_paths(run(prefix + ["diff", "--name-only", "-z", reported_head, current, "--", "src"]))
+    changed = nul_paths(run(prefix + ["diff", "--no-renames", "--name-only", "-z", reported_head, current, "--", "src"]))
     warning = None
     return current, tracked, local, changed, warning
 
 
-def index_claims(prs):
+def index_claims(prs, failures=()):
+    title_paths = {}
+    for row in failures:
+        module = PurePosixPath(row["path"]).relative_to("src").with_suffix("")
+        title_paths["Fix " + ".".join(module.parts)] = row["path"]
     claims = {}
     incomplete = []
     for pr in prs:
         files = pr["files"]
         if len(files) < pr["changedFiles"]:
             incomplete.append(pr["number"])
-        for file in files:
-            claims.setdefault(file["path"], []).append({"number": pr["number"], "url": pr["url"]})
+        paths = {file["path"] for file in files}
+        titled_path = title_paths.get(pr.get("title"))
+        if pr["changedFiles"] == 0 and titled_path:
+            paths.add(titled_path)
+        for path in paths:
+            claims.setdefault(path, []).append({"number": pr["number"], "url": pr["url"]})
     # The CLI request is bounded. Never silently interpret a truncated list as unclaimed.
     return claims, incomplete, len(prs) >= 1000
 
 
-def fetch_claims():
+def fetch_claims(failures=()):
     prs = json.loads(run(["gh", "pr", "list", "--repo", REPO, "--base", BASE,
-                          "--limit", "1000", "--json", "number,url,files,changedFiles"]))
+                          "--limit", "1000", "--json", "number,url,title,files,changedFiles"]))
     for pr in prs:
         if len(pr["files"]) < pr["changedFiles"]:
             pages = json.loads(run(["gh", "api", "--paginate", "--slurp",
                                     f"repos/{REPO}/pulls/{pr['number']}/files?per_page=100"]))
             pr["files"] = [{"path": file["filename"]} for page in pages for file in page]
-    return index_claims(prs)
+    return index_claims(prs, failures)
 
 
 def triage(failures, tracked, local, changed, claims, claims_complete):
@@ -133,14 +141,14 @@ def main(argv=None):
     parser.add_argument("--json", action="store_true", help="emit structured data, including warnings")
     args = parser.parse_args(argv)
     try:
-        reported_head, failures = parse_report(args.report.read_text())
+        reported_head, failures = parse_report(args.report.read_text(encoding="utf-8"))
         current, tracked, local, changed, warning = inspect_checkout(args.checkout, reported_head)
         warnings = [warning] if warning else []
         claims, complete = {}, False
         if args.offline:
             warnings.append("GitHub claims were not checked (--offline).")
         else:
-            claims, incomplete, truncated = fetch_claims()
+            claims, incomplete, truncated = fetch_claims(failures)
             complete = not incomplete and not truncated
             if incomplete:
                 warnings.append("GitHub omitted changed files for PRs " + ", ".join(f"#{n}" for n in incomplete)
@@ -169,4 +177,6 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
     sys.exit(main())

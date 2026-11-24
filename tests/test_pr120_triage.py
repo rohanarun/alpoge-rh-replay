@@ -4,6 +4,9 @@ from contextlib import redirect_stdout, redirect_stderr
 import importlib.util
 import io
 import json
+import locale
+import os
+import sys
 from pathlib import Path
 import subprocess
 import tempfile
@@ -56,6 +59,33 @@ class ReportTests(unittest.TestCase):
 
 
 class ClaimTests(unittest.TestCase):
+    def test_empty_draft_reserves_only_the_full_dotted_module_title(self):
+        _, failures = triage.parse_report(report(rows=[
+            "| `Development/GaloisCohomology₂/Foo.lean:1` | other | error | |",
+            "| `Development/Other/Foo.lean:2` | other | error | |",
+        ]))
+        pr = {"number": 1065, "url": "url", "title": "Fix Development.GaloisCohomology₂.Foo",
+              "changedFiles": 0, "files": []}
+        with patch.object(triage, "run", return_value=json.dumps([pr])) as run:
+            claims, incomplete, truncated = triage.fetch_claims(failures)
+        self.assertIn("title", run.call_args.args[0][-1].split(","))
+        self.assertFalse(incomplete or truncated)
+        rows = triage.triage(failures, {row["path"] for row in failures}, set(), set(), claims, True)
+        self.assertEqual([row["claim_status"] for row in rows], ["claimed", "unclaimed"])
+
+    def test_titles_do_not_override_nonempty_diffs_or_match_partial_names(self):
+        _, failures = triage.parse_report(report())
+        for title, files in [
+            ("Fix Foo", []),
+            ("Fix Development.Foo and Development.Bar", []),
+            ("Fix Development.Foo", [{"path": "src/Other.lean"}]),
+        ]:
+            with self.subTest(title=title, files=files):
+                claims, _, _ = triage.index_claims([
+                    {"number": 1, "url": "url", "title": title,
+                     "changedFiles": len(files), "files": files}], failures)
+                self.assertNotIn("src/Development/Foo.lean", claims)
+
     def test_large_pr_files_are_paginated_before_declaring_unclaimed(self):
         pr = {"number": 18, "url": "url", "changedFiles": 2,
               "files": [{"path": "src/First.lean"}]}
@@ -109,12 +139,12 @@ class CheckoutTests(unittest.TestCase):
         self.base = self.git("rev-parse", "HEAD").strip()
 
     def git(self, *args):
-        return subprocess.check_output(["git", "-C", str(self.root), *args], text=True)
+        return subprocess.check_output(["git", "-C", str(self.root), *args], text=True, encoding="utf-8")
 
     def write(self, path, text):
         target = self.root / path
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(text)
+        target.write_text(text, encoding="utf-8")
 
     def commit(self):
         self.git("add", ".")
@@ -140,6 +170,52 @@ class CheckoutTests(unittest.TestCase):
         self.assertIn("src/Development/Stable.lean", tracked)
         self.assertFalse(local or changed)
 
+    def test_staged_rename_marks_both_paths_as_locally_edited(self):
+        old = "src/Development/Foo.lean"
+        new = "src/Development/New.lean"
+        self.git("config", "diff.renames", "true")
+        self.git("mv", old, new)
+        _, tracked, local, changed, _ = triage.inspect_checkout(self.root, self.base)
+        self.assertEqual(local, {old, new})
+        rows = triage.triage(triage.parse_report(report(self.base))[1], tracked, local, changed, {}, False)
+        self.assertEqual(rows[0]["source"], "local edits")
+
+    def test_committed_rename_reports_old_and_new_paths(self):
+        self.git("config", "diff.renames", "true")
+        self.git("mv", "src/Development/Foo.lean", "src/Development/New.lean")
+        self.commit()
+        _, _, local, changed, _ = triage.inspect_checkout(self.root, self.base)
+        self.assertFalse(local)
+        self.assertEqual(changed, {"src/Development/Foo.lean", "src/Development/New.lean"})
+
+    def test_unicode_subprocess_output_ignores_default_decoder(self):
+        data = "src/Development/GaloisCohomology₂/Foo.lean\0"
+        code = f"import sys; sys.stdout.buffer.write({data.encode('utf-8')!r})"
+        decoder = "getencoding" if hasattr(locale, "getencoding") else "getpreferredencoding"
+        with patch.object(locale, decoder, return_value="cp1252"):
+            decoded = triage.run([sys.executable, "-c", code])
+        self.assertEqual(triage.nul_paths(decoded), {data.rstrip("\0")})
+
+    def test_cli_reads_and_writes_utf8_with_legacy_io_defaults(self):
+        module = "src/Development/GaloisCohomology₂/Foo.lean"
+        self.write(module, "-- Unicode path\n")
+        self.commit()
+        head = self.git("rev-parse", "HEAD").strip()
+        report_path = self.root / "report.md"
+        report_path.write_text(report(head, [
+            f"| `{module[4:]}:1` | other | curly quote \u201d | |",
+        ]), encoding="utf-8")
+        env = dict(os.environ, PYTHONUTF8="0", PYTHONIOENCODING="cp1252")
+        for flags in [[], ["--json"]]:
+            with self.subTest(flags=flags):
+                output = subprocess.check_output([
+                    sys.executable, str(SCRIPT), "--checkout", str(self.root),
+                    "--report", str(report_path), "--offline", *flags,
+                ], env=env, encoding="utf-8")
+                self.assertIn(module, output)
+                if flags:
+                    self.assertEqual(json.loads(output)["failures"][0]["path"], module)
+
     def test_missing_report_commit_is_unknown(self):
         _, _, _, changed, warning = triage.inspect_checkout(self.root, "1" * 40)
         self.assertIsNone(changed)
@@ -156,7 +232,7 @@ class CheckoutTests(unittest.TestCase):
 
     def test_offline_json_cli_does_not_call_github(self):
         report_path = self.root / "report.md"
-        report_path.write_text(report(self.base))
+        report_path.write_text(report(self.base), encoding="utf-8")
         original_run = triage.run
 
         def local_only(args):
@@ -174,7 +250,7 @@ class CheckoutTests(unittest.TestCase):
 
     def test_github_failure_exits_nonzero(self):
         report_path = self.root / "report.md"
-        report_path.write_text(report(self.base))
+        report_path.write_text(report(self.base), encoding="utf-8")
         original_run = triage.run
 
         def fail_github(args):

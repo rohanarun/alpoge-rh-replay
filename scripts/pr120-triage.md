@@ -26,7 +26,10 @@ An older or unrelated checkout also produces unknown comparisons instead of
 presenting reversed differences as fixes made since the report.
 
 The claim column reports PRs that currently change each module and retains claims
-recorded in the report. Larger PR file lists are fetched with pagination. If GitHub
+recorded in the report. A zero-file PR also reserves a module when its title is
+exactly `Fix <full.dotted.module>`, following the project's early claim convention.
+Partial titles and matching basenames in other directories are not inferred.
+Larger PR file lists are fetched with pagination. If GitHub
 still truncates a PR's file list or the PR list reaches
 its limit, unmatched claims are unknown, rather than being called unclaimed.
 GitHub/authentication failures exit with status 2 instead of implying no claims exist.
