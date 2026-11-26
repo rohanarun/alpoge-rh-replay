@@ -1,0 +1,14 @@
+[
+  {"name":"private_proof","targets":["ReachabilityFixtures.viaPrivate"],"required":["ReachabilityFixtures.viaPrivate","True.intro"],"required_suffixes":[["ReachabilityFixtures","hiddenProof"]]},
+  {"name":"opaque_value","targets":["ReachabilityFixtures.viaOpaque"],"required":["ReachabilityFixtures.opaqueNat"],"required_suffixes":[["ReachabilityFixtures","hiddenNat"]]},
+  {"name":"type_only","targets":["ReachabilityFixtures.typeOnly"],"required":["ReachabilityFixtures.TypeMarker"]},
+  {"name":"mutual_inductive","targets":["ReachabilityFixtures.Left"],"required":["ReachabilityFixtures.Left","ReachabilityFixtures.Right","ReachabilityFixtures.Left.leaf","ReachabilityFixtures.Left.next","ReachabilityFixtures.Right.leaf","ReachabilityFixtures.Right.next","ReachabilityFixtures.Left.rec","ReachabilityFixtures.Right.rec"]},
+  {"name":"recursor_root","targets":["ReachabilityFixtures.Left.rec"],"required":["ReachabilityFixtures.Left","ReachabilityFixtures.Right","ReachabilityFixtures.Right.rec"]},
+  {"name":"constructor_root","targets":["ReachabilityFixtures.Left.leaf"],"required":["ReachabilityFixtures.Left","ReachabilityFixtures.Right","ReachabilityFixtures.Left.rec"]},
+  {"name":"nested_recursors","targets":["ReachabilityFixtures.Nested"],"required":["ReachabilityFixtures.Nested","ReachabilityFixtures.Nested.node","ReachabilityFixtures.Nested.rec"]},
+  {"name":"projection","targets":["ReachabilityFixtures.projectValue"],"required":["ReachabilityFixtures.Bundle","ReachabilityFixtures.Bundle.mk"],"required_expression_tags":["proj"]},
+  {"name":"literals","targets":["ReachabilityFixtures.natLiteral","ReachabilityFixtures.stringLiteral"],"required":["Nat","Char.ofNat","String.ofList"],"required_nat_literal":"123456789","required_string_literal":"reachability λ"},
+  {"name":"quotient_package","targets":["Quot.lift"],"required":["Eq","Quot","Quot.mk","Quot.lift","Quot.ind"]},
+  {"name":"metadata_stripped","targets":["ReachabilityFixtures.metadataRoot"],"required":["True.intro"],"forbidden":["ReachabilityFixtures.metadataOnlyMention"]},
+  {"name":"metadata_retained","targets":["ReachabilityFixtures.metadataRoot"],"export_options":["--export-mdata"],"required":["True.intro"],"forbidden":["ReachabilityFixtures.metadataOnlyMention"],"required_expression_tags":["mdata"]}
+]
