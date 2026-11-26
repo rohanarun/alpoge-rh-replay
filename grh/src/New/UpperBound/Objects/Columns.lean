@@ -230,12 +230,31 @@ lemma exists_embedGL_scalar_eq_scalarFin [h : IsSplitLevel P N] {ν : unitary (�
       (Subtype.ext h_inv)
   refine ⟨x, fun v hv ↦ ?_, eq_of_supportedOn (embedGL_mem_supportedOn _) ?_ ?_⟩
   · -- `P` contains no pair of conjugate places, so `v` is neither `w` nor its conjugate.
-    have h_one : ν.val v = 1 := h_supp v (by grind) (by grind [star_notMem])
+    have h_one : ν.val v = 1 :=
+      h_supp v (fun h_eq ↦ hv (Subtype.ext h_eq)) fun h_eq ↦
+        h.star_notMem v.val v.property (h_eq.symm ▸ w.property)
     have h_residue : residueAt v (x : O (F := LocProd P)) = 1 :=
       (congrArg (IsLocalRing.residue (LocInt v.val)) (Subtype.ext h_one)).trans (map_one _)
     exact (residueEquiv v).map_eq_one_iff.2 h_residue
-  · simp +contextual (disch := grind) [Units.ext_iff, h_supp]
-  · simp [x, Subtype.forall', embedGL, Units.ext_iff]
+  · rw [mem_supportedOn]
+    intro u hu hsu
+    have h_u : ν.1 u = 1 :=
+      h_supp u (fun h_eq ↦ hu (h_eq ▸ w.2)) (fun h_eq ↦ hsu (h_eq ▸ w.2))
+    rw [Units.ext_iff]
+    ext i j
+    simp only [scalarFin_atPlace, Matrix.diagonal_apply, h_u, Units.val_one, Matrix.one_apply]
+  · intro u hu
+    dsimp only [embedGL, MonoidHom.comp_apply]
+    rw [atPlace_ofSplitPlaces h.star_notMem _ ⟨u, hu⟩, Units.ext_iff]
+    ext i j
+    simp only [MonoidHom.pi_apply, GeneralLinearGroup.map_apply, Pi.evalRingHom_apply, inclGL,
+      scalarFin_atPlace, GeneralLinearGroup.scalar, Units.coe_map, Matrix.diagonal_apply,
+      Subring.coe_subtype, x, Units.val_mkOfMulEqOne]
+    congr 1
+    change ((Matrix.scalar n
+      (⟨evalPlaces P ν.1, evalPlaces_mem_O _ h_int⟩ : O (F := LocProd P))) i j).1 ⟨u, hu⟩ = _
+    rw [Matrix.scalar_apply, Matrix.diagonal_apply]
+    split_ifs <;> rfl
 
 omit h [DecidableEq n] [DecidableEq n'] in
 /-- Let `P` hold one place of each conjugate pair above the prime `N`, all unramified of degree one
@@ -350,12 +369,13 @@ lemma norm_detCharAt_diagN_anti [h : IsSplitLevel P N] {ι : ℂ →+* ℂ_[N]} 
   -- has `N`-adic size at least `1`, and it occurs with the exponent `-k`.
   let d (w : P) : (LocField w.val)ˣ := if ↑w ∈ S then .mk0 N NeZero.out else 1
   have hd_one_le (w : P) : 1 ≤ ‖ι √‖(d w).val‖‖ := by
-    rw [← one_le_sq_iff₀ (by simp), ← norm_pow, ← map_pow]
+    rw [← one_le_sq_iff₀ (norm_nonneg _), ← norm_pow, ← map_pow]
     norm_cast
     by_cases hw : ↑w ∈ S
     · simp [d, hw, norm_locField_eq_q_zpow, h.q_eq, h.v_natCast, norm_p_eq_inv, NeZero.one_le,
         NeZero.ne]
-    · simp [d, hw]
+    · simp only [d, hw, ↓reduceIte, Units.val_one, norm_one, Real.sqrt_one, one_pow,
+        Complex.ofReal_one, map_one, norm_one, le_rfl]
   -- In every rank the value is a product over `P` of local factors at the determinants `d w`.
   have h_norm {r : Type} [Fintype r] [DecidableEq r] (l : ℕ) :
       ‖ι (detCharAt χ l (h.diagN r S))‖ = ∏ w : P,
@@ -368,7 +388,7 @@ lemma norm_detCharAt_diagN_anti [h : IsSplitLevel P N] {ι : ℂ →+* ℂ_[N]} 
     simp [h_det, localChar, h_component]
   rw [h_norm, h_norm]
   gcongr with w
-  · simp
+  · exact pow_pos (lt_of_lt_of_le zero_lt_one (hd_one_le w)) _
   · exact hd_one_le w
 
 open scoped Classical in
@@ -390,12 +410,25 @@ lemma exists_sub_residueOverN_mem_iff [h : IsSplitLevel P N] (z : 𝔸f E) :
   refine ⟨h.reduction x, fun y ↦ ?_⟩
   -- If `z - y / N` is integral at `P`, so is `N z = N (z - y / N) + y`.
   have h_int (hz : idem P * (z - residueOverN y) ∈ Ô E) : idem P * ((N : 𝔸f E) * z) ∈ Ô E := by
-    simpa [mul_sub, mul_div_cancel₀, mem_O_locProd, idem_mul_mem_Ô, idem_apply, NeZero.ne] using
-      add_mem (nsmul_mem (evalPlaces_mem_O _ hz) N)
-        (mem_O_locProd.2 fun w ↦ natCast_mem (LocInt _) (y w).val)
+    rw [idem_mul_mem_Ô] at hz ⊢
+    intro w hw
+    have hwP : w ∈ P := Finset.mem_coe.1 hw
+    have hzw : z w - ((y ⟨w, hwP⟩).val : LocField w) / (N : LocField w) ∈ LocInt w := by
+      have h' := hz w hw
+      change Valued.v (z w - residueOverN y w) ≤ 1 at h'
+      rw [residueOverN_apply, dite_eq_left hwP] at h'
+      exact h'
+    have hsum : (N : LocField w) * (z w - ((y ⟨w, hwP⟩).val : LocField w) / (N : LocField w)) +
+        ((y ⟨w, hwP⟩).val : LocField w) ∈ LocInt w :=
+      add_mem (mul_mem (natCast_mem (LocInt w) N) hzw) (natCast_mem (LocInt w) (y ⟨w, hwP⟩).val)
+    have heq : (N : LocField w) * (z w - ((y ⟨w, hwP⟩).val : LocField w) / (N : LocField w)) +
+        ((y ⟨w, hwP⟩).val : LocField w) = ((N : 𝔸f E) * z) w := by
+      rw [mul_sub, mul_div_cancel₀ _ (Nat.cast_ne_zero.2 (NeZero.ne N)), sub_add_cancel]
+      rfl
+    exact heq ▸ hsum
   refine (iff_and_self.2 h_int).trans (and_congr_right fun hz ↦ ?_)
   have hx : x.val = evalPlaces P (N * z) :=
-    Function.invFun_eq (by simpa [mem_O_locProd, idem_mul_mem_Ô] using hz)
+    Function.invFun_eq ⟨⟨_, mem_O_locProd.2 fun w ↦ idem_mul_mem_Ô.1 hz w.val w.property⟩, rfl⟩
   exact (reduction_eq_iff_idem_mul_mem hx).symm
 
 /-- The finite adele `residueOverN y`, which is `y w / N` at each `w ∈ P` and `0` elsewhere,
@@ -433,17 +466,73 @@ lemma exists_sub_mem_and_sub_star_mem_iff [hP : IsSplitLevel P N] (hS : IsSplitL
   -- Integrality of an adele and its conjugate at `P` means integrality at all places above `N`.
   have h_closure (x : 𝔸f E) : idem P * x ∈ Ô E ∧ idem P * star x ∈ Ô E ↔
       idem S * x ∈ Ô E ∧ idem S * star x ∈ Ô E := by
-    grind [IsSplitLevel, star_star, idem_mul_mem_Ô, v_star_apply]
+    simp only [idem_mul_mem_Ô, v_star_apply]
+    have h_iff (Q : Finset (FinPlace E)) [hQ : IsSplitLevel Q N] :
+        ((∀ w ∈ Q, Valued.v (x w) ≤ 1) ∧ ∀ w ∈ Q, Valued.v (x (star w)) ≤ 1) ↔
+          ∀ w : FinPlace E, (N : NumberField.RingOfIntegers E) ∈ w.asIdeal →
+            Valued.v (x w) ≤ 1 := by
+      constructor
+      · rintro ⟨h1, h2⟩ w hw
+        rcases (hQ.natCast_mem_iff w).1 hw with hwQ | hswQ
+        · exact h1 w hwQ
+        · have h2' := h2 (star w) hswQ
+          rw [star_star] at h2'
+          exact h2'
+      · intro h_all
+        exact ⟨fun w hw ↦ h_all w ((hQ.natCast_mem_iff w).2 (.inl hw)),
+          fun w hw ↦ h_all (star w)
+            ((hQ.natCast_mem_iff (star w)).2 (.inr (by simpa only [star_star] using hw)))⟩
+    exact (h_iff P).trans (h_iff S).symm
   -- `b` is the class at `S` of the adele `z` that is `t` on `P` and `s̄` on the conjugates of `P`.
-  let z : 𝔸f E := idem P * t + star (idem P * s)
+  let eP : 𝔸f E := idem P
+  let eS : 𝔸f E := idem S
+  let z : 𝔸f E := eP * t + star (eP * s)
   obtain ⟨b, hb⟩ := hS.exists_sub_residueOverN_mem_iff z
+  have hPP : eP * eP = eP := idem_mul_self (P : Set (FinPlace E))
+  have hSS : eS * eS = eS := idem_mul_self (S : Set (FinPlace E))
+  have hPsP : eP * star eP = 0 := idem_mul_star hP.isConjDisjoint
+  have hSsS : eS * star eS = 0 := idem_mul_star hS.isConjDisjoint
+  have h_sum_idem : eP + star eP = eS + star eS := hP.idem_add_star_eq hS
+  have hPz : eP * z = eP * t := by
+    dsimp only [z]; rw [star_mul']
+    linear_combination t * hPP + star s * hPsP
+  have hP_sz : eP * star z = eP * s := by
+    dsimp only [z]; rw [star_add, star_mul', star_star]
+    linear_combination star t * hPsP + s * hPP
+  have hS_pz : eS * (p * z) = eS * ((N : 𝔸f E) * z) := by
+    rw [hp]
+    linear_combination ((N : 𝔸f E) - 1) * z * hSS
+  have hS_spz : eS * star (p * z) = eS * star z := by
+    rw [hp, star_mul', star_add, star_one, star_mul', star_sub, star_natCast, star_one]
+    linear_combination ((N : 𝔸f E) - 1) * star z * hSsS
+  have hP_sp : eP * star p = eP * ((N : 𝔸f E) + 1 - p) := by
+    rw [hp, star_add, star_one, star_mul', star_sub, star_natCast, star_one]
+    linear_combination ((N : 𝔸f E) - 1) * (hPP + hPsP - eP * h_sum_idem)
+  have hP_pz : eP * (p * z) = eP * (t * p) := by
+    calc eP * (p * z) = p * (eP * z) := by ring
+      _ = p * (eP * t) := by rw [hPz]
+      _ = eP * (t * p) := by ring
+  have hP_spz : eP * star (p * z) = eP * (((N : 𝔸f E) + 1 - p) * s) := by
+    calc eP * star (p * z) = eP * (star p * star z) := by rw [star_mul']
+      _ = (eP * star z) * star p := by ring
+      _ = (eP * s) * star p := by rw [hP_sz]
+      _ = (eP * star p) * s := by ring
+      _ = (eP * ((N : 𝔸f E) + 1 - p)) * s := by rw [hP_sp]
+      _ = eP * (((N : 𝔸f E) + 1 - p) * s) := by ring
   refine ⟨b, fun y ↦ ?_⟩
-  -- Apply this to `z - y / N` and to `p z`.
+  have hP_sub : eP * (z - residueOverN y) = eP * (t - residueOverN y) := by
+    rw [mul_sub, hPz, ← mul_sub]
+  have hP_ssub : eP * star (z - residueOverN y) = eP * (s - star (residueOverN y)) := by
+    rw [star_sub, mul_sub, hP_sz, ← mul_sub]
+  have hS_ssub : eS * star (z - residueOverN y) = eS * star z := by
+    have h_sr : eS * star (residueOverN y) = 0 := by
+      rw [← idem_mul_residueOverN y, star_mul', ← mul_assoc, hSsS, zero_mul]
+    rw [star_sub, mul_sub, h_sr, sub_zero]
   have h_sub := h_closure (z - residueOverN y)
   have h_mul := h_closure (p * z)
-  simp only [z, hp, star_sub, star_add, star_mul', star_star, star_one, star_natCast] at h_sub h_mul
-  grind [hb y, idem_mul_star hP.isConjDisjoint, idem_mul_star hS.isConjDisjoint,
-    hP.idem_add_star_eq hS, idem_mul_residueOverN, idem_mul_self, star_mul']
+  rw [hP_sub, hP_ssub, hS_ssub] at h_sub
+  rw [hP_pz, hP_spz, hS_pz, hS_spz] at h_mul
+  rw [h_sub, hb y, and_right_comm, ← h_mul]
 
 open scoped Classical in
 /-- Let `P` and `S` each hold one place of every conjugate pair above the prime `N`, all unramified
@@ -471,40 +560,117 @@ lemma sum_translate_eq_gluedDatum [hP : IsSplitLevel P N] (hS : IsSplitLevel S N
   choose b hb using fun i : n' ↦
     hP.exists_sub_mem_and_sub_star_mem_iff hS (p := p) rfl (T (i, .inr ())) (R (.inr (), i))
   have hD_S : (diagN n S).val = diagonal fun i ↦ evalPlaces P (if i.isLeft then 1 else p) := by
-    simp +contextual [diagN, funext_iff, apply_ite, p, idem_apply]
+    ext i k w
+    by_cases hik : i = k
+    · subst hik
+      cases i with
+      | inl _ => simp [diagN]
+      | inr _ =>
+        by_cases hw : w.1 ∈ S <;> simp [diagN, p, hw]
+    · simp [diagN, Matrix.diagonal_apply_ne _ hik]
   have hD_PS : (diagN m (P \ S)).val =
       diagonal fun i ↦ evalPlaces P (if i.isLeft then 1 else N + 1 - p) := by
-    simp +contextual [diagN, funext_iff, apply_ite, p, idem_apply]
+    ext i k w
+    by_cases hik : i = k
+    · subst hik
+      cases i with
+      | inl _ => simp [diagN]
+      | inr _ =>
+        by_cases hw : w.1 ∈ S <;> simp [diagN, p, hw]
+    · simp [diagN, Matrix.diagonal_apply_ne _ hik]
   have h_int (x : 𝔸f E) : evalPlaces P x ∈ O ↔ j * x ∈ Ô E := by
     simp [j, mem_O_locProd, idem_mul_mem_Ô]
   have h_norm (i : n') : star (residueOverN (b i)) * residueOverN (b i) = 0 :=
     hS.star_residueOverN_mul_self (b i)
-  have hj_idem : j * j = j := idem_mul_self _
-  have hp_mul : p * (N + 1 - p) = N := by grind [idem_mul_self]
+  have hj_idem : j * j = j := idem_mul_self (P : Set (FinPlace E))
+  have hp_mul : p * (N + 1 - p) = N := by
+    have hSS : (idem S : 𝔸f E) * idem S = idem S := idem_mul_self (S : Set (FinPlace E))
+    dsimp only [p]
+    linear_combination -((N : 𝔸f E) - 1) ^ 2 * hSS
   -- Each term is a character value on a set given by integrality conditions, and zero off it.
   simp [gluedDatum, charDatum, poleColumn, poleRow, hD_S, hD_PS, h_int, ← map_mul, vecToMatrix,
     schrodingerAct, ← ite_and, mem_integralBox, ← AddChar.map_add_eq_mul, liftFn_apply, ← map_sum,
     sum_prod_type, dotProduct, mul_sum]
   -- Only the class `b` contributes.
   rw [Fintype.sum_eq_single b fun y hy ↦ ite_eq_right fun h_y ↦
-    hy (funext fun i ↦ ((hb i (y i)).1 (by grind)).right.symm)]
+    hy (funext fun i ↦ ((hb i (y i)).1 ⟨by rw [sub_eq_add_neg]; exact (h_y.2 i).2 (),
+      by rw [sub_eq_add_neg]; exact h_y.1.2 () i⟩).right.symm)]
   replace hb (i : n') := hb i (b i)
-  repeat split
-  · -- Let `c` be the residue of `N r ⬝ t`. The two phases differ by
+  have h_iff_cond :
+      (((∀ (a : m) (i : n'), j * R (.inl a, i) ∈ Ô E) ∧
+          ∀ (u : Unit) (i : n'), j * (R (.inr u, i) + -star (residueOverN (b i))) ∈ Ô E) ∧
+        ∀ (i : n'), (∀ (a : n), j * T (i, .inl a) ∈ Ô E) ∧
+          ∀ (u : Unit), j * (T (i, .inr u) + -residueOverN (b i)) ∈ Ô E) ↔
+      ((∀ (i : n'), (∀ (a : n), j * T (i, .inl a) ∈ Ô E) ∧
+          ∀ (u : Unit), j * (T (i, .inr u) * p) ∈ Ô E) ∧
+        ((∀ (a : m) (i : n'), j * R (.inl a, i) ∈ Ô E) ∧
+          ∀ (u : Unit) (i : n'), j * (((N : 𝔸f E) + 1 - p) * R (.inr u, i)) ∈ Ô E)) := by
+    constructor
+    · rintro ⟨⟨hRl, hRr⟩, hT⟩
+      refine ⟨fun i ↦ ⟨(hT i).1, fun () ↦ ?_⟩, hRl, fun () i ↦ ?_⟩
+      · exact ((hb i).1 ⟨by rw [sub_eq_add_neg]; exact (hT i).2 (),
+          by rw [sub_eq_add_neg]; exact hRr () i⟩).1.1
+      · exact ((hb i).1 ⟨by rw [sub_eq_add_neg]; exact (hT i).2 (),
+          by rw [sub_eq_add_neg]; exact hRr () i⟩).1.2
+    · rintro ⟨hT, hRl, hRr⟩
+      refine ⟨⟨hRl, fun () i ↦ ?_⟩, fun i ↦ ⟨(hT i).1, fun () ↦ ?_⟩⟩
+      · rw [← sub_eq_add_neg]; exact ((hb i).2 ⟨⟨(hT i).2 (), hRr () i⟩, rfl⟩).2
+      · rw [← sub_eq_add_neg]; exact ((hb i).2 ⟨⟨(hT i).2 (), hRr () i⟩, rfl⟩).1
+  by_cases h_lhs :
+      ((∀ (a : m) (i : n'), j * R (.inl a, i) ∈ Ô E) ∧
+          ∀ (u : Unit) (i : n'), j * (R (.inr u, i) + -star (residueOverN (b i))) ∈ Ô E) ∧
+        ∀ (i : n'), (∀ (a : n), j * T (i, .inl a) ∈ Ô E) ∧
+          ∀ (u : Unit), j * (T (i, .inr u) + -residueOverN (b i)) ∈ Ô E
+  · have ⟨h_rhsT, h_rhsR⟩ := h_iff_cond.1 h_lhs
+    rw [ite_eq_left h_lhs, dite_eq_left h_rhsT, dite_eq_left h_rhsR]
+    -- Let `c` be the residue of `N r ⬝ t`. The two phases differ by
     -- `(t - b / N) ⬝ (r - b̄ / N) - (r ⬝ t - c / N)` at `P`, which is integral.
     generalize hc : hP.reduction _ = c
     have h_prod : ∑ i, j * (T (i, .inr ()) - residueOverN (b i)) *
         (j * (R (.inr (), i) - star (residueOverN (b i)))) ∈ Ô E :=
-      sum_mem fun i _ ↦ ((hb i).2 (by grind)).elim mul_mem
+      sum_mem fun i _ ↦ mul_mem (by rw [sub_eq_add_neg]; exact (h_lhs.2 i).2 ())
+        (by rw [sub_eq_add_neg]; exact h_lhs.1.2 () i)
     have h_red : j * (∑ i, R (.inr (), i) * T (i, .inr ()) - residueOverN c) ∈ Ô E := by
       refine (reduction_eq_iff_idem_mul_mem ?_).1 hc
-      simp [-map_mul, mul_sum]
-      grind
+      push_cast
+      rw [← map_sum]
+      congr 1
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl fun i _ ↦ ?_
+      linear_combination R (.inr (), i) * T (i, .inr ()) * hp_mul
     apply selfDualAddChar_congr 0 (sub_mem h_prod h_red)
-    simp [← sum_add_distrib, ← sum_neg_distrib, ← sum_sub_distrib, ← sub_add, mul_sub, mul_sum]
-    grind [idem_mul_residueOverN]
-  -- By `hb` the two supports agree.
-  all_goals grind
+    rw [star_zero, zero_add, add_zero, mul_sub, mul_sum]
+    change -(∑ i, _) + -(∑ i, _) =
+      -residueOverN c + (∑ i, _ - (∑ i, _ - idem ↑P * residueOverN c))
+    rw [idem_mul_residueOverN c]
+    have h_sum_eq :
+        ∑ i : n',
+          (half * (star (residueOverN (b i)) *
+              (j * (T (i, .inr ()) + (T (i, .inr ()) + -residueOverN (b i))))) +
+            half * (residueOverN (b i) *
+              (j * (R (.inr (), i) + (R (.inr (), i) + -star (residueOverN (b i))))))) =
+          ∑ i : n',
+            -(j * (T (i, .inr ()) - residueOverN (b i)) *
+                (j * (R (.inr (), i) - star (residueOverN (b i)))) -
+              j * (R (.inr (), i) * T (i, .inr ()))) := by
+      refine Finset.sum_congr rfl fun i _ ↦ ?_
+      have h_half : (half : 𝔸f E) + half = 1 := by
+        simpa [two_mul] using two_mul_half (E := E)
+      have h_n := h_norm i
+      linear_combination
+        (star (residueOverN (b i)) * j * T (i, .inr ()) +
+          residueOverN (b i) * j * R (.inr (), i)) * h_half +
+        (j * j - half * j - half * j) * h_n +
+        (T (i, .inr ()) * R (.inr (), i) - T (i, .inr ()) * star (residueOverN (b i)) -
+          residueOverN (b i) * R (.inr (), i)) * hj_idem
+    rw [← neg_add, ← Finset.sum_add_distrib, h_sum_eq, Finset.sum_neg_distrib, neg_neg,
+      Finset.sum_sub_distrib]
+    ring
+  · rw [ite_eq_right h_lhs]
+    by_cases h_rhsT : ∀ (i : n'), (∀ (a : n), j * T (i, .inl a) ∈ Ô E) ∧
+        ∀ (u : Unit), j * (T (i, .inr u) * p) ∈ Ô E
+    · rw [dite_eq_left h_rhsT, dite_eq_right fun h_rhsR ↦ h_lhs (h_iff_cond.2 ⟨h_rhsT, h_rhsR⟩)]
+    · rw [dite_eq_right h_rhsT]
 
 open scoped Classical in
 /-- **The glued datum in any model.** Let `P` and `S` each hold one place of every conjugate pair
@@ -544,7 +710,14 @@ lemma doubleLiftGluing_eq_sum_schrodingerOpAt [hP : IsSplitLevel P N] (hS : IsSp
   have h_supp (y : S → ZMod N) :
       (idem S + star (idem S)) * residueOverN y = residueOverN y ∧
       (idem S + star (idem S)) * star (residueOverN y) = star (residueOverN y) := by
-    grind [idem_mul_star hS.isConjDisjoint, idem_mul_residueOverN, star_mul']
+    let eS : 𝔸f E := idem S
+    have h0 : eS * star eS = 0 := idem_mul_star hS.isConjDisjoint
+    have h1 : eS * residueOverN y = residueOverN y := idem_mul_residueOverN y
+    have h2 : star eS * star (residueOverN y) = star (residueOverN y) := by
+      rw [← star_mul', h1]
+    constructor
+    · rw [add_mul, h1, ← h1, ← mul_assoc, mul_comm (star eS), h0, zero_mul, add_zero]
+    · rw [add_mul, h2, ← h2, ← mul_assoc, h0, zero_mul, zero_add]
   let applyModel := TensorProduct.map
     ((ContinuousLinearMap.apply ℂ _ v.val).toLinearMap ∘ₗ Space.schrodingerOp _ P)
     ((ContinuousLinearMap.apply ℂ _ v'.val).toLinearMap ∘ₗ Space.schrodingerOp _ P)
