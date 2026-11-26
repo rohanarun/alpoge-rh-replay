@@ -179,7 +179,8 @@ variable {U : Subfunctor V} (hU : ∀ A : C, ∀ x ∈ U.obj A, ∃ l : L.obj A,
 well defined because every point of `U` has a witness. -/
 def fromRel : relFreeAb U ⟶ abCoker (boundary R 0) :=
   desc (freeAb.map (noWitness R).inv ≫ π (boundary R 0))
-    (freeAb.hom_ext fun A x ↦ proj_boundary_of_eq_zero (hU A x.val x.property))
+    (freeAb.hom_ext fun A x ↦ proj_boundary_of_eq_zero
+      (R := R) (A := A) (t := (noWitness R).inv.app A x.val) (hU A x.val x.property))
 
 /-- The universal class in degree `n`, with coefficients in the chains with `n` witnesses modulo
 boundaries. In degree `0` it is the map `fromRel hU`; each further degree composes with the
