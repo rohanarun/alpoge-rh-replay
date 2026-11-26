@@ -83,19 +83,23 @@ lemma crapo_complementation {L : Type*} [Lattice L] [BoundedOrder L] [IsModularL
   intro U hU
   induction U using WellFoundedLT.induction with | ind U ih => ?_
   -- If `U ⊓ (W ⊔ C) = ⊥` then `W` is disjoint from `C ⊔ U` (modularity), so `U ≤ C` by maximality.
-  have meet_ne : U ⊓ (W ⊔ C) ≠ ⊥ := by
-    grind [disjoint_iff, le_sup_left, le_sup_right,
-      hC.disjoint_sup_right_of_disjoint_sup_left (c := U)]
+  have meet_ne : U ⊓ (W ⊔ C) ≠ ⊥ := fun h_bot ↦
+    hU ((h_max (hC.disjoint_sup_right_of_disjoint_sup_left
+      (disjoint_iff.mpr h_bot).symm) le_sup_left).trans' le_sup_right |>.trans le_sup_right)
   -- The sums of `μ` below `U` and below `U ⊓ (W ⊔ C)` vanish; by `ih` their difference is `μ U`.
-  have h_sub : ({A | A ≤ U ⊓ (W ⊔ C)} : Finset L) ⊆ ({A | A ≤ U} : Finset L) := by
-    grind [le_inf_iff]
+  have h_sub : ({A | A ≤ U ⊓ (W ⊔ C)} : Finset L) ⊆ ({A | A ≤ U} : Finset L) :=
+    fun _ hA ↦ mem_filter.mpr ⟨mem_univ _, (mem_filter.mp hA).2.trans inf_le_left⟩
   rw [← h_sum U (ne_bot_of_le_ne_bot meet_ne inf_le_left), ← sum_sdiff h_sub, h_sum _ meet_ne,
     sum_eq_single U]
   · rw [add_zero]
   · -- an `A < U` outside `U ⊓ (W ⊔ C)` is not below `W ⊔ C`, so `μ A = 0` by `ih`
-    grind [Ne.lt_of_le, le_inf_iff]
+    intro A hA hAU
+    rw [mem_sdiff, mem_filter, mem_filter] at hA
+    exact ih A (lt_of_le_of_ne hA.1.2 hAU) fun hAWC ↦ hA.2 ⟨mem_univ _, le_inf hA.1.2 hAWC⟩
   · -- `U` itself lies in the difference, as `¬U ≤ W ⊔ C`
-    grind [le_inf_iff]
+    intro hU_not
+    exact False.elim (hU_not (mem_sdiff.mpr ⟨mem_filter.mpr ⟨mem_univ _, le_rfl⟩,
+      fun h ↦ hU ((mem_filter.mp h).2.trans inf_le_right)⟩))
 
 variable {k V K : Type*} [Field k] [Finite k] [AddCommGroup V] [Module k V] [Module.Finite k V]
   {g : End k V} {o : SimClass k} (B : Hall k) [Field K] [Algebra k K] (η : K → ℂ)
@@ -104,7 +108,8 @@ variable {k V K : Type*} [Field k] [Finite k] [AddCommGroup V] [Module k V] [Mod
 
 /-- `μ` is inverse to `New.Hall.constOne`; at `g` this reads: the sum of `μ (g|W)` over the stable
 subspaces `W` is `1` in dimension `0` and `0` otherwise. -/
-lemma moebius_mul_constOne : moebius * constOne = (1 : Hall k) := by grind [isUnit_constOne]
+lemma moebius_mul_constOne : moebius * constOne = (1 : Hall k) :=
+  Ring.inverse_mul_cancel _ isUnit_constOne
 
 /-- At the class of `g`, the sum of `μ (g|W)` over the `g`-stable subspaces `W` is the value of the
 unit `1` of `New.Hall k` at the class of `g`. -/
@@ -126,7 +131,8 @@ lemma isSemisimple_of_moebius_ne_zero (h_mu_ne : moebius (simClassOf g) ≠ 0) :
   · -- The sum over `U ≤ X` is that of `sum_moebius_simClassOf_endOnSub` for `endOnSub X`, which is
     -- `0` for `X ≠ ⊥`; `sum_comap` matches the stable subspaces of `X` with the stable `U ≤ X`.
     have h_subtype : ∀ v : (X : Submodule k V),
-        (X : Submodule k V).subtype (endOnSub X v) = g ((X : Submodule k V).subtype v) := by aesop
+        (X : Submodule k V).subtype (endOnSub X v) = g ((X : Submodule k V).subtype v) :=
+      fun _ ↦ rfl
     have h_reindex (F : StableSubspace (endOnSub X) → ℂ) :
         ∑ W, F W = ∑ U : StableSubspace g, if (U : Submodule k V) ≤ X then
           F (comap (X : Submodule k V).subtype h_subtype U) else 0 := by
@@ -169,18 +175,43 @@ lemma blockAverage_mulMoebius (a b : SimClass k) :
         ∑ A : StableSubspace x, (moebius.blockAverage (simClassOf A.endOnSub) *
           constOne.blockAverage (simClassOf A.endOnQuot)) (simClassOf y) :=
       blockAverage_mul moebius constOne x y
-    simp_all [F, F', blockAverage_simClassOf, ite_and, ← mul_sum, mul_simClassOf,
-      finsum_eq_sum_of_fintype, sum_moebius_simClassOf_endOnSub]
+    rw [moebius_mul_constOne] at h_mackey
+    have h_lhs : (F * constOne : Hall k) (simClassOf x) =
+        ∑ A : StableSubspace x, ((moebius.blockAverage (simClassOf A.endOnSub) * constOne : Hall k)
+          (simClassOf y)) := by
+      simp only [mul_simClassOf, finsum_eq_sum_of_fintype, constOne, mul_one, F]
+    have h_const_avg (c : SimClass k) : constOne.blockAverage c = constOne := by
+      funext d
+      simp only [blockAverage, constOne, finMean_const]
+    have h_mackey' : (1 : Hall k).blockAverage (simClassOf x) (simClassOf y) =
+        (F * constOne : Hall k) (simClassOf x) := by
+      rw [h_lhs, h_mackey]
+      exact sum_congr rfl fun A _ ↦ by rw [h_const_avg]
+    have h_rhs : (F' * constOne : Hall k) (simClassOf x) =
+        (1 : Hall k) (simClassOf x) * (1 : Hall k) (simClassOf y) := by
+      simp only [mul_simClassOf, finsum_eq_sum_of_fintype, constOne, mul_one, F', Hall.smul_apply,
+        ← mul_sum, ← sum_mul, sum_moebius_simClassOf_endOnSub]
+    rw [← h_mackey', h_rhs, blockAverage_simClassOf]
+    have h_one_blk (z : _) : (1 : Hall k) (simClassOf (blockTriangularEnd x y z)) =
+        (1 : Hall k) (simClassOf x) * (1 : Hall k) (simClassOf y) := by
+      simp only [one_apply, dim_simClassOf, Module.finrank_prod, Nat.add_eq_zero_iff]
+      split_ifs <;> simp_all
+    simp only [h_one_blk, finMean_const]
   -- So it suffices that `B` agrees at a block triangular map and at `b ⊕ a` whenever `moebius` does
   -- not vanish at the former.
-  have h_mu_ab : moebius a * moebius b = moebius.blockAverage a b := by simp [delta_eq]
+  have h_mu_ab : moebius a * moebius b = moebius.blockAverage a b := by
+    rw [delta_eq, smul_apply]
   rw [h_mu_ab, blockAverage, blockAverage, mul_comm, ← finMean_const_mul]
   congr! 2 with x
   simp only [mul_eq_mul_right_iff, or_iff_not_imp_right]
   intro h_ne
   -- Then that map, say `g`, is semisimple, so the second factor has a stable complement `C`.
   have h_inv_prod : (⊥ : Submodule k (Fin b.out.fst → k)).prod ⊤ ∈
-      invtSubmodule (blockTriangularEnd a.out.snd b.out.snd x) := fun v ↦ by aesop
+      invtSubmodule (blockTriangularEnd a.out.snd b.out.snd x) :=
+    fun ⟨u, _⟩ h ↦ ⟨(Submodule.mem_bot k).2 (by
+      have hu : u = 0 := (Submodule.mem_bot k).1 h.1
+      change b.out.snd u + 0 = 0
+      rw [hu, map_zero, add_zero]), trivial⟩
   obtain ⟨C, C_inv, hC⟩ : ∃ C : Submodule k ((Fin b.out.fst → k) × (Fin a.out.fst → k)),
       C ∈ invtSubmodule (blockTriangularEnd a.out.snd b.out.snd x) ∧
         IsCompl ((⊥ : Submodule k (Fin b.out.fst → k)).prod ⊤) C :=
@@ -197,11 +228,38 @@ lemma blockAverage_mulMoebius (a b : SimClass k) :
     (.ofInjectiveEndo (.prod (fst k (Fin b.out.fst → k) (Fin a.out.fst → k))
       (snd k (Fin b.out.fst → k) (Fin a.out.fst → k) ∘ₗ projection _ _ hC)) ?_) ?_)
   · -- the map is injective
-    simp_all [injective_iff_map_eq_zero, Prod.ext_iff, mem_prod, DFunLike.ext_iff,
-      projection_apply_of_mem_left]
-  · -- and it conjugates the block triangular map to `b ⊕ a`; `↓`: membership in `⊥.prod ⊤` has
-    -- to be split before the other lemmas act
-    simp_all [Prod.ext_iff, ↓mem_prod, DFunLike.ext_iff, projection_apply_of_mem_left]
+    rw [injective_iff_map_eq_zero]
+    rintro ⟨u, v⟩ huv
+    have hu : u = 0 := congrArg Prod.fst huv
+    subst hu
+    have hmem : ((0 : Fin b.out.fst → k), v) ∈
+        (⊥ : Submodule k (Fin b.out.fst → k)).prod ⊤ := ⟨rfl, trivial⟩
+    have hv : v = 0 := by
+      have h2 : (projection _ C hC (0, v)).2 = 0 := congrArg Prod.snd huv
+      rwa [projection_apply_of_mem_left hC hmem] at h2
+    exact Prod.ext rfl hv
+  · -- and it conjugates the block triangular map to `b ⊕ a`
+    rintro ⟨u, v⟩
+    refine Prod.ext ?_ ?_
+    · change b.out.snd u + 0 = b.out.snd u
+      exact add_zero _
+    · have h_pc := LinearMap.congr_fun proj_comm (u, v)
+      simp only [comp_apply] at h_pc
+      have h_p1 : (projection _ C hC (u, v)).1 = 0 := (proj_mem (u, v)).1
+      have h_img_mem : blockTriangularEnd a.out.snd b.out.snd x (projection _ C hC (u, v)) =
+          (0, a.out.snd (projection _ C hC (u, v)).2) := by
+        refine Prod.ext ?_ ?_
+        · change b.out.snd (projection _ C hC (u, v)).1 + 0 = 0
+          rw [h_p1, map_zero, add_zero]
+        · change x (projection _ C hC (u, v)).1 + a.out.snd (projection _ C hC (u, v)).2 = _
+          rw [h_p1, map_zero, zero_add]
+      have h_eq : projection _ C hC (blockTriangularEnd a.out.snd b.out.snd x (u, v)) =
+          (0, a.out.snd (projection _ C hC (u, v)).2) := by
+        rw [← h_pc, h_img_mem,
+          projection_apply_of_mem_left hC ⟨(Submodule.mem_bot k).2 rfl, trivial⟩]
+      change (projection _ C hC (blockTriangularEnd a.out.snd b.out.snd x (u, v))).2 =
+        a.out.snd (projection _ C hC (u, v)).2
+      exact congrArg Prod.snd h_eq
 
 /-- `μ` takes real values: each value is its own complex conjugate. -/
 @[simp]
@@ -210,7 +268,8 @@ lemma conj_moebius : ∀ c : SimClass k, conj (moebius c) = moebius c := by
   -- well.
   let μ' : Hall k := fun c ↦ conj (moebius c)
   have h_inv : μ' * constOne = moebius * constOne := ext fun _ y ↦ by
-    simp [μ', ← map_sum, mul_simClassOf, finsum_eq_sum_of_fintype, sum_moebius_simClassOf_endOnSub]
+    simp only [mul_simClassOf, finsum_eq_sum_of_fintype, constOne, mul_one, μ', ← map_sum,
+      sum_moebius_simClassOf_endOnSub, one_apply, apply_ite (starRingEnd ℂ), map_one, map_zero]
   exact congrFun (isUnit_constOne.mul_right_cancel h_inv)
 
 /-! ### The cuspidal function attached to `η` -/
@@ -220,15 +279,30 @@ lemma conj_moebius : ∀ c : SimClass k, conj (moebius c) = moebius c := by
 @[simp]
 lemma greenCuspidal_mul_constOne : greenCuspidal k η * constOne = -brauerLift k η := by
   -- It suffices that `greenCuspidal k η = -(moebius * brauerLift k η)`; multiply by `constOne`.
-  suffices greenCuspidal k η + moebius * brauerLift k η = 0 by grind [moebius_mul_constOne]
+  suffices h : greenCuspidal k η + moebius * brauerLift k η = 0 by
+    have h1 := congrArg (· * constOne) h
+    rw [add_mul, zero_mul, mul_comm moebius, mul_assoc, moebius_mul_constOne, mul_one] at h1
+    exact eq_neg_of_add_eq_zero_left h1
   ext _ g
   -- `β = brauerLift k η` is additive, `β (g|W) + β (g|V/W) = β g`, so the sum factors as
   -- `β g * ∑ W, moebius (g|W) = 0`.
   trans brauerLift k η (simClassOf g) * ∑ W : StableSubspace g, moebius (simClassOf W.endOnSub)
-  · simp [← sum_add_distrib, mul_sum, greenCuspidal, mul_simClassOf, finsum_eq_sum_of_fintype]
+  · simp only [add_apply, greenCuspidal, mul_simClassOf, finsum_eq_sum_of_fintype, mulMoebius,
+      constOne, mul_one, ← sum_add_distrib, mul_sum]
     refine sum_congr rfl fun W _ ↦ ?_
-    simp [← charpoly_endOnSub_mul_endOnQuot _ W, field, charpoly_monic, Monic.ne_zero, aroots_mul]
-  · simp +contextual [← g.charpoly_natDegree, sum_moebius_simClassOf_endOnSub, charpoly_monic]
+    have h_add : brauerLift k η (simClassOf W.endOnSub) + brauerLift k η (simClassOf W.endOnQuot) =
+        brauerLift k η (simClassOf g) := by
+      simp only [brauerLift, charpoly_simClassOf, ← charpoly_endOnSub_mul_endOnQuot g W,
+        aroots_mul (mul_ne_zero (charpoly_monic _).ne_zero (charpoly_monic _).ne_zero),
+        Multiset.map_add, Multiset.sum_add]
+    rw [← h_add, add_mul, mul_comm (moebius _)]
+  · rw [sum_moebius_simClassOf_endOnSub, one_apply, dim_simClassOf]
+    split_ifs with h0
+    · have h1 : g.charpoly = 1 :=
+        g.charpoly_monic.natDegree_eq_zero.mp (g.charpoly_natDegree.trans h0)
+      simp only [brauerLift, charpoly_simClassOf, h1, aroots_one, Multiset.map_zero,
+        Multiset.sum_zero, zero_mul, zero_apply]
+    · rw [mul_zero, zero_apply]
 
 /-- The value of `New.Hall.greenCuspidal k η` in dimension zero is zero. -/
 lemma greenCuspidal_eq_zero_of_dim_lt_one (c : SimClass k) :
@@ -242,13 +316,42 @@ lemma isCuspidal_greenCuspidal : (greenCuspidal k η).IsCuspidal := by
   -- Write `δ = blockAverage`, `β = brauerLift k η`. By the Mackey formula `blockAverage_mul`,
   -- `δ C_η = δ (β moebius) * δ 𝟙`, a sum over stable subspaces of `a` and of `b`.
   rw [← simClassOf_out a, ← simClassOf_out b, greenCuspidal, blockAverage_mul]
-  -- By `blockAverage_mulMoebius` and additivity of `β`,
-  -- `δ (β moebius) = β moebius ⊗ moebius + moebius ⊗ β moebius`. Each of the two parts has a factor
-  -- `∑ W, moebius (c|W) = 1 c` with `c = a` or `c = b`, which is `0` as `c.dim ≠ 0`.
-  -- `-simClassOf_out`: otherwise `simp` undoes the first rewrite, which wrote `a`, `b` as classes
-  simp_all [blockAverage, -simClassOf_out, charpoly_prodMap, mul_add, ← mul_sum, ← sum_mul,
-    mul_assoc, mul_simClassOf, finsum_eq_sum_of_fintype, charpoly_monic, Monic.ne_zero,
-    aroots_mul, sum_add_distrib, sum_moebius_simClassOf_endOnSub]
+  have h_const_avg (c : SimClass k) : constOne.blockAverage c = constOne := by
+    funext d; simp only [blockAverage, constOne, finMean_const]
+  have h_one_a : (1 : Hall k) (simClassOf a.out.2) = 0 := by
+    rw [simClassOf_out, one_apply, ite_eq_right ha]
+  have h_one_b : (1 : Hall k) (simClassOf b.out.2) = 0 := by
+    rw [simClassOf_out, one_apply, ite_eq_right hb]
+  have h_brauer_prod (c d : SimClass k) :
+      brauerLift k η (simClassOf (d.out.snd.prodMap c.out.snd)) =
+        brauerLift k η d + brauerLift k η c := by
+    conv_rhs => rw [← simClassOf_out d, ← simClassOf_out c]
+    simp only [brauerLift, charpoly_simClassOf, charpoly_prodMap,
+      aroots_mul (mul_ne_zero (charpoly_monic _).ne_zero (charpoly_monic _).ne_zero),
+      Multiset.map_add, Multiset.sum_add]
+  simp only [h_const_avg, mul_simClassOf, finsum_eq_sum_of_fintype, constOne, mul_one,
+    blockAverage_mulMoebius, h_brauer_prod, mul_add, sum_add_distrib]
+  have h1 : ∑ A : StableSubspace a.out.2, ∑ B : StableSubspace b.out.2,
+      moebius (simClassOf A.endOnSub) * moebius (simClassOf B.endOnSub) *
+        brauerLift k η (simClassOf B.endOnSub) = 0 := by
+    have : ∀ A : StableSubspace a.out.2,
+        ∑ B : StableSubspace b.out.2, moebius (simClassOf A.endOnSub) *
+          moebius (simClassOf B.endOnSub) * brauerLift k η (simClassOf B.endOnSub) =
+        moebius (simClassOf A.endOnSub) * ∑ B : StableSubspace b.out.2,
+          moebius (simClassOf B.endOnSub) * brauerLift k η (simClassOf B.endOnSub) :=
+      fun A ↦ by simp only [mul_assoc, ← mul_sum]
+    simp only [this, ← sum_mul, sum_moebius_simClassOf_endOnSub, h_one_a, zero_mul]
+  have h2 : ∑ A : StableSubspace a.out.2, ∑ B : StableSubspace b.out.2,
+      moebius (simClassOf A.endOnSub) * moebius (simClassOf B.endOnSub) *
+        brauerLift k η (simClassOf A.endOnSub) = 0 := by
+    have : ∀ A : StableSubspace a.out.2,
+        ∑ B : StableSubspace b.out.2, moebius (simClassOf A.endOnSub) *
+          moebius (simClassOf B.endOnSub) * brauerLift k η (simClassOf A.endOnSub) =
+        (moebius (simClassOf A.endOnSub) * brauerLift k η (simClassOf A.endOnSub)) *
+          ∑ B : StableSubspace b.out.2, moebius (simClassOf B.endOnSub) :=
+      fun A ↦ by rw [mul_sum]; exact sum_congr rfl fun _ _ ↦ by ring
+    simp only [this, sum_moebius_simClassOf_endOnSub, h_one_b, mul_zero, sum_const_zero]
+  rw [h1, h2, add_zero]
 
 end New.Hall
 
@@ -331,8 +434,19 @@ lemma Hall.IsCuspidal.exists_charpoly_eq_pow {F : Hall k} (h_cusp : IsCuspidal F
     obtain ⟨y, rfl⟩ := surjective_of_injective sylvester_inj x
     refine simClassOf_eq_of_equiv
       (.skewProd (quotKerEquivRange _) 1 y ≪≫ₗ prodEquivOfIsCompl _ _ hN.symm) ?_
-    simp [Submodule.Quotient.forall, sylvester, endOnSub, endOnQuot, C, comm g (fun _ ↦ rfl)]
-    intros
+    rintro ⟨q, ⟨c, hc⟩⟩
+    obtain ⟨v, rfl⟩ := Submodule.Quotient.mk_surjective C.val q
+    have h_comm : g ((aeval g P ^ N) v) = (aeval g P ^ N) (g v) := comm g (fun _ ↦ rfl) v
+    simp only [LinearEquiv.trans_apply, LinearEquiv.skewProd_apply, blockTriangularEnd,
+      LinearMap.coprod_apply, LinearMap.prod_apply, Function.prod_apply, LinearMap.zero_apply,
+      Prod.mk_add_mk, endOnQuot, endOnSub, sylvester, Submodule.mapQ_apply, restrict_apply,
+      add_zero]
+    change (aeval g P ^ N) (g v) +
+        ((g (y (Submodule.Quotient.mk v)) -
+          (y (Submodule.Quotient.mk (g v))).val + g c) +
+          (y (Submodule.Quotient.mk (g v))).val) =
+      g ((aeval g P ^ N) v + (c + (y (Submodule.Quotient.mk v)).val))
+    rw [_root_.map_add, _root_.map_add, h_comm]
     abel
   -- The block average of `F` at `(a, b)` is thus `F g ≠ 0`, forcing `C = ⊤` (`C = ⊥` is excluded).
   refine ⟨P, _, hP_irred, charpoly_eq_pow_of_isNilpotent hP_irred hP_monic ⟨N, ?_⟩⟩
@@ -363,7 +477,12 @@ lemma greenCuspidal_simClassOf_eq_mul {a : ℂ}
   -- By `aroots_pow_eq_frobenius_orbit`, the roots of `P ^ j` are the Frobenius orbit of any one
   -- root `z`.
   have h_root (z : K) (hz : aeval z g.charpoly = 0) : a * η z = η' z := by
-    grind [aroots_pow_eq_frobenius_orbit, pow_ne_zero, charpoly_natDegree]
+    have hzP : aeval z P = 0 := by
+      rw [hg, map_pow] at hz
+      exact eq_zero_of_pow_eq_zero hz
+    obtain ⟨h_ar, h_frob⟩ := aroots_pow_eq_frobenius_orbit (j := j) hP hzP
+    rw [← hg, charpoly_natDegree] at h_ar h_frob
+    exact h_scale z h_ar h_frob
   -- `greenCuspidal k η` reads `η` only at eigenvalues of restrictions to stable subspaces `W`.
   have h_terms (W : StableSubspace g) (z : K) (hz : z ∈ (charpoly W.endOnSub).aroots K) :
       η' z = a * η z := by
@@ -378,8 +497,9 @@ lemma greenCuspidal_simClassOf_eq_mul {a : ℂ}
       ∑ W : StableSubspace g,
         (Multiset.map (fun x ↦ a * η x) ((charpoly W.endOnSub).aroots K)).sum *
           moebius (simClassOf W.endOnSub) by
-    simpa [greenCuspidal, mul_simClassOf, mulMoebius, Finset.mul_sum, ← mul_assoc,
-      ← sum_map_mul_left, finsum_eq_sum_of_fintype] using h_sum_eq
+    simpa only [greenCuspidal, mul_simClassOf, finsum_eq_sum_of_fintype, mulMoebius, brauerLift,
+      charpoly_simClassOf, constOne, mul_one, Finset.mul_sum, ← mul_assoc, ← sum_map_mul_left]
+      using h_sum_eq
   refine Finset.sum_congr rfl fun W _ ↦ ?_
   rw [Multiset.map_congr rfl (h_terms W)]
 
@@ -493,7 +613,8 @@ lemma moebius_and_greenCuspidal_lsmul (η : K → ℂ) :
     rw [sum_comm]
     refine Finset.sum_eq_zero fun v _ ↦ ?_
     -- The span `U` of `v` is a stable subspace other than `V`, as `j < m`.
-    let U : StableSubspace g := ⟨(span F (.range v)).restrictScalars k, by aesop⟩
+    let U : StableSubspace g :=
+      ⟨(span F (.range v)).restrictScalars k, fun _ hx ↦ Submodule.smul_mem _ z.gen hx⟩
     have hU_ne : (U : Submodule k V) ≠ ⊤ := by simp [U, mt finrank_le_of_span_eq_top, hj]
     have h_le_iff (W : StableSubspace g) :
         span F (.range v) ≤ S W ↔ (U : Submodule k V) ≤ W := Iff.rfl
@@ -522,12 +643,12 @@ lemma moebius_and_greenCuspidal_lsmul (η : K → ℂ) :
         Multiset.sum_nsmul]
     -- `moebius` is inverse to `constOne`; expand the product over `W` and compare with `M'(1)`.
     have h_cusp : greenCuspidal k η = -brauerLift k η * moebius := by
-      grind [moebius_mul_constOne, greenCuspidal_mul_constOne η]
-    -- `h_brauer` is applied before `simp` unfolds `brauerLift` (hence `↓`).
-    simp [M, h_cusp, ↓h_brauer, derivative_monomial, mul_sum, mul_simClassOf,
-      finsum_eq_sum_of_fintype, eval_finsetSum]
-    -- The two sums agree term by term up to the order of the factors.
-    ac_rfl
+      rw [← mul_one (greenCuspidal k η), ← moebius_mul_constOne, mul_comm moebius, ← mul_assoc,
+        greenCuspidal_mul_constOne]
+    simp only [M, h_cusp, mul_simClassOf, finsum_eq_sum_of_fintype, Hall.neg_apply, h_brauer,
+      map_sum, derivative_monomial, eval_finsetSum, eval_monomial, one_pow, mul_one, mul_sum,
+      neg_mul]
+    exact sum_congr rfl fun W _ ↦ by ring
 
 /-- Let F = k[z] have Q elements and let V be an F-space of dimension d. At multiplication by z
 on V, μ = 𝟙⁻¹ takes the value N(0), where N = ∏_{0≤i<d} (X − Q^i). -/
@@ -621,7 +742,7 @@ lemma exists_conj_mulLeft_eq {L : Type*} [Field L] [Finite L] [Algebra k L] {g :
   let V : Type _ := AEval' g
   have : Fact (Irreducible P) := ⟨hP⟩
   have : Module.Finite k (AdjoinRoot P) := (AdjoinRoot.powerBasis hP.ne_zero).finite
-  have : Finite V := inferInstanceAs (Finite L)
+  have : Finite V := ‹Finite L›
   let _ : Module (AdjoinRoot P) V := IsTorsionBy.module (LinearMap.congr_fun h_aeval)
   have : IsScalarTower k (AdjoinRoot P) V := IsTorsionBySet.isScalarTower _
   have tower_V := finrank_mul_finrank k (AdjoinRoot P) V
@@ -668,20 +789,28 @@ lemma rankInner_greenCuspidal_mulMoebius {L : Type*} [Field L] [Finite L] [Algeb
     -- centraliser of `y`; compare with the right side term by term.
     have h_card_ne : (Nat.card Lˣ : ℂ) ≠ 0 := by simp
     -- Multiplication by `y` on `L` is the action of the generator of the field `k⟮y⟯`.
-    have h_mulLeft : mulLeft k y = Algebra.lsmul k k L (adjoin.powerBasis (integral k y)).gen := rfl
-    have h_gen : (adjoin.powerBasis (integral k y)).gen = AdjoinSimple.gen k y := rfl
+    let pb := adjoin.powerBasis (integral k y)
+    have h_mulLeft : mulLeft k y = Algebra.lsmul k k L pb.gen := rfl
+    have h_gen : pb.gen = AdjoinSimple.gen k y := rfl
     rw [eq_div_iff h_card_ne, cls_conj, Nat.card_units, h_mulLeft,
-      mulMoebius_greenCuspidal_lsmul (adjoin.powerBasis (integral k y)), h_gen, minpoly_gen,
+      mulMoebius_greenCuspidal_lsmul pb, h_gen, minpoly_gen,
       ← (splits _ y).map_aroots_algebraMap, Multiset.map_map,
       ← sum_mk _ (nodup_roots (.map (separable k y))), sum_mul]
     refine sum_subset_zero_on_sdiff le_top (fun z hz ↦ ?_) fun z hz ↦ ?_
     · -- If `z` is not a root of `minpoly k y`, no `ρ e z` is `ρ a y`.
       have h_aeval_ne (e : L ≃ₗ[k] L) :
           aeval (ρ e z) (minpoly k y) ≠ aeval (ρ a y) (minpoly k y) := by
-        simp_all [aeval_algHom_apply, ne_zero_of_finite]
+        rw [aeval_algHom_apply, aeval_algHom_apply, minpoly.aeval, map_zero]
+        intro h_eq
+        have h_zero : aeval z (minpoly k y) = 0 := by
+          have h1 := LinearMap.congr_fun h_eq (e 1)
+          change e (aeval z (minpoly k y) * e.symm (e 1)) = 0 at h1
+          rw [e.symm_apply_apply, mul_one] at h1
+          exact (EmbeddingLike.map_eq_zero_iff (f := e)).mp h1
+        exact (mem_sdiff.mp hz).2 (mem_aroots.mpr ⟨ne_zero_of_finite k y, h_zero⟩)
       have h_ne (e : L ≃ₗ[k] L) : ρ e z ≠ ρ a y :=
         ne_of_apply_ne (fun f ↦ aeval f (minpoly k y)) (h_aeval_ne e)
-      simp [h_ne]
+      simp only [h_ne, Nat.card_eq_fintype_card, Fintype.card_eq_zero, Nat.cast_zero, mul_zero]
     · -- If `y = c z`, then `e ↦ a * e * c` maps the centraliser of `y` onto the `e` with
       -- `ρ e z = ρ a y`.
       obtain ⟨-, h_root⟩ : minpoly k y ≠ 0 ∧ aeval z (minpoly k y) = 0 := mem_aroots.mp hz
