@@ -42,6 +42,30 @@ Notions from other files:
 
 noncomputable section
 
+private lemma New.Shape.besselIndexEquiv_bijective (𝔰 : Shape) :
+    Function.Bijective
+      (Sum.elim (fun i : Fin 𝔰.ϱ ↦ Sum.inr (⟨i, by omega⟩ : Fin (2 * 𝔰.ϱ + 1)))
+        (Sum.elim (Sum.elim Sum.inl fun _ : Unit ↦ Sum.inr ⟨𝔰.ϱ, by omega⟩)
+          fun i : Fin 𝔰.ϱ ↦ Sum.inr ⟨2 * 𝔰.ϱ - i, by omega⟩) :
+        𝔰.BesselIndex → 𝔰.κ ⊕ Fin (2 * 𝔰.ϱ + 1)) := by
+  rw [Fintype.bijective_iff_injective_and_card]
+  refine ⟨?_, ?_⟩
+  · rintro (i | (x | ⟨⟩) | i) (j | (y | ⟨⟩) | j) h <;>
+      simp only [Sum.elim_inl, Sum.elim_inr, Sum.inl.injEq, Sum.inr.injEq, Fin.mk.injEq,
+        reduceCtorEq] at h
+    · exact congrArg Sum.inl (Fin.ext h)
+    · omega
+    · omega
+    · exact congrArg (Sum.inr ∘ Sum.inl ∘ Sum.inl) h
+    · omega
+    · rfl
+    · omega
+    · omega
+    · omega
+    · exact congrArg (Sum.inr ∘ Sum.inr) (Fin.ext (by omega))
+  · simp
+    omega
+
 /-- The bijection from κ plus a string of length 2ϱ + 1 to the basis indices
 `New.Shape.BesselIndex`: κ goes to the x_i, and the string index a goes to e_a if a < ϱ, to z if
 a = ϱ and to e*_{2ϱ−a} if a > ϱ (e and e* numbered from 0). -/
@@ -49,12 +73,9 @@ def New.Shape.besselIndexEquiv (𝔰 : Shape) : 𝔰.κ ⊕ Fin (2 * 𝔰.ϱ + 1
   -- The inverse sends `e_i` to `i`, keeps `κ`, sends `z` to `ϱ` and `e*_i` to `2 ϱ - i`.
   Equiv.symm <|
     Equiv.ofBijective
-        (Sum.elim (fun i ↦ Sum.inr ⟨i, by grind⟩)
-          (Sum.elim (Sum.elim Sum.inl fun _ ↦ Sum.inr ⟨𝔰.ϱ, by grind⟩) fun i ↦
-            Sum.inr ⟨2 * 𝔰.ϱ - i, by grind⟩)) <| by
-      -- an injection between finite sets of the same size
-      simp [↓Fintype.bijective_iff_injective_and_card, Function.Injective]
-      grind
+        (Sum.elim (fun i ↦ Sum.inr ⟨i, by omega⟩)
+          (Sum.elim (Sum.elim Sum.inl fun _ ↦ Sum.inr ⟨𝔰.ϱ, by omega⟩) fun i ↦
+            Sum.inr ⟨2 * 𝔰.ϱ - i, by omega⟩)) (by exact 𝔰.besselIndexEquiv_bijective)
 
 namespace New.Data
 
@@ -65,13 +86,17 @@ variable {P : Parameters} (D : Data P) (ϑ : D.TameChar) (j : ℕ) {s : D.RowInd
 
 /-! ### Sizes and places -/
 
-/-- The number ϱ lies between m/4 and m, so that `exp (logX / 2 - 4) ≤ ϱ ≤ exp (logX / 2 + 2)`;
-`u` chooses between the upper and the lower bound. -/
-instance {u : Bool} : D.HasLogBound u D.ϱ (D.logX / 2 + (if u then 2 else -4)) := by
+private lemma hasLogBound_ϱ {u : Bool} :
+    D.HasLogBound u D.ϱ (D.logX / 2 + (if u then 2 else -4)) := by
   have h_mem : (D.ϱ : ℝ) ∈ Set.Icc (D.m / 4 : ℝ) D.m := by
     have h_nat : D.m ≤ 4 * D.ϱ ∧ D.ϱ ≤ D.m := by grind [ten_thousand_le_m]
     simpa [field] using mod_cast h_nat
   exact .of_mem_Icc (D.m / 4) D.m h_mem (by cases u <;> grind [D.scale_inequalities])
+
+/-- The number ϱ lies between m/4 and m, so that `exp (logX / 2 - 4) ≤ ϱ ≤ exp (logX / 2 + 2)`;
+`u` chooses between the upper and the lower bound. -/
+instance {u : Bool} : D.HasLogBound u D.ϱ (D.logX / 2 + (if u then 2 else -4)) :=
+  D.hasLogBound_ϱ
 
 /-- A place w of the modulus Q of ϑ, or the conjugate of one, divides the product `ϑ.normQ` of
 the norms of the places of Q, and divides neither π̄₀π̄₁ (`D.piM`) nor the level N. -/
@@ -89,6 +114,27 @@ lemma normQ_mem_and_notMem_of_mem_Q (hw : w ∈ ϑ.Q ∨ star w ∈ ϑ.Q) :
   exact ⟨h_mem, fun h ↦ h_notMem (mul_mem_right _ _ (mul_mem_right _ _ h)),
     fun h ↦ h_notMem (mul_mem_left _ _ h)⟩
 
+private lemma levelPlaces_apart :
+    IsConjApart (Sum.elim D.chosenPlace ((↑) : ϑ.Q → FinPlace D.E)) where
+  injective := by
+    have h_ne (x : Σ i : Fin 2, D.ChosenPlace i) (u : ϑ.Q) : D.chosenPlace x ≠ u := fun h ↦
+      (D.normQ_mem_and_notMem_of_mem_Q ϑ (.inl u.prop)).2.1 (h ▸ x.2.prop.1)
+    exact D.isConjApart_chosenPlace.injective.sumElim Subtype.val_injective h_ne
+  star_ne := by
+    rintro (x | u) (y | v) h
+    · exact D.isConjApart_chosenPlace.star_ne x y h
+    · dsimp only [Sum.elim_inl, Sum.elim_inr] at h
+      have h' : D.chosenPlace x = star (v : FinPlace D.E) := by rw [← h, star_star]
+      have hx : D.piM ∈ (D.chosenPlace x).asIdeal := x.2.prop.1
+      exact (D.normQ_mem_and_notMem_of_mem_Q ϑ (.inr (by rw [star_star]; exact v.prop))).2.1
+        (h' ▸ hx)
+    · dsimp only [Sum.elim_inl, Sum.elim_inr] at h
+      have hy : D.piM ∈ (D.chosenPlace y).asIdeal := y.2.prop.1
+      exact (D.normQ_mem_and_notMem_of_mem_Q ϑ (.inr (by rw [star_star]; exact u.prop))).2.1
+        (h ▸ hy)
+    · dsimp only [Sum.elim_inr] at h
+      exact ϑ.star_notMem u u.prop (h ▸ v.prop)
+
 /-- The system of places (`New.LevelPlaces`) formed by the chosen places above p₀, p₁ and the places
 of the modulus Q of ϑ. -/
 def levelPlaces : LevelPlaces D.E where
@@ -98,14 +144,7 @@ def levelPlaces : LevelPlaces D.E where
   twistPlace := (↑)
   -- A chosen place contains `D.piM`; by `normQ_mem_and_notMem_of_mem_Q` a place of `ϑ.Q` or
   -- its conjugate does not.
-  apart :=
-    { injective := by
-        have h_ne (x : Σ i : Fin 2, D.ChosenPlace i) (u : ϑ.Q) : D.chosenPlace x ≠ u := by
-          grind [→ normQ_mem_and_notMem_of_mem_Q, Data.chosenPlace]
-        exact D.isConjApart_chosenPlace.injective.sumElim Subtype.val_injective h_ne
-      star_ne := by
-        grind [D.isConjApart_chosenPlace.star_ne, → normQ_mem_and_notMem_of_mem_Q, Data.chosenPlace,
-          ϑ.star_notMem, star_star] }
+  apart := by exact D.levelPlaces_apart ϑ
 
 /-- The modulus `ϖ^c Q` if `b` is `true` (the default) and `ϖ^c` if `b` is `false`. Here `ϖ` is the
 product of the chosen places above p₀, p₁, and `Q` is the product of the places of the modulus of
@@ -287,10 +326,18 @@ abbrev principalForms : Submodule ℂ (V.Form (typeKernel D.paramW s)) :=
   levelSpace (V.formRep (typeKernel D.paramW s)) (levelOf D.chosenPlace ⊥)
     (MonoidHom.comp 1 (levelOf.reduction D.chosenPlace ⊥))
 
+private lemma principalRep_conj (g : D.chosenGL) (x : (⊥ : Subgroup D.chosenGL)) :
+    ∃ hx : (MonoidHom.id D.chosenGL g)⁻¹ * x * MonoidHom.id D.chosenGL g ∈ (⊥ : Subgroup D.chosenGL),
+      (1 : (⊥ : Subgroup D.chosenGL) →* ℂ) ⟨_, hx⟩ = (1 : (⊥ : Subgroup D.chosenGL) →* ℂ) x := by
+  have hx1 : (x : D.chosenGL) = 1 := Subgroup.mem_bot.1 x.2
+  exact ⟨by rw [MonoidHom.id_apply, hx1, mul_one, inv_mul_cancel]; exact Subgroup.one_mem _, rfl⟩
+
 /-- The complex representation of 𝖦 = ∏ GL_r(𝔽_w), over the chosen places w, on the forms on V of
 principal level: an element acts through an integral lift with the given reductions. -/
 def principalRep : Representation ℂ D.chosenGL (D.principalForms V) :=
-  levelRep (V.formRep (typeKernel D.paramW s)) 1 (MonoidHom.id D.chosenGL) (by simp)
+  levelRep (A := ℂ) (S := D.chosenGL) (w := D.chosenPlace) (H := (⊥ : Subgroup D.chosenGL))
+    (π := V.formRep (typeKernel D.paramW s)) (χ := (1 : (⊥ : Subgroup D.chosenGL) →* ℂ))
+    (MonoidHom.id D.chosenGL) (by exact D.principalRep_conj)
 
 /-- The good forms on V: the image of the idempotent e₀ of ℂ[𝖦] acting on forms of principal
 level at the chosen places above p₀, p₁. -/
@@ -439,8 +486,16 @@ lemma thetaKernelY_omega_pointDatumY_eq_smul {k : stdLevel D.E (D.Y j)}
     (modDatum_vacVector (D.spaceY j) (D.spaceY (j + 1)) _).symm
   -- The tame part of the character is trivial away from the level places, so on integral points
   -- the character of the determinant is the product of the tame parts at the level places.
-  have h_tame : ∀ u ∉ Set.range (D.levelPlaces ϑ).placeAt, chainTamePart ϑ j u = 1 :=
-    (D.descentPair (TameChar.pow ϑ (j + 1)) (j + 1)).tame_eq_one
+  have h_tame : ∀ u ∉ Set.range (D.levelPlaces ϑ).placeAt, chainTamePart ϑ j u = 1 := by
+    intro u hu
+    simp only [levelPlaces, LevelPlaces.placeAt, Set.mem_range, Sum.exists, Sum.elim_inl,
+      Sum.elim_inr, not_exists, not_or] at hu
+    have h1 : ¬D.IsChosen u := fun hch ↦ by
+      have : u ∈ Set.range D.chosenPlace := by rw [range_chosenPlace]; exact hch
+      obtain ⟨x, hx⟩ := this
+      exact hu.1 x hx
+    have h2 : u ∉ (TameChar.pow ϑ (j + 1)).Q := fun h ↦ hu.2 ⟨u, h⟩ rfl
+    simp [chainTamePart, liftTamePart, h1, (TameChar.pow ϑ (j + 1)).tamePart_eq_one u h2]
   have h_char :
       pairChar (rankTwist (D.chainChar ϑ (j + 1)) (D.Y j))
           (rankTwist (D.chainChar ϑ (j + 1)) (D.Y (j + 1)))
@@ -481,18 +536,31 @@ instance hasGap_signsY_paramW :
     (toHCParam (n := D.RowIndex) (D.signsY 0) (D.paramW v)).HasGap D.gap :=
   D.hasGap_gridParam v false 0 0 0
 
+private lemma hasGap_paramW_gap :
+    ∀ a b : D.RowIndex, D.signsW j a ≠ D.signsW j b →
+      2 * (D.gap : ℤ) ≤ |toHCParam (D.signsW j) (D.paramW v) a -
+        toHCParam (D.signsW j) (D.paramW v) b| := by
+  intro a b hab
+  simp only [toHCParam, paramW, signsW] at hab ⊢
+  have hgap : D.gap = 2 * D.halfGap := rfl
+  have hk : 0 < D.k := D.k_pos
+  have hpr : D.posRank j = D.k + j - 1 := rfl
+  split_ifs at hab with ha hb
+  · exact absurd rfl hab
+  · have h1 := D.targetParameter_add_liftWeight_le_neg_halfGap v (by omega : D.posRank j ≤ (D.basisNumber a : ℕ))
+    have h2 := D.halfGap_le_targetParameter_add_liftWeight v (by omega : (D.basisNumber b : ℕ) < D.posRank j)
+    rw [abs_of_nonpos (by omega)]
+    omega
+  · have h1 := D.halfGap_le_targetParameter_add_liftWeight v (by omega : (D.basisNumber a : ℕ) < D.posRank j)
+    have h2 := D.targetParameter_add_liftWeight_le_neg_halfGap v (by omega : D.posRank j ≤ (D.basisNumber b : ℕ))
+    rw [abs_of_nonneg (by omega)]
+    omega
+  · exact absurd rfl hab
+
 /-- At each infinite place, the doubled target parameter 2ς is a parameter of gap h for the signs
 `New.Data.signsW` of W_j. -/
 instance hasGap_paramW : (toHCParam (D.signsW j) (D.paramW v)).HasGap D.gap :=
-  { D.hasGap_signsY_paramW v with
-    gap := by
-      -- Entries of `targetParameter` at indices of opposite sign lie on either side of `-w_j`, at
-      -- least `D.halfGap` from it.
-      have h_far (p : ℕ) :
-          if p < D.posRank j then D.halfGap ≤ D.targetParameter v p + D.liftWeight j v
-          else D.targetParameter v p + D.liftWeight j v ≤ -D.halfGap :=
-        D.targetParameter_add_liftWeight_gap j v p
-      grind [paramW, signsW] }
+  { D.hasGap_signsY_paramW v with gap := by exact D.hasGap_paramW_gap j v }
 
 variable {s : D.RowIndex → ℤˣ}
 
@@ -507,11 +575,19 @@ theorem isCuspKernel_typeKernel_paramW [hs : ∀ v : D.Φ, (toHCParam s (D.param
   rw [gapThreshold, card_rowIndex, gap]
   omega
 
+private lemma finite_principalForms [∀ v : D.Φ, (toHCParam s (D.paramW v)).HasGap D.gap]
+    (V : Space D.E D.RowIndex s) : Module.Finite ℂ (D.principalForms V) := by
+  have h : D.principalForms V =
+      levelSpace (V.formRep (typeKernel D.paramW s)) (levelOf D.chosenPlace ⊥) 1 := by
+    rw [principalForms, MonoidHom.one_comp]
+  rw [h]
+  exact V.finite_levelSpace D.isCuspKernel_typeKernel_paramW ⟨levelOf D.chosenPlace ⊥, isOpen_levelOf⟩
+
 variable [∀ v : D.Φ, (toHCParam s (D.paramW v)).HasGap D.gap] in
 /-- If at each infinite place 2ς is a parameter of gap h for the signs s of V, the forms on V of
 parameter ς and principal level at the chosen places make up a finite-dimensional space. -/
 instance {V : Space D.E D.RowIndex s} : Module.Finite ℂ (D.principalForms V) :=
-  V.finite_levelSpace D.isCuspKernel_typeKernel_paramW ⟨levelOf D.chosenPlace ⊥, isOpen_levelOf⟩
+  D.finite_principalForms V
 
 end RowKernel
 
@@ -561,12 +637,19 @@ lemma isHCParam_paramY : IsHCParam D.columnsY (D.lastEntry D.m) (D.paramY D.m) :
   · -- The entry `y` of the target parameter; the summand indexed by `Fin 0` is empty.
     simp [paramY, gridParam, h_even]
     by_cases h_head : y + 1 < D.k
-    · exact ⟨y, by grind [D.k_le_n D.m], (ite_eq_left h_head).symm⟩
+    · have hk := D.k_le_n D.m
+      exact ⟨y, by omega, (ite_eq_left h_head).symm⟩
     · obtain ⟨i, rfl⟩ : ∃ i : ℕ, y = D.k - 1 + i := Nat.exists_eq_add_of_le (by omega)
-      have hi : i < D.m := by grind [D.r_add_one]
-      exact ⟨D.n i - 1, by grind [D.n_pos i, h_rank i hi], (D.sortedParamY_n_sub_one i τ).symm⟩
+      have hr : D.r + 1 = D.k + D.m := D.r_add_one
+      have hy' : D.k - 1 + i < D.r := by simpa using hy
+      have hi : i < D.m := by omega
+      have hnp : 0 < D.n i := D.n_pos i
+      have hri := h_rank i hi
+      exact ⟨D.n i - 1, by omega, (D.sortedParamY_n_sub_one i τ).symm⟩
   · -- Entry `b` of block `l + 1`.
-    refine ⟨D.n l + b, by grind [h_rank l l.isLt], ?_⟩
+    have hrl := h_rank l l.isLt
+    have hb := b.isLt
+    refine ⟨D.n l + b, by omega, ?_⟩
     rw [D.sortedParamY_block l τ b.isLt]
     simp [paramY, gridParam, h_even, twiceBlockEntry]
     ring
@@ -609,6 +692,26 @@ lemma negCount_signsW (j : D.LiftIndex) : negCount (D.signsW j) = D.m - j := by
   rw [negCount, Fintype.card_subtype, D.card_filter_basisNumber _ _ h_neg le_rfl, posRank]
   omega
 
+private lemma colsPlus_descentPair_eq_zero (ϑ : D.TameChar) (τ : D.Φ) (j : D.LiftIndex) {i : ℕ}
+    (hi : D.posRank j < i) : (D.descentPair ϑ j).colsPlus τ i = 0 := by
+  dsimp only [descentPair]
+  rw [Int.toNat_eq_zero]
+  have h_le := D.targetParameter_add_liftWeight_le_neg_halfGap (j := j) τ (by omega : D.posRank j ≤ i - 1)
+  have h_gap : D.k + D.t + 1 ≤ D.halfGap := D.k_add_t_add_one_le_halfGap
+  omega
+
+private lemma colsMinus_descentPair_eq_zero (ϑ : D.TameChar) (τ : D.Φ) (j : D.LiftIndex) {i : ℕ}
+    (hi : D.m - j < i) : (D.descentPair ϑ j).colsMinus τ i = 0 := by
+  dsimp only [descentPair]
+  rw [Int.toNat_eq_zero]
+  have hr : D.r + 1 = D.k + D.m := D.r_add_one
+  have hk : 0 < D.k := D.k_pos
+  obtain ⟨hj1, hjm⟩ := j.prop
+  have h_ge := D.halfGap_le_targetParameter_add_liftWeight (j := j) τ
+    (by dsimp only [posRank]; omega : D.r - i < D.posRank j)
+  have h_gap : D.k + D.t + 1 ≤ D.halfGap := D.k_add_t_add_one_le_halfGap
+  omega
+
 /-- Let `ϑ` be a tame character, `τ` an infinite place and `1 ≤ j ≤ m`. The weight at `τ` of the
 forms on the space `V_j` of the `j`-th descent pair, of rank `r + t = card (D.RowIndex ⊕ Fin D.t)`,
 has `columnCount τ i = colsPlus τ i + colsMinus τ (r + t - i)` columns of height `i`. The number of
@@ -618,14 +721,22 @@ lemma sum_Ioo_posRank_columnCount_descentPair (ϑ : D.TameChar) (τ : D.Φ) (j :
     ∑ i ∈ Ioo (D.posRank j) (card (D.RowIndex ⊕ Fin D.t)), (D.descentPair ϑ j).columnCount τ i =
       ∑ i ∈ Ico 1 (card (D.RowIndex ⊕ Fin D.t)), (D.descentPair ϑ j).colsMinus τ i := by
   have h_card : card (D.RowIndex ⊕ Fin D.t) = D.r + D.t := D.card_rowIndex_sum_fin
+  have hr : D.r + 1 = D.k + D.m := D.r_add_one
+  have hj := j.prop
+  have ht := D.t_odd.pos
   calc ∑ i ∈ Ioo (D.posRank j) (card (D.RowIndex ⊕ Fin D.t)), (D.descentPair ϑ j).columnCount τ i
     _ = ∑ i ∈ Ico 1 (card (D.RowIndex ⊕ Fin D.t)),
           (D.descentPair ϑ j).colsMinus τ (D.r + D.t - i) := by
-      refine sum_subset_zero_on_sdiff (by grind) (fun i hi ↦ ?_) fun i hi ↦ ?_
+      refine sum_subset_zero_on_sdiff (by
+        intro i hi; simp only [mem_Ioo, mem_Ico] at hi ⊢; dsimp only [posRank] at hi; omega)
+        (fun i hi ↦ ?_) fun i hi ↦ ?_
       · -- For `i ≤ D.posRank j` the count `colsMinus` vanishes at height `r + t - i`.
-        grind [descentPair]
+        simp only [mem_sdiff, mem_Ico, mem_Ioo, not_and, not_lt] at hi
+        exact D.colsMinus_descentPair_eq_zero ϑ τ j (by dsimp only [posRank] at hi; omega)
       · -- For `D.posRank j < i` the count `colsPlus` vanishes at height `i`.
-        grind [descentPair]
+        simp only [mem_Ioo] at hi
+        rw [DescentPair.columnCount, mixedWeight, h_card,
+          D.colsPlus_descentPair_eq_zero ϑ τ j hi.1, zero_add]
     _ = ∑ i ∈ Ico 1 (card (D.RowIndex ⊕ Fin D.t)), (D.descentPair ϑ j).colsMinus τ i := by
       rw [sum_Ico_reflect ((D.descentPair ϑ j).colsMinus τ) 1 h_card.le.step, h_card]
       simp
@@ -646,49 +757,86 @@ lemma hcParameter_descentPair (ϑ : D.TameChar) (τ : D.Φ) (j : D.LiftIndex) {p
           else if p < D.posRank j + D.t then D.t / 2 - (p - D.posRank j)
           else D.targetParameter τ (p - D.t) + D.liftWeight j τ : ℤ) := by
   have h_card : card (D.RowIndex ⊕ Fin D.t) = D.r + D.t := D.card_rowIndex_sum_fin
+  have hr : D.r + 1 = D.k + D.m := D.r_add_one
+  have hk : 0 < D.k := D.k_pos
+  obtain ⟨hj1, hjm⟩ := j.prop
+  have ht := D.t_odd.pos
+  have h_odd : D.t % 2 = 1 := Nat.odd_iff.1 D.t_odd
   let a : ℕ := D.posRank j
+  have ha_def : a = D.k + j - 1 := rfl
   let ℓ (p : ℕ) : ℤ :=
     if p < a then D.targetParameter τ p + D.liftWeight j τ
     else if p < a + D.t then D.t / 2 - (p - a)
     else D.targetParameter τ (p - D.t) + D.liftWeight j τ
   let L (p : ℕ) : ℤ := D.r - 2 * a + 2 * ℓ p
-  have ha : a < card (D.RowIndex ⊕ Fin D.t) := by grind [j.prop, D.t_odd.pos, D.r_add_one]
+  have ha : a < card (D.RowIndex ⊕ Fin D.t) := by omega
   -- The columns of `descentPair` are defined as the steps of the list `L`.
   have h_step (p : ℕ) (hp : p + 1 < card (D.RowIndex ⊕ Fin D.t)) :
       L p = L (p + 1) + 2 * (D.descentPair ϑ j).columnCount τ (p + 1) + 2 := by
+    have hp' : p + 1 < D.r + D.t := hp.trans_eq h_card
     -- Entries `ς_q + w` are at least `halfGap` for `q < a` and at most `-halfGap` otherwise, and
     -- `t / 2 < halfGap`. This decides each maximum, minimum and positive part in the column counts.
-    have h_far (q : ℕ) : if q < a then D.halfGap ≤ D.targetParameter τ q + D.liftWeight j τ
-        else D.targetParameter τ q + D.liftWeight j τ ≤ -D.halfGap :=
-      D.targetParameter_add_liftWeight_gap j τ q
     have h_gap : D.k + D.t + 1 ≤ D.halfGap := D.k_add_t_add_one_le_halfGap
-    have h_columnCount : (D.descentPair ϑ j).columnCount τ (p + 1) =
-        (D.descentPair ϑ j).colsPlus τ (p + 1) +
-          (D.descentPair ϑ j).colsMinus τ (D.r + D.t - (p + 1)) := by
-      grind
-    rw [h_columnCount]
+    rw [DescentPair.columnCount, mixedWeight, h_card]
     by_cases h_above : p < a
     · -- Only `colsPlus` counts: the step from `ς_p + w` to `ς_{p+1} + w` or to the string.
-      have h_anti : D.targetParameter τ (p + 1) < D.targetParameter τ p :=
-        D.targetParameter_strictAnti τ p.lt_add_one
-      have h_minus : (D.descentPair ϑ j).colsMinus τ (D.r + D.t - (p + 1)) = 0 := by
-        grind [descentPair]
-      rw [h_minus]
-      grind [descentPair]
-    have h_plus : (D.descentPair ϑ j).colsPlus τ (p + 1) = 0 := by grind [descentPair]
-    rw [h_plus]
-    -- Only `colsMinus` counts: inside the string there are no columns, and below it the step is to
-    -- `ς_{p+1-t} + w` from the string or `ς_{p-t} + w`.
-    have h_anti : D.targetParameter τ (p - D.t + 1) < D.targetParameter τ (p - D.t) :=
-      D.targetParameter_strictAnti τ (p - D.t).lt_add_one
-    grind [descentPair]
+      have h_minus : (D.descentPair ϑ j).colsMinus τ (D.r + D.t - (p + 1)) = 0 :=
+        D.colsMinus_descentPair_eq_zero ϑ τ j (by omega)
+      rw [h_minus, add_zero]
+      dsimp only [L, ℓ, descentPair]
+      have hp1_sub : p + 1 - 1 = p := Nat.add_sub_cancel p 1
+      rw [hp1_sub, ite_eq_left h_above]
+      by_cases h_next : p + 1 < a
+      · rw [ite_eq_left h_next]
+        have h_anti : D.targetParameter τ (p + 1) < D.targetParameter τ p :=
+          D.targetParameter_strictAnti τ p.lt_add_one
+        have h_ge := D.halfGap_le_targetParameter_add_liftWeight (j := j) τ h_next
+        omega
+      · have h_pa : p + 1 = a := by omega
+        rw [ite_eq_right h_next, ite_eq_left (by omega : p + 1 < a + D.t)]
+        have h_ge := D.halfGap_le_targetParameter_add_liftWeight (j := j) τ h_above
+        have h_le := D.targetParameter_add_liftWeight_le_neg_halfGap (j := j) τ (by omega : D.posRank j ≤ p + 1)
+        omega
+    · have h_plus : (D.descentPair ϑ j).colsPlus τ (p + 1) = 0 :=
+        D.colsPlus_descentPair_eq_zero ϑ τ j (by omega)
+      rw [h_plus, zero_add]
+      dsimp only [L, ℓ, descentPair]
+      rw [ite_eq_right h_above, ite_eq_right (by omega : ¬p + 1 < a)]
+      by_cases h_str : p + 1 < a + D.t
+      · rw [ite_eq_left (by omega : p < a + D.t), ite_eq_left h_str]
+        have h_zero : (D.targetParameter τ (D.r - (D.r + D.t - (p + 1)) - 1) ⊓
+            (-D.liftWeight j τ - ↑(D.t / 2)) -
+            D.targetParameter τ (D.r - (D.r + D.t - (p + 1))) - 1).toNat = 0 := by
+          rw [Int.toNat_eq_zero]
+          have h_idx : D.r - (D.r + D.t - (p + 1)) < D.posRank j := by
+            dsimp only [posRank]; omega
+          have h_ge := D.halfGap_le_targetParameter_add_liftWeight (j := j) τ h_idx
+          omega
+        omega
+      · rw [ite_eq_right h_str]
+        have h_idx2 : D.r - (D.r + D.t - (p + 1)) = p + 1 - D.t := by omega
+        rw [h_idx2]
+        by_cases h_edge : p < a + D.t
+        · rw [ite_eq_left h_edge]
+          have h_idx1 : p + 1 - D.t - 1 < D.posRank j := by dsimp only [posRank]; omega
+          have h_ge := D.halfGap_le_targetParameter_add_liftWeight (j := j) τ h_idx1
+          have h_le := D.targetParameter_add_liftWeight_le_neg_halfGap (j := j) τ
+            (by dsimp only [posRank]; omega : D.posRank j ≤ p + 1 - D.t)
+          omega
+        · rw [ite_eq_right h_edge]
+          have h_sub : p + 1 - D.t - 1 = p - D.t := by omega
+          rw [h_sub]
+          have h_anti : D.targetParameter τ (p + 1 - D.t) < D.targetParameter τ (p - D.t) :=
+            D.targetParameter_strictAnti τ (by omega : p - D.t < p + 1 - D.t)
+          have h_le := D.targetParameter_add_liftWeight_le_neg_halfGap (j := j) τ
+            (by dsimp only [posRank]; omega : D.posRank j ≤ p - D.t)
+          omega
   have h_agree : L a =
       hcParameter (D.descentPair ϑ j).columnCount (D.descentPair ϑ j).detExp
         (card (D.RowIndex ⊕ Fin D.t)) τ a := by
     -- The columns above height `a` cancel the exponent `detExp`.
-    have h_odd : D.t % 2 = 1 := Nat.odd_iff.1 D.t_odd
     have hL : L a = D.r - 2 * a + 2 * (D.t / 2) := by
-      simp [L, ℓ, D.t_odd.pos]
+      simp [L, ℓ, ht]
     rw [hL, hcParameter, diagramWeight_apply, sum_Ioo_posRank_columnCount_descentPair,
       DescentPair.detExp, h_card]
     omega
@@ -774,7 +922,10 @@ lemma isParam_paramV (ϑ : D.TameChar) (τ : D.Φ) (j : D.LiftIndex) :
   refine ⟨?_, ?_, fun x ↦ by rw [sign_descentCentres, one_mul, Pi.one_apply]⟩
   · rw [card_rowIndex_sum_fin, CentreSystem.rank, h_stem]
     simp [descentCentres, gridCentres]
-  · have h_posRank : D.posRank j ≤ D.r := by grind [j.prop, D.r_add_one]
+  · have h_posRank : D.posRank j ≤ D.r := by
+      obtain ⟨hj1, hjm⟩ := j.prop
+      have hr : D.r + 1 = D.k + D.m := D.r_add_one
+      dsimp only [posRank]; omega
     have h_card : card (D.RowIndex ⊕ Fin D.t) = D.r + D.t := D.card_rowIndex_sum_fin
     let shift (y : ℤ) : ℤ := y - 2 * (D.m - j + D.liftWeight j τ - D.r / 2) + 1
     have h_image : univ.image (shift ∘ (D.descentPair ϑ j).paramV τ) =
@@ -801,11 +952,13 @@ lemma isParam_paramV (ϑ : D.TameChar) (τ : D.Φ) (j : D.LiftIndex) :
         · refine ⟨p, by omega, ?_⟩
           rw [D.hcParameter_descentPair_sub ϑ τ j (by omega), ite_eq_left h_above]
         · refine ⟨p + D.t, by omega, ?_⟩
-          rw [D.hcParameter_descentPair_sub ϑ τ j (by omega)]
-          grind
+          rw [D.hcParameter_descentPair_sub ϑ τ j (by omega),
+            ite_eq_right (by omega : ¬p + D.t < D.posRank j),
+            ite_eq_right (by omega : ¬p + D.t < D.posRank j + D.t), Nat.add_sub_cancel]
       · refine ⟨D.posRank j + b, by omega, ?_⟩
-        rw [D.hcParameter_descentPair_sub ϑ τ j (by omega)]
-        grind
+        rw [D.hcParameter_descentPair_sub ϑ τ j (by omega),
+          ite_eq_right (by omega : ¬D.posRank j + b < D.posRank j),
+          ite_eq_left (by omega : D.posRank j + b < D.posRank j + D.t), Nat.add_sub_cancel_left]
 
 /-- Let `ϑ` be a tame character and 1 ≤ j ≤ m. The doubled parameter 2ς = `D.paramW` on W_j (signs
 `D.signsW j`) and the doubled parameter `paramV` of the j-th descent pair `D.descentPair ϑ j` on V_j
@@ -818,17 +971,23 @@ lemma paramsCorrespond_descentPair (ϑ : D.TameChar) (j : D.LiftIndex) :
       D.paramW (D.descentPair ϑ j).paramV (D.signsW j) 1 := by
   intro τ
   let u : ℤ := D.m - j + D.liftWeight j τ - D.r / 2
-  have : 500 * (D.r + (D.r + D.t)) ^ 3 + D.t + 2 ≤ D.gap := D.nat_le_of_hasLogBound
+  have h_gap : 500 * (card D.RowIndex + card (D.RowIndex ⊕ Fin D.t)) ^ 3 ≤ D.gap - D.t - 2 := by
+    have h_size : 500 * (D.r + (D.r + D.t)) ^ 3 + D.t + 2 ≤ D.gap := D.nat_le_of_hasLogBound
+    rw [card_rowIndex_sum_fin, card_rowIndex]
+    omega
   -- Insert the block of the centre `-w_j`, then raise the first weight by `u`.
   have h_rule : IsBlockRule _ _ (toHCParam (D.signsW j) (D.paramW τ))
       (toHCParam 1 fun x ↦ (D.descentPair ϑ j).paramV τ x - 2 * u) :=
     (D.isParam_paramW τ j).isBlockRule_insert_of_down (D.isParam_paramV ϑ τ j) rfl
       ((D.isSeparated_gridCentres τ false).subset (singleton_subset_iff.2
         (by simpa [gridCentres] using Nat.sub_one_lt_of_le j.prop.1 j.prop.2)))
-      (empty_subset _) (mem_singleton_self _) (notMem_empty _)
-      (by grind [card_rowIndex_sum_fin, card_rowIndex]) rfl
-  rw [show (negCount (D.signsW j) : ℤ) = -D.liftWeight j τ + card D.RowIndex / 2 + u by
-    grind [negCount_signsW, card_rowIndex]]
+      (empty_subset _) (mem_singleton_self _) (notMem_empty _) h_gap rfl
+  have h_weight : (negCount (D.signsW j) : ℤ) = -D.liftWeight j τ + card D.RowIndex / 2 + u := by
+    have := j.prop.2
+    rw [negCount_signsW, card_rowIndex]
+    dsimp only [u]
+    omega
+  rw [h_weight]
   simpa [descentCentres_centre, add_comm] using h_rule.shift u 0
 
 /-- The doubled parameter 2ς = `D.paramW` on W_j fits the j-th descent pair (W_j, V_j), that is:
@@ -840,31 +999,44 @@ lemma paramsCorrespond_descentPair (ϑ : D.TameChar) (j : D.LiftIndex) :
 lemma fitsParams_descentPair (ϑ : D.TameChar) (j : D.LiftIndex) :
     (D.descentPair ϑ j).FitsParams D.paramW := by
   let a : ℕ := D.posRank j
+  have hk : 0 < D.k := D.k_pos
+  obtain ⟨hj1, hjm⟩ := j.prop
   refine ⟨D.paramsCorrespond_descentPair ϑ j, fun τ c ↦ ?_, fun τ i hi ↦ ?_, fun τ i hi ↦ ?_⟩
   · -- As ς decreases, the vectors that precede c are those of its sign with a smaller number
     -- (sign 1) or a larger number (sign -1).
-    dsimp [descentPair, signsW]
+    dsimp only [descentPair, signsW]
     split
-    · have h_count :
+    · next h =>
+      have hc : a ≤ (D.basisNumber c : ℕ) := by dsimp only [a, posRank]; omega
+      have h_count :
           #{x : D.RowIndex | a ≤ D.basisNumber x ∧ D.basisNumber c < D.basisNumber x} =
             D.r - (D.basisNumber c + 1) :=
-        D.card_filter_basisNumber _ _ (by grind) le_rfl
+        D.card_filter_basisNumber _ _ (fun x ↦ by
+          have hx := (D.basisNumber x).isLt
+          simp only [mem_Ico, Fin.lt_def]; omega) le_rfl
       simpa [a, paramW_lt_iff, tsub_tsub, add_comm] using h_count.symm
-    · have h_count : #{x : D.RowIndex | D.basisNumber x < a ∧ D.basisNumber x < D.basisNumber c} =
+    · next h =>
+      have hpr : a = D.k + j - 1 := rfl
+      have hc : (D.basisNumber c : ℕ) < a := by omega
+      have h_count : #{x : D.RowIndex | D.basisNumber x < a ∧ D.basisNumber x < D.basisNumber c} =
           D.basisNumber c :=
-        D.card_filter_basisNumber 0 _ (by grind) (D.basisNumber c).isLt.le
+        D.card_filter_basisNumber 0 _ (fun x ↦ by
+          simp only [mem_Ico, Nat.zero_le, true_and]
+          exact ⟨fun h' ↦ h'.2, fun h' ↦ ⟨h'.trans hc, h'⟩⟩) (D.basisNumber c).isLt.le
       simpa [a, paramW_lt_iff, lt_tsub_iff_right] using h_count.symm
   · -- There are `a` vectors of sign 1; above that height `ς_(i-1)` is at most `(t - 1) / 2 - w_j`.
     have h_card : Fintype.card {c : D.RowIndex // D.signsW j c = 1} = a := by
-      grind [D.card_filter_basisNumber 0 a, signsW, units_ne_neg_self, Fintype.card_subtype]
-    have h_above : a < i := h_card.symm.trans_lt hi
-    simp only [descentPair, Int.toNat_eq_zero]
-    grind
+      have h_pos (x : D.RowIndex) : D.signsW j x = 1 ↔ (D.basisNumber x : ℕ) ∈ Ico 0 a := by
+        simp only [signsW, mem_Ico, Nat.zero_le, true_and, a]
+        split_ifs with hx
+        · simp [not_lt.2 hx]
+        · exact ⟨fun _ ↦ lt_of_not_ge hx, fun _ ↦ rfl⟩
+      have h_a : a ≤ D.r := by have := D.r_add_one; dsimp only [a, posRank]; omega
+      rw [Fintype.card_subtype, D.card_filter_basisNumber 0 a h_pos h_a, Nat.sub_zero]
+    exact D.colsPlus_descentPair_eq_zero ϑ τ j (h_card.symm.trans_lt hi)
   · -- There are `m - j` vectors of sign -1; above that height `ς_(r-i)` is at least
     -- `-w_j - (t - 1) / 2`.
-    have h_above : D.m - j < i := (D.negCount_signsW j).symm.trans_lt hi
-    simp only [descentPair, Int.toNat_eq_zero]
-    grind
+    exact D.colsMinus_descentPair_eq_zero ϑ τ j ((D.negCount_signsW j).symm.trans_lt hi)
 
 end Parameters
 
