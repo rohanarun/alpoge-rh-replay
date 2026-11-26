@@ -802,7 +802,8 @@ lemma Comparison.pull_push (β : c.functor ⋙ G ⟶ G') (γ : F ⟶ G) (γ' : F
 @[simp]
 lemma Comparison.id_pull : (id F).pull α = H.map F α := by
   ext n x
-  simp [mapExactFunctor_restrictAlong_id, x.comp_mk₀_id, pull, H.map, H.push, mapExtAddHom]
+  change H.map F α n ((x.mapExactFunctor (restrictAlong (𝟭 C))).comp (mk₀ (𝟙 F)) rfl) = _
+  rw [mapExactFunctor_restrictAlong_id, x.comp_mk₀_id]
 
 /-- The composite of comparisons (φ,β) from F to F' and (φ',β') from F' to F'': the functor φ∘φ'
 with the map Fφφ' → F'φ' → F''. -/
@@ -824,8 +825,9 @@ namespace Comparison
 
 /-- The comparison map of `(𝟭 C, β)` along the identity of `N` is the push-forward along `β`. -/
 lemma pull_id_eq_push : pull ⟨𝟭 C, β⟩ (𝟙 N) n = push N β n := by
-  ext
-  simp [mapExactFunctor_restrictAlong_id, pull, H.map, H.push, mapExtAddHom]
+  ext x
+  change H.map _ (𝟙 N) n (push N β n (x.mapExactFunctor (restrictAlong (𝟭 C)))) = _
+  rw [mapExactFunctor_restrictAlong_id, H.map_id]
 
 /-- For `η : φ ⟶ ψ` and `β : ψ ⋙ F ⟶ F'`, moving `η` from the coefficient map (`η F` before
 `β`) to the source map (`η N` after `α`) does not change the comparison map. The target of `α` is
