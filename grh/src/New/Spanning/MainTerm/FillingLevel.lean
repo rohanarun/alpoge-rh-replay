@@ -154,9 +154,10 @@ lemma ratToInf_weylElem (p : ℕ → Eˣ) (v : InfinitePlace E) :
   -- `basisScale` multiplies the entries on the pair of floor `a` by `S.frameScaleSq v a` or by its
   -- inverse, and keeps the others.
   ext i j
+  simp only [ratToInf_apply, weylElem, weylOn, Matrix.of_apply, Units.isUnit, and_true, and_self]
   rcases j with a | (a | a) | a
   all_goals
-    simp [weylElem, weylOn, BesselIndex.level, basisScale, frameScaleSq, unitOrOne, two_mul,
+    simp [BesselIndex.level, basisScale, frameScaleSq, unitOrOne, two_mul,
       pow_add, Nat.add_sub_assoc, Nat.Prime.ne_zero]
     split_ifs with hi
     · simp [field, ← Complex.ofReal_pow, hi, Nat.Prime.ne_zero]
@@ -489,8 +490,9 @@ theorem isMulLeftInvariant_haar_inv [P : IntegralPlace (LocProd T)] :
       (volume (stdLevel E 𝔰.BesselIndex : Set (Gf E 𝔰.BesselIndex)) •
         (haar (G := (S.latticeMiddle (LocProd T)).G)).inv).IsMulLeftInvariant := by
     rw [← h_int]
-    exact isMulLeftInvariant_measure_smul_inv volume haar (h_pr.comp hc).measurable
-      hX.measurableSet h_lift P.measurableSet_unitaryLevel
+    have hπ : Measurable π := (h_pr.comp hc).measurable
+    exact isMulLeftInvariant_measure_smul_inv volume haar (π := π) hπ hX.measurableSet
+      h_lift P.measurableSet_unitaryLevel
   simpa using h_inv
 
 section
