@@ -245,7 +245,9 @@ lemma isAnalyticFamily_of_continuousAt_of_differentiableAt [R1Space K] {f : E �
     have h_diff : DifferentiableOn ℂ (fun z : ℂ ↦ f (e.symm (z, (e y).2)) k)
         (closedBall (e p).1 r) :=
       fun z hz ↦ (h_diff_at (z, (e y).2) (max_le hz hx) k).comp_differentiableWithinAt z
-        (f := fun z ↦ e.symm (z, (e y).2)) (by fun_prop)
+        (f := fun w ↦ e.symm (w, (e y).2))
+        ((e.symm.differentiableAt.comp z
+          (differentiableAt_id.prodMk (differentiableAt_const (e y).2))).differentiableWithinAt)
     simpa [hH, G, ringInverse_apply_of_isUnit (h_unit (e y).1 hw), u, param] using
       integral_cauchyKernel_circleMap hw h_diff
 
