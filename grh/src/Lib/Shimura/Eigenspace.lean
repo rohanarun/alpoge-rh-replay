@@ -357,6 +357,8 @@ lemma IsEigenQuotient.exists_sum_baseChange_eq_zero_of_jump_eq_zero [Fintype ι]
     have h_pair : Λ (tensorAction ℂ_[ℓ] (toGp g) (ρ i g) (∑ k, e k ⊗ₜ[ℤ_[ℓ]] x k)) z =
         Λ ((cyclotomicGp (toGp g) ^ (-u)).val • ∑ k, e k ⊗ₜ[ℤ_[ℓ]] x k) z :=
       congrArg (fun y' ↦ Λ y' z) (hy g)
+    -- Only the underlying form and its transformation law matter in this calculation.
+    generalize (z.val) = form at hg h_pair ⊢
     simpa [Λ, hg, Finset.smul_sum, tensorAction] using h_pair
   -- Every linear form on `ℂ_ℓ ⊗ V i` is the pairing with some form.
   refine (forall_dual_apply_eq_zero_iff ℂ_[ℓ] _).1 fun φ ↦ ?_
