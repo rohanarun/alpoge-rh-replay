@@ -29,6 +29,31 @@ that nothing needs compiling. `lake exe mathlib/cache get` fetches Mathlib alone
 A change to the sources, `lakefile.toml`, `lake-manifest.json` or `lean-toolchain` gives different
 build inputs; `lake exe cache get` then says that no cache matches.
 
+## Independent source build
+
+Start in the repository root of a fresh checkout with no project build outputs. The following
+commands fetch Mathlib's compiled dependencies and compile the readable RH project locally.
+
+```sh
+cd grh
+lake exe mathlib/cache get &&
+  LAKE_ARTIFACT_CACHE=false LEAN_ABORT_ON_PANIC=1 lake --no-cache build &&
+  lake env lean scripts/PrintAxioms.lean
+```
+
+The qualified `mathlib/cache` executable fetches the import closure of Mathlib. On the build
+command, `--no-cache` disables Lake's package build-cache downloads and `LAKE_ARTIFACT_CACHE=false`
+disables local Lake artifact reuse. The freshly fetched Mathlib build outputs remain available.
+The unqualified `lake exe cache get` in the development workflow above also restores compiled
+RH modules and can satisfy the entire project build from cache.
+
+For a separate statement and proof check on Linux with Bubblewrap installed, run
+`lake comparator` from the same `grh/` directory with its checked-in `comparator.json`.
+When using elan, add the selected toolchain's binaries to `PATH` if Comparator cannot find
+`nanoda_bin` (`export PATH="$(dirname "$(elan which lean)"):$PATH"`).
+Report the source-build outcome, the axioms printed for each of the five theorems,
+and the Comparator outcome separately, including any step you skipped.
+
 ## Baseline
 
 When no record matches, `python3 scripts/ci-cache-get.py --baseline origin/main` (after

@@ -23,7 +23,7 @@ Baseline build times, with the Mathlib cache, both editions at once on 128 cores
 
 **Where the time goes (current `main`):** a from-scratch build is about 590s on 128 cores, and about 573s of that is one critical path of 35 modules. Only files on that path change wall time. The next-longest path is about 458s, so gains flatten out past that point.
 
-1. **Verify.** Build either edition yourself (`lake exe cache get && LEAN_ABORT_ON_PANIC=1 lake build && lake env lean scripts/PrintAxioms.lean`) and run `lake comparator` against its `Challenge.lean` + `comparator.json`. Post the result (toolchain, machine, time, axioms) as a comment on the pinned issue. Independent confirmations matter most.
+1. **Verify.** For the readable edition in this repository, follow the [independent source build](grh/CACHE.md#independent-source-build) in a fresh checkout. Volunteers can also verify the [compact edition in its own repository](https://github.com/lsernau/grh-lean/tree/72fead102f663d5c7a407964a13dc0cf9d977207/grh-compact). Post the edition, commit, toolchain, machine, build time, five axiom lists, and Comparator outcome on the [coordination issue](https://github.com/rohanarun/alpoge-rh-replay/issues/35052).
 2. **Port to Lean v4.37.0-rc1** (Mathlib tag `v4.37.0-rc1`, commit `31ce06ea`). Breakages found so far:
    - root-level `one_apply` / `mul_apply` now shadow `Matrix.` / `ArithmeticFunction.` ones, so qualify them;
    - `padicValNat` lemmas are deprecated in favour of `multiplicity`;
