@@ -88,11 +88,21 @@ def thickeningOver.oneSubMu :
         map_one' := by simp
         -- `(1 - mulMu s) * (1 - mulMu t) = 1 - mulMu (s + t)`, as
         -- `mulMu s * mulMu t = mulMu (proj (mulMu s) * t) = 0`.
-        map_mul' := by simp [mul_sub, ← mulMu_proj_mul, proj_mulMu, sub_sub] }
+        map_mul' := by
+          intro s t
+          change 1 - mulMu c (s.toAdd + t.toAdd) =
+            (1 - mulMu c s.toAdd) * (1 - mulMu c t.toAdd)
+          have hsquare : mulMu c s.toAdd * mulMu c t.toAdd = 0 := by
+            rw [← mulMu_proj_mul c (mulMu c s.toAdd) t.toAdd, proj_mulMu, zero_mul, map_zero]
+          rw [map_add, mul_sub, mul_one, sub_mul, one_mul, hsquare, sub_zero, sub_sub] }
   naturality c d f := by
     refine ext fun t ↦ Gm.ext.2 (.symm ?_)
     change thickeningOver.map f (1 - mulMu c t.1) = 1 - mulMu d (genericOver.map f t.1)
-    rw [map_sub, map_one, map_mulMu]
+    calc
+      _ = 1 - thickeningOver.map f (mulMu c t.1) :=
+        ((PadicTest.mapThickening f).toRingHom.map_sub 1 _).trans
+          (congrArg (· - thickeningOver.map f (mulMu c t.1)) (PadicTest.mapThickening f).map_one)
+      _ = _ := congrArg (1 - ·) (map_mulMu c d f t.1)
 
 /-- On `p`-adic tests the sequence `0 → T → Bˣ → Tˣ → 0` is short exact: its first map is
 `t ↦ 1 - μ t` (`New.Variety.thickeningOver.oneSubMu`), its second is induced on units by the
@@ -107,13 +117,19 @@ lemma thickeningOver.shortExact_oneSubMu :
   · -- `1 - μ s = 1 - μ t` forces `s = t`.
     exact congrArg ULift.up (h_inj c (sub_right_injective (Gm.ext.mp h_eq)))
   · -- Exactness applied to `1 - u`: the units with image `1` are those of the form `1 - mulMu t`.
-    have : Nonempty (genericOver (k := k) |>.obj c) := ⟨0⟩
-    have : Nonempty (PadicTest.genericAlg.obj c) := ⟨0⟩
+    have hproj : proj c (1 - u.val) = 1 - proj c u.val :=
+      (c.thickeningProj.map_sub 1 u.val).trans (congrArg (· - proj c u.val) c.thickeningProj.map_one)
     have h_one : proj c u.val = 1 ↔ ∃ t, 1 - mulMu c t = u.val := by
-      simpa [sub_eq_zero.trans eq_comm, eq_comm.trans sub_eq_iff_comm] using h_exact c (1 - u.val)
-    refine .trans ?_ ULift.exists.symm
-    -- `using!`: `Gm.map` of `proj` and `oneSubMu` agree with `h_one` only after unfolding.
-    simpa [Gm.ext] using! h_one
+      calc
+        _ ↔ proj c (1 - u.val) = 0 := by rw [hproj, sub_eq_zero]; exact eq_comm
+        _ ↔ ∃ t, mulMu c t = 1 - u.val := h_exact c (1 - u.val)
+        _ ↔ _ := exists_congr fun _ ↦ eq_comm.trans sub_eq_iff_comm
+    constructor
+    · intro h
+      obtain ⟨t, ht⟩ := h_one.mp (Gm.ext.mp h)
+      exact ⟨⟨t⟩, Gm.ext.mpr ht⟩
+    · rintro ⟨⟨t⟩, ht⟩
+      exact Gm.ext.mpr (h_one.mpr ⟨t, Gm.ext.mp ht⟩)
   · -- A lift `b` of the unit `u` is a unit, as the kernel has square zero.
     obtain ⟨b, hb⟩ : ∃ b : thickeningOver.obj c, proj c b = u.val := h_surj c u.val
     have h_unit : IsUnit b := (IsNilpotent.isUnit_quotient_mk_iff ⟨2, c.ker_thickeningProj_sq⟩).mp
