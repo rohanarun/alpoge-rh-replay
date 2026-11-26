@@ -167,12 +167,26 @@ lemma exists_add_eq_of_interlace {N : ℕ} (hN : 0 < N)
       simp only [d, diagramWeight_eq_add_succ τ hq_lt,
         diagramWeight_eq_add_succ τ (Nat.succ_lt_succ hq_lt)]
       lia
-    simp only [γ, κ₁, add_tsub_cancel_right]
-    grind [hd τ q, hd τ (q + 1)]
+    have h1 := hd τ q (by omega)
+    have h2 : 0 ≤ d τ (q + 1) ∧ d τ (q + 1) ≤ κ τ (q + 2) := hd τ (q + 1) hq_lt
+    have h1n : ((d τ q).toNat : ℤ) = d τ q := Int.toNat_of_nonneg h1.1
+    have h2n : ((d τ (q + 1)).toNat : ℤ) = d τ (q + 1) := Int.toNat_of_nonneg h2.1
+    have h1_le : (d τ q).toNat ≤ κ τ (q + 1) := by omega
+    simp only [γ, κ₁, add_tsub_cancel_right, min_eq_right h1_le]
+    change κ₀ τ (q + 1) = (d τ q).toNat + (κ τ (q + 2) - (d τ (q + 1)).toNat)
+    omega
   · have h_diff : d τ (N - 1) = e₀ τ - e τ := by
-      simp (disch := lia) [d, diagramWeight_eq_zero_of_le_succ]
-    simp only [κ₁]
-    grind [hd τ (N - 1)]
+      change e₀ τ + diagramWeight (fun _ : Φ ↦ N) κ₀ (τ, N - 1) -
+        (e τ + diagramWeight (fun _ : Φ ↦ N + 1) κ (τ, N - 1 + 1)) = e₀ τ - e τ
+      rw [diagramWeight_eq_zero_of_le_succ _ (by omega),
+        diagramWeight_eq_zero_of_le_succ _ (by omega)]
+      omega
+    have h1 := hd τ (N - 1) (by omega)
+    rw [show N - 1 + 1 = N by omega] at h1
+    have h1n : ((d τ (N - 1)).toNat : ℤ) = d τ (N - 1) := Int.toNat_of_nonneg h1.1
+    have h1_le : (d τ (N - 1)).toNat ≤ κ τ N := by omega
+    simp only [κ₁, min_eq_right h1_le]
+    omega
 
 end Interlacing
 
@@ -294,7 +308,11 @@ lemma exists_isBranchingPairing [DecidableEq n'] [DecidableEq n] [Nonempty n]
       _ ≤ √(weylNormSq v' * (((M ^ M) ^ 3) ^ 2 * weylNormSq v)) := by
           grw [hb_norm M (by simpa using h_boxes.trans hM) v]
           simp
-      _ = _ := by simp [field, sqrt_sq_eq_abs]
+      _ = _ := by
+          rw [Real.sqrt_mul (weylNormSq_nonneg _), Real.sqrt_mul (sq_nonneg _),
+            Real.sqrt_sq (by positivity)]
+          push_cast
+          ring
   · -- Right translation by `(g, 1)` only changes the linear form that is integrated. By
     -- multiplicity one, the integral over the real points is a multiple of the pairing.
     obtain ⟨c, hc⟩ := integral_algFormCoeff_blockEmb (stdSpace E n) (by simp) hb_uniq
@@ -378,7 +396,7 @@ theorem exists_isLiftWeight_isHCParam :
     simpa [gridSigns_eq_one] using D.paramsCorrespond_grid_succ_left z j D.m hj le_rfl
   have h_mono : StrictMono fun j ↦ card (ι j) :=
     strictMono_nat_of_lt_succ (by simp [ι, card_gridIndex, D.t_odd.pos])
-  have hm : 1 ≤ D.m := D.nat_le_of_hasLogBound
+  have hm : 1 ≤ D.m := by linarith [D.ten_thousand_le_m]
   let κ₁ : ℕ → ℕ := (Set.range fun j ↦ card (ι j)).indicator fun _ ↦ D.gap - D.t - z.toNat
   obtain ⟨κ, h_param, h_above⟩ :
       ∃ κ : D.Φ → ℕ → ℕ,
@@ -400,11 +418,16 @@ theorem exists_isLiftWeight_isHCParam :
     ext τ
     have h_columns : κ τ (card (ι (j + 1))) = D.gap - D.t - z.toNat := by
       simp [h_above τ _ (h_mono j.succ_pos), κ₁]
-    simp only [e, h_columns]
-    -- `D.liftWeight` grows by `D.gap` from `j + 1` to `j + 2`, and half the rank by `D.t + z` in
-    -- two steps.
-    simp only [gridWeight, card_gridIndex, ι]
-    cases z <;> grind
+    have h_w : D.liftWeight (j + 2) τ = D.liftWeight (j + 1) τ + D.gap := D.liftWeight_succ (j + 1) τ
+    have h_sizes : D.k + D.t + 1 ≤ D.halfGap := D.k_add_t_add_one_le_halfGap
+    have h_gap : D.gap = 2 * D.halfGap := rfl
+    have h_card : card (ι (j + 2)) = card (ι j) + 2 * (D.t + z.toNat) := by
+      simp only [ι, card_gridIndex]
+      ring
+    simp only [e, h_columns, gridWeight, h_card, h_w]
+    cases z <;>
+      simp only [Bool.toNat_false, Bool.toNat_true, Bool.not_false, Bool.not_true] at h_card ⊢ <;>
+      omega
   refine ⟨κ, e, h_up, h_next, fun j hj ↦ ?_⟩
   induction j with
   | zero => exact h_param
@@ -604,7 +627,10 @@ theorem lastPathLevel_le_principalLevel (ϑ : D.MFoldTwist) (z : Bool) (j : ℕ)
   rintro _ ⟨k, hk, rfl⟩
   -- `nodeLevel` is trivial or the kernel of the reduction to the modulus of the trivial twist.
   have h_le : nodeLevel ϑ (z, j, D.m) ≤ (GeneralLinearGroup.map (reduceToTriangle ϑ true)).ker := by
-    aesop (add simp nodeLevel)
+    simp only [nodeLevel]
+    split_ifs
+    · exact bot_le
+    · exact le_rfl
   -- Reducing in two steps is reducing modulo the modulus of the trivial twist.
   have h_factor : GeneralLinearGroup.map (reduceToTriangle ϑ true)
       ((gridModulus ϑ).reductionGL k) = (gridModulus 1).reductionGL k :=
@@ -810,21 +836,28 @@ lemma lastPathPairing_lastPathChain_mem_smoothInvariants (S : EdgeTuple ϑ)
     have h_point : lastPathBlockPoint ϑ ((stdSpace D.E (D.LastPathIndex false D.m)).embFin γ * g) =
         (stdSpace D.E (D.LastPathIndex true D.m)).embFin (U.block (D.gridDiagEquiv D.m) (γ, 1)) *
           lastPathBlockPoint ϑ g := by
-      simp [lastPathBlockPoint, ← map_mul, ← block_embFin]
+      simp only [lastPathBlockPoint, ← block_embFin, ← map_mul, Prod.mk_mul_mk, one_mul]
     have h_false := (h_aut γ g).trans (stdSpace_weightRep_apply ..)
     have h_true := (h_aut' (U.block (D.gridDiagEquiv D.m) (γ, 1)) (lastPathBlockPoint ϑ g)).trans
       (stdSpace_weightRep_apply ..)
     dsimp only
     rw [h_point, h_false, h_true]
-    exact (h_equiv D.E ℂ _ γ 1 _ _).trans (by simp)
+    exact (h_equiv D.E ℂ _ γ 1 _ _).trans (by
+      simp only [OneMemClass.coe_one, map_one, _root_.one_zpow, prod_const_one, Units.val_one,
+        one_mul]
+      rfl)
   · -- The stabiliser contains the open intersection of that of the first lift with the
     -- preimage of that of the second under `h ↦ diag(h, 1)`.
     let incl : Gf D.E (D.LastPathIndex false D.m) →* Gf D.E (D.LastPathIndex true D.m) :=
       (U.block (D.gridDiagEquiv D.m)).comp (.inl _ _)
     have h_cont : Continuous incl := by
       change Continuous fun h : Gf D.E (D.LastPathIndex false D.m) ↦
-        (G.blockEmb (s := 1) Sum.elim_one_one.symm ⟨⟨1, h⟩, 1⟩).2
-      fun_prop
+        (G.blockEmb (s := (1 : D.LastPathIndex true D.m → ℤˣ)) (e := D.gridDiagEquiv D.m)
+          Sum.elim_one_one.symm ((1, h), 1)).2
+      exact continuous_snd.comp ((G.isClosedEmbedding_blockEmb
+        (s := (1 : D.LastPathIndex true D.m → ℤˣ))
+        (e := D.gridDiagEquiv D.m) Sum.elim_one_one.symm).continuous.comp
+        ((continuous_const.prodMk continuous_id).prodMk continuous_const))
     refine Subgroup.isOpen_mono (H₁ := rightStabilizer (lastPathChain S false D.m (y false)).val ⊓
       comap incl (rightStabilizer (lastPathChain S true D.m (y true)).val)) ?_
       (.and h_open (h_open'.preimage h_cont))
@@ -859,13 +892,31 @@ lemma IsPathDatum.sum_lastPathPairing_mul_level (hΨ : IsPathDatum N (TwoGridPat
   have h_level : U.block (D.gridDiagEquiv D.m) (u.val, 1) ∈ lastPathLevel ϑ true D.m := by
     refine ⟨⟨_, h_int⟩, ?_, rfl⟩
     -- By `h_red` its residue is `diag(r, 1)`, where `r` is that of `u` and lies in the level.
-    simp_all [Modulus.reductionGL, nodeLevel, m_eq_two_mul_varrho_add_two, Units.ext_iff,
-      ← submatrix_map, fromBlocks_map]
+    have hu_ker : GeneralLinearGroup.map (reduceToTriangle ϑ true) ((gridModulus ϑ).reductionGL u) = 1 := by
+      simpa only [nodeLevel, m_eq_two_mul_varrho_add_two, Bool.not_false, Bool.true_and,
+        Nat.add_eq_zero_iff, OfNat.ofNat_ne_zero, and_false, ↓reduceIte, MonoidHom.mem_ker] using hu
+    simp only [SetLike.mem_coe, Subgroup.mem_comap, nodeLevel, Bool.not_true, Bool.false_eq_true,
+      false_and, ↓reduceIte, MonoidHom.mem_ker, Units.ext_iff, Units.val_one]
+    have hu_val : ((gridModulus ϑ).reductionGL u).val.map (reduceToTriangle ϑ true) = 1 :=
+      congrArg Units.val hu_ker
+    have h_red' : ((gridModulus ϑ).reductionGL
+        ⟨U.block (D.gridDiagEquiv D.m) (u.1, 1), h_int⟩).val =
+        (((gridModulus ϑ).reductionGL u).val.fromBlocks 0 0 1).submatrix (D.gridDiagEquiv D.m).symm
+          (D.gridDiagEquiv D.m).symm := by
+      have hr := congrArg Units.val h_red
+      rw [map_one] at hr
+      exact hr
+    change (((gridModulus ϑ).reductionGL ⟨U.block (D.gridDiagEquiv D.m) (u.1, 1), h_int⟩).val).map
+        (reduceToTriangle ϑ true) = 1
+    rw [h_red', ← submatrix_map, fromBlocks_map, Matrix.map_zero _ (map_zero _),
+      Matrix.map_zero _ (map_zero _), Matrix.map_one _ (map_zero _) (map_one _), hu_val,
+      fromBlocks_one, submatrix_one_equiv]
   -- The family that is `u`, `diag(u, 1)` at `(m, m)` in the two grids and `1` elsewhere.
   let a : ∀ (z : Bool) (j : ℕ), lastPathLevel ϑ z j
     | false => Pi.mulSingle D.m ⟨u.val, u, hu, rfl⟩
     | true => Pi.mulSingle D.m ⟨U.block (D.gridDiagEquiv D.m) (u.val, 1), h_level⟩
-  have ha : (a true D.m).val = U.block (D.gridDiagEquiv D.m) ((a false D.m).val, 1) := by simp [a]
+  have ha : (a true D.m).val = U.block (D.gridDiagEquiv D.m) ((a false D.m).val, 1) := by
+    simp only [a, Pi.mulSingle_eq_same]
   -- The values of the two chains at `g` and at `lastPathBlockPoint ϑ g` are linear images of the
   -- tensors of their data.
   obtain ⟨β, hβ⟩ :=
@@ -875,8 +926,27 @@ lemma IsPathDatum.sum_lastPathPairing_mul_level (hΨ : IsPathDatum N (TwoGridPat
     exists_linearMap_chain_eq_apply_pure (lastPathKernel ϑ true) D.m
       (D.lastPathToAlgForm true (y true))
       (lastPathBlockPoint ϑ g)
-  convert hΨ.sum_lastPathPairing_omega_invariant a ha β β' <;>
-    simp [a, ← hβ, ← hβ', chain_equivariant, hy _, lastPathBlockPoint, ← map_mul]
+  have h_inv := hΨ.sum_lastPathPairing_omega_invariant a ha β β'
+  have h_lhs : ∀ S : EdgeTuple ϑ,
+      (lastPathChain S false D.m (y false)).val (g * u.val) =
+        β (pure (fun j : ℕ ↦ (lastPathKernel ϑ false j).ω ((a false j).val, (a false (j + 1)).val)
+          (lastPathEdgeDatum S false j)) D.m) ∧
+      (lastPathChain S true D.m (y true)).val (lastPathBlockPoint ϑ (g * u.val)) =
+        β' (pure (fun j : ℕ ↦ (lastPathKernel ϑ true j).ω ((a true j).val, (a true (j + 1)).val)
+          (lastPathEdgeDatum S true j)) D.m) := fun S ↦ by
+    have h_pt : lastPathBlockPoint ϑ (g * u.val) =
+        lastPathBlockPoint ϑ g * U.block (D.gridDiagEquiv D.m) (u.1, 1) := by
+      simp only [lastPathBlockPoint, ← map_mul, Prod.mk_mul_mk, mul_one]
+    constructor
+    · rw [← hβ, chain_equivariant (lastPathKernel ϑ false) (hy false) (a false)
+        (lastPathEdgeDatum S false) D.m]
+      simp only [a, Pi.mulSingle_eq_same]; rfl
+    · rw [h_pt, ← hβ', chain_equivariant (lastPathKernel ϑ true) (hy true) (a true)
+        (lastPathEdgeDatum S true) D.m]
+      simp only [a, Pi.mulSingle_eq_same]; rfl
+  refine (Finset.sum_congr rfl fun S _ ↦ ?_).trans (h_inv.trans (Finset.sum_congr rfl fun S _ ↦ ?_))
+  · rw [(h_lhs S).1, (h_lhs S).2]
+  · rw [← hβ, ← hβ']
 
 -- Keeps definitional checks from unfolding the finite sums.
 seal Finset.univ in
@@ -951,9 +1021,12 @@ theorem exists_lastPathPeriod_mem_smul_norm_le {ϑ : D.MFoldTwist} {N : ℕ} {Ψ
       intro a ha β'
       have h_ends : (a D.m).val =
           U.block (D.gridDiagEquiv D.m) ((1 : lastPathLevel ϑ false D.m).val, 1) := by
-        simp [ha, Prod.mk_one_one]
-      simpa [data, Prod.mk_one_one] using hΨ.sum_lastPathPairing_omega_invariant (Bool.rec 1 a)
-        h_ends β β'
+        rw [ha D.m le_rfl, Subgroup.coe_one, Subgroup.coe_one,
+          show ((1 : Gf D.E _), (1 : Gf D.E Unit)) = 1 from rfl, map_one]
+      have h_inv' := hΨ.sum_lastPathPairing_omega_invariant (Bool.rec 1 a) h_ends β β'
+      simp only [Pi.one_apply, OneMemClass.coe_one, Prod.mk_one_one, map_one,
+        one_apply_eq_self] at h_inv'
+      simpa only [LinearMap.smul_apply, smul_eq_mul, data] using h_inv'
     exact h_inv.sum_chain_mem_nsmul (lastPathKernel ϑ true) (fun j hj ↦ h_free true j hj.le)
       (hy true) (IsReached true) (fun S _ ↦ h_step S true) (h_start true)
       fun _ hβ' ↦ h_tuples hβ hβ'
@@ -973,16 +1046,20 @@ theorem exists_lastPathPeriod_mem_smul_norm_le {ϑ : D.MFoldTwist} {N : ℕ} {Ψ
       intro a ha β
       have h_ends : (1 : lastPathLevel ϑ true D.m).val =
           U.block (D.gridDiagEquiv D.m) ((a D.m).val, 1) := by
-        simp [ha, Prod.mk_one_one]
-      simpa [hβ', data, Prod.mk_one_one] using hΨ.sum_lastPathPairing_omega_invariant (Bool.rec a 1)
-        h_ends β β'
+        rw [ha D.m le_rfl, Subgroup.coe_one, Subgroup.coe_one,
+          show ((1 : Gf D.E _), (1 : Gf D.E Unit)) = 1 from rfl, map_one]
+      have h_inv' := hΨ.sum_lastPathPairing_omega_invariant (Bool.rec a 1) h_ends β β'
+      simp only [Pi.one_apply, OneMemClass.coe_one, Prod.mk_one_one, map_one,
+        one_apply_eq_self] at h_inv'
+      simpa only [LinearMap.smul_apply, LinearMap.flip_apply, smul_eq_mul, hβ', data] using h_inv'
     exact h_inv.sum_chain_mem_nsmul (lastPathKernel ϑ false) (fun j hj ↦ h_free false j hj.le)
       (hy false) (IsReached false) (fun S _ ↦ h_step S false) (h_start false) (h_sum_tilde_chain g)
   -- The integrands are smooth and left invariant, so the integral commutes with the sum.
   have h_swap : lastPathPeriod Ψ y = classIntegral stdRatPoints (lastPathLevel ϑ false D.m) fun g ↦
       ∑ S ∈ W, Ψ S * D.lastPathPairing (value false S g) (value true S (lastPathBlockPoint ϑ g)) :=
     (classIntegral_sum W (fun S ↦ .mulLeft (Ψ S)) 1
-      (fun S ↦ lastPathPairing_lastPathChain_mem_smoothInvariants S y) (by simp [value])).symm
+      (fun S ↦ lastPathPairing_lastPathChain_mem_smoothInvariants S y)
+      (fun _ ↦ by simp only [Pi.one_apply, mul_one, value]; rfl)).symm
   have h_count : ∏ z : Bool, ∏ j ∈ range (D.m + (!z).toNat),
       Nat.card (StdClasses (lastPathLevel ϑ z j)) =
         classes true * classes false * Nat.card (StdClasses (lastPathLevel ϑ false D.m)) := by
@@ -1131,9 +1208,33 @@ theorem isProportional_lastPathPeriod (Ψ : ∀ ϑ : D.MFoldTwist, EdgeTuple ϑ 
     -- `erw`, as the grid spaces at `(m, m)` agree with those of `hc` and `hβ` by definition.
     rw [hc, hc, hβ _ _ _ _ (lastPathLevel ϑ false D.m)]
     -- The index at `Y^m_m` cancels, and those in the grid of the `Ỹ` do not depend on the twist.
-    simp [I, γ, lastPathLevel, stdLevelIndex_levelOfSubgroup, levelIndex_eq_card_GL_untwisted,
-      lastPathBlockPoint]
-    field_simp [Subgroup.index_ne_zero_of_finite]
+    have hm_ne : D.m ≠ 0 := by rw [m_eq_two_mul_varrho_add_two]; omega
+    have h_std : (stdLevelIndex (lastPathLevel ϑ false D.m) : ℂ) = levelIndex ϑ false D.m D.m :=
+      congrArg Nat.cast stdLevelIndex_levelOfSubgroup
+    have h_true_m : levelIndex ϑ true D.m D.m = D.levelIndex 1 true D.m D.m := by
+      rw [levelIndex_eq_card_GL_untwisted (.inl rfl), levelIndex_eq_card_GL_untwisted (.inl rfl)]
+    have h_true_0 : levelIndex ϑ true 0 D.m = D.levelIndex 1 true 0 D.m := by
+      rw [levelIndex_eq_card_GL_untwisted (.inl rfl), levelIndex_eq_card_GL_untwisted (.inl rfl)]
+    have h_ne (z : Bool) (i : ℕ) : (levelIndex ϑ z i D.m : ℂ) ≠ 0 :=
+      Nat.cast_ne_zero.2 Subgroup.index_ne_zero_of_finite
+    have h_ne1 : (D.levelIndex 1 true 0 D.m : ℂ) ≠ 0 :=
+      Nat.cast_ne_zero.2 Subgroup.index_ne_zero_of_finite
+    simp only [SetLike.val_smul, Pi.smul_apply, map_smul, LinearMap.smul_apply, smul_eq_mul,
+      classIntegral_const_mul, h_std, h_true_m, h_true_0]
+    change β / levelIndex ϑ false D.m D.m *
+        (c true * D.levelIndex 1 true D.m D.m / D.levelIndex 1 true 0 D.m *
+          (c false * levelIndex ϑ false D.m D.m / levelIndex ϑ false 0 D.m * I S)) =
+      γ / levelIndex ϑ false 0 D.m * I S
+    have h_scalar : β / levelIndex ϑ false D.m D.m *
+        (c true * D.levelIndex 1 true D.m D.m / D.levelIndex 1 true 0 D.m *
+          (c false * levelIndex ϑ false D.m D.m / levelIndex ϑ false 0 D.m)) =
+        γ / levelIndex ϑ false 0 D.m := by
+      dsimp only [γ]
+      rw [Fintype.prod_bool]
+      have h1 : (levelIndex ϑ false D.m D.m : ℂ) ≠ 0 := h_ne false D.m
+      have h2 : (levelIndex ϑ false 0 D.m : ℂ) ≠ 0 := h_ne false 0
+      field_simp
+    rw [← mul_assoc, ← mul_assoc, mul_assoc (β / _), h_scalar]
   -- The index of the level on `Y_m` and `triangleGLCard` differ by the constant `κ`.
   have h_index : γ / levelIndex ϑ false 0 D.m = γ * κ / triangleGLCard false ϑ D.m := by
     have h_order_ne : (triangleGLCard false ϑ D.m : ℂ) ≠ 0 := Nat.cast_ne_zero.2 card_ne_zero
