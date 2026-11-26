@@ -573,7 +573,7 @@ lemma commute_weylOn {p : ℕ → A} (hP : ∀ a : ℕ, P a → a < l) (hs : s �
     sum_eq_single k' (by grind only)
   rw [h_left, h_right]
   -- On an exchanged floor, which is below `l`, the rows and columns of `s` are those of `1`.
-  grind (splits := 20) only [oppositeIndex_involutive_and_floorOf_level]
+  grind only [oppositeIndex_involutive_and_floorOf_level]
 
 @[simp]
 lemma weylElem_zero : (weylElem 0 p : T.G) = 1 := by

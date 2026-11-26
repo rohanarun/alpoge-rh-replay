@@ -399,7 +399,7 @@ protected lemma lt_of_hasLogBound
       clear_aux_decl
       clear * - D
       repeat clear ‹_›
-      grind (splits := 99) [D.scale_inequalities]) :
+      grind [D.scale_inequalities]) :
     F < G :=
   calc F ≤ |F| := le_abs_self F
     _ ≤ exp l := D.hasLogUpper_iff.1 inferInstance
@@ -412,7 +412,7 @@ protected lemma le_of_hasLogBound
       clear_aux_decl
       clear * - D
       repeat clear ‹_›
-      grind (splits := 99) [D.scale_inequalities]) :
+      grind [D.scale_inequalities]) :
     F ≤ G := (D.lt_of_hasLogBound h_exp).le
 
 /-- If natural numbers `A`, `B` satisfy `A ≤ exp l`, `exp l' ≤ B` and `l < l'`, then `A < B`. -/
@@ -421,7 +421,7 @@ lemma nat_lt_of_hasLogBound
       clear_aux_decl
       clear * - D
       repeat clear ‹_›
-      grind (splits := 99) [D.scale_inequalities]) :
+      grind [D.scale_inequalities]) :
     A < B := cast_lt.mp (D.lt_of_hasLogBound h_exp)
 
 /-- If natural numbers `A`, `B` satisfy `A ≤ exp l`, `exp l' ≤ B` and `l < l'`, then `A ≤ B`. -/
@@ -430,7 +430,7 @@ lemma nat_le_of_hasLogBound
       clear_aux_decl
       clear * - D
       repeat clear ‹_›
-      grind (splits := 99) [D.scale_inequalities]) :
+      grind [D.scale_inequalities]) :
     A ≤ B := (D.nat_lt_of_hasLogBound h_exp).le
 
 end

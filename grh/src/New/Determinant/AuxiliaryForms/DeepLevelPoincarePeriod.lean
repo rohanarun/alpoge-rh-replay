@@ -88,7 +88,7 @@ lemma New.Data.abs_targetParameter_sub_lowestKType_le_and_eq {P : Parameters} (D
     | zero => simp
     | succ M ih =>
       rw [Finset.sum_range_succ]
-      grind (splits := 20) [targetParameter_eq]
+      grind [targetParameter_eq]
   -- `entrySign 0 0 i` depends only on the parity of `i`
   have h_sign (i i' : ℕ) : entrySign 0 0 i = entrySign 0 0 i' ↔ i % 2 = i' % 2 := by
     have h_ne : (-1 : ℤˣ) ≠ 1 := by decide

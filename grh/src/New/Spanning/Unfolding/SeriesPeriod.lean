@@ -136,7 +136,7 @@ lemma shift_eq_smul_besselCharMatrix (h : S.Fits V l kw Y η) :
       Nat.Prime.ne_zero, Matrix.one_apply]
     -- Without the context, `grind` is much faster.
     clear * -
-    grind (splits := 20) [map_natCast]
+    grind [map_natCast]
 
 /-- Suppose `V` with the grading `Y` fits the filling data `S`, and let `h.besselChar r` be the
 standard additive character of `E` at `-(M ϖ)⁻¹ σ`. Here `M = S.M`, `ϖ = S.deltaE`, and `σ` is the
