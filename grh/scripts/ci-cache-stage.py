@@ -43,8 +43,7 @@ def main():
     args = parser.parse_args()
     root = args.project.resolve()
     identity = cli.current_identity(root)
-    listed = subprocess.check_output(["git", "-C", str(root), "ls-tree", "-r", "-z", "--name-only", "HEAD:src"],
-                                     text=True).split("\0")
+    listed = cli.source_paths(root, identity["source_tree"])
     names = sorted(path[:-5].replace("/", ".") for path in listed if path.endswith(".lean"))
     lines = args.outputs.read_bytes().splitlines()
     if not lines or cli.decode(lines[0]) != cli.SCHEMA:

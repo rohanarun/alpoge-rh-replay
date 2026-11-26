@@ -102,10 +102,8 @@ def git(root, *args):
     return subprocess.check_output(["git", "-C", str(root), *args], text=True).strip()
 
 
-def source_modules(root, sha):
-    listed = subprocess.check_output(["git", "-C", str(root), "ls-tree", "-r", "-z", "--name-only", f"{sha}:src"],
-                                     text=True).split("\0")
-    paths = [path for path in listed if path]
+def source_modules(root, tree):
+    paths = cli.source_paths(root, tree)
     if not paths or not all(path.endswith(".lean") for path in paths):
         raise ValueError("src must hold Lean files only")
     names = {path[:-5].replace("/", ".") for path in paths}
@@ -155,7 +153,7 @@ def verify(root, sha, staging, work):
         raise ValueError(f"{sha} is not a commit of this checkout")
     identity = cli.identity_at(root, sha, {})
     prefix = toolchain_prefix(identity["toolchain"])
-    names = source_modules(root, sha)
+    names = source_modules(root, identity["source_tree"])
     if staging.is_symlink() or not staging.is_dir() or {path.name for path in staging.iterdir()} != {
             "outputs.jsonl", "modules.jsonl.gz", "artifacts"}:
         raise ValueError("the staging directory must hold exactly outputs.jsonl, modules.jsonl.gz and artifacts/")

@@ -212,7 +212,7 @@ def find_record(identity, fetcher=fetch):
 
 def blob_sha256(root, revision, name, memo):
     """SHA-256 and bytes of a file at a revision, memoised by blob id."""
-    oid = git(root, "rev-parse", "--verify", "--quiet", f"{revision}:{name}", quiet=True)
+    oid = git(root, "rev-parse", "--verify", "--quiet", f"{revision}:./{name}", quiet=True)
     if oid not in memo:
         if git(root, "cat-file", "-t", oid) != "blob" or int(git(root, "cat-file", "-s", oid)) > MAX_JSON:
             raise ValueError(f"expected a bounded file: {name} at {revision}")
@@ -223,7 +223,7 @@ def blob_sha256(root, revision, name, memo):
 
 def identity_at(root, revision, memo):
     """The build inputs of a commit, from Git objects, in the form of current_identity."""
-    tree = git(root, "rev-parse", "--verify", "--quiet", f"{revision}:src", quiet=True)
+    tree = git(root, "rev-parse", "--verify", "--quiet", f"{revision}:./src", quiet=True)
     if not SHA40.fullmatch(tree):
         raise ValueError(f"invalid src Git tree at {revision}")
     return {
@@ -232,6 +232,13 @@ def identity_at(root, revision, memo):
         "manifest_sha256": blob_sha256(root, revision, "lake-manifest.json", memo)[0],
         "toolchain": blob_sha256(root, revision, "lean-toolchain", memo)[1].decode().strip(),
     }
+
+
+def source_paths(root, tree):
+    """List paths relative to the recorded src tree, even from a project subdirectory."""
+    listing = subprocess.check_output(["git", "-C", str(root), "ls-tree", "--full-tree", "-r", "-z",
+                                       "--name-only", tree], text=True)
+    return [path for path in listing.split("\0") if path]
 
 
 BASELINE_FILE = Path(__file__).resolve().with_name("cache-baseline.json")

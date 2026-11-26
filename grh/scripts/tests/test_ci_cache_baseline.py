@@ -82,6 +82,19 @@ class Baseline(unittest.TestCase):
     def pin(self, identity):
         cache.BASELINE_FILE.write_text(json.dumps({**identity, "input_fingerprint": cache.fingerprint(identity)}))
 
+    def test_project_in_subdirectory(self):
+        self.base()
+        first = commit(self.root, {"grh/lakefile.toml": LAKEFILE.replace('"T"', '"GRH"'),
+                                   "grh/lake-manifest.json": '{"name":"GRH"}\n',
+                                   "grh/lean-toolchain": "leanprover/lean4:v4.37.0-rc1\n",
+                                   "grh/src/Inner/B.lean": "-- 1\n"}, "nested project")
+        project = self.root / "grh"
+        original = cache.current_identity(project)
+        commit(self.root, {"grh/src/Inner/B.lean": "-- 2\n"}, "change nested source")
+        historical = cache.identity_at(project, first, {})
+        self.assertEqual(historical, original)
+        self.assertEqual(cache.source_paths(project, historical["source_tree"]), ["Inner/B.lean"])
+
     def test_nearest_published_ancestor(self):
         first = self.base()
         published = cache.identity_at(self.root, first, {})
