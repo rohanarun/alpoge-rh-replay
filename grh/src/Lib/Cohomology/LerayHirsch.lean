@@ -32,10 +32,17 @@ Notions from other files:
 
 ## Relation to the literature
 
-Known result: Leray–Hirsch theorem that a local basis of cohomology classes is a global basis. The
-theorem is stated abstractly for Ext groups of functors and finitely many classes. It says that if
-the Leray–Hirsch map is bijective on ℤ[h_c] for every representable functor h_c, then it is
-bijective on every functor. Source: Leray, Hirsch; Hatcher, Algebraic Topology, Thm 4D.1; SGA 5 VII
+For a fibre bundle E → B, suppose each degree of fibre cohomology is finite free over the
+coefficient ring. The classical Leray–Hirsch theorem takes classes on E whose restrictions form a
+basis on every fibre. Those same classes then form a basis of H*(E) as a module over H*(B).
+The Hopf bundle S¹ → S³ → S² shows why the global classes matter: every fibre has an integral
+degree-one generator, but H¹(S³; ℤ) = 0, so that generator cannot be the restriction of a class
+on S³. See Hatcher, [Algebraic Topology, Theorem 4D.1, p. 432](https://pi.math.cornell.edu/~hatcher/AT/AT.pdf#page=441).
+
+Here the input is a single finite family θ in Ext(ΦG, F). For Φ given by restriction along a
+functor, `isLerayHirschBasis_of_reprBy` tests the map built from this θ on every ℤ[h_c] and
+deduces bijectivity for every abelian-group-valued functor S. In the projective-line application
+the family is (1, η); see `Lib.Cohomology.ProjectiveLine.ConstantLineFormula` and SGA 5 VII
 (projective bundle formula).
 -/
 
