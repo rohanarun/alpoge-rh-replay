@@ -663,6 +663,91 @@ lemma GradeZeroPart.card_pos_eq_card_neg (Z : GradeZeroPart V V'' w) :
     _ = trace Q := by simp [show P * V.J = V.J * Q from Z.proj_pos_mul_J, trace_mul_comm _ V.J⁻¹]
   simpa [hP, hQ, card_subtype] using h_trace
 
+private lemma GradeZeroPart.splitting_gram_kk (Z : GradeZeroPart V V'' w) :
+    (inclMatrix E (Subtype.val : {i : ι // 0 < w i} → ι))ᴴ * V.J *
+      inclMatrix E (Subtype.val : {i : ι // 0 < w i} → ι) = 0 := by
+  simp [inclMatrix, ← Matrix.ext_iff, Matrix.mul_apply, Matrix.one_apply]
+  grind [→ Z.grade_add_eq_zero]
+
+private lemma GradeZeroPart.splitting_gram_ll (Z : GradeZeroPart V V'' w) :
+    (V.J⁻¹ * inclMatrix E (Subtype.val : {i : ι // 0 < w i} → ι))ᴴ * V.J *
+      (V.J⁻¹ * inclMatrix E (Subtype.val : {i : ι // 0 < w i} → ι)) = 0 := by
+  simpa [Matrix.mul_assoc, V.isHermitian_J.inv.eq, ← ext_iff, inclMatrix, Matrix.mul_apply,
+    Matrix.one_apply] using fun a ha b hb ↦ Z.inv_J_apply_eq_zero_of_pos ha hb
+
+private lemma GradeZeroPart.splitting_gram_lk (_Z : GradeZeroPart V V'' w) :
+    (V.J⁻¹ * inclMatrix E (Subtype.val : {i : ι // 0 < w i} → ι))ᴴ * V.J *
+      inclMatrix E (Subtype.val : {i : ι // 0 < w i} → ι) = 1 := by
+  simp [Matrix.mul_assoc, V.isHermitian_J.inv.eq, inclMatrix, ← Matrix.ext_iff, Matrix.mul_apply,
+    Matrix.one_apply]
+
+private lemma GradeZeroPart.splitting_gram_ik (Z : GradeZeroPart V V'' w) :
+    Z.inclᴴ * V.J * inclMatrix E (Subtype.val : {i : ι // 0 < w i} → ι) = 0 := by
+  simp [inclMatrix, ← Matrix.ext_iff, Matrix.mul_apply, Matrix.one_apply]
+  grind +splitImp [→ Z.grade_add_eq_zero, Z.incl_eq_zero, star_zero, Finset.sum_eq_zero]
+
+private lemma GradeZeroPart.splitting_gram_il (Z : GradeZeroPart V V'' w) :
+    Z.inclᴴ * V.J * (V.J⁻¹ * inclMatrix E (Subtype.val : {i : ι // 0 < w i} → ι)) = 0 := by
+  simp [Matrix.mul_assoc, inclMatrix, ← Matrix.ext_iff, Matrix.mul_apply, Matrix.one_apply]
+  grind [Z.incl_eq_zero]
+
+private lemma GradeZeroPart.splitting_card_eq (Z : GradeZeroPart V V'' w) :
+    Fintype.card ι = Fintype.card ι'' + 2 * Fintype.card {i : ι // 0 < w i} := by
+  -- Count the indices by the sign of their weight.
+  have h_total : Fintype.card ι = Fintype.card {i : ι // w i = 0} +
+      (Fintype.card {i : ι // w i < 0} + Fintype.card {i : ι // 0 < w i}) := by
+    simp [SignType.univ_eq, sign_eq_one_iff, sign_eq_neg_one_iff, card_subtype,
+      ← card_congr (.sigmaFiberEquiv (SignType.sign ∘ w))]
+  have h_zero : Fintype.card {i : ι // w i = 0} = Fintype.card ι'' := by
+    simp [card_subtype, ← Z.mem_range_index, ← card_range Z.index]
+  have h_pos_neg : Fintype.card {i : ι // 0 < w i} = Fintype.card {i : ι // w i < 0} :=
+    Z.card_pos_eq_card_neg
+  omega
+
+omit [Fintype X'] in
+private lemma GradeZeroPart.hom_mem_range_index (Z : GradeZeroPart V V'' w) (hs' : Even s')
+    (hw : ∀ i : ι, Even (w i)) (r : ι × ι') :
+    r ∈ Set.range (Z.index.prodMap (.trans .inl Y'.indexEquiv.toEmbedding)) ↔
+      w r.1 - Y'.gradeOf r.2 = 0 := by
+  revert r
+  -- On the string of `V'` the weights are odd, as `s'` is even, so they differ from those of `V`.
+  simp [reindex_equiv Y'.indexEquiv]
+  grind [GradeZeroPart]
+
+omit [Fintype X'] in
+private lemma GradeZeroPart.hom_incl_eq_zero (Z : GradeZeroPart V V'' w)
+    (a : ι × ι') (b : ι'' × X') :
+    w a.1 - Y'.gradeOf a.2 ≠ 0 →
+      (Z.incl ⊗ₖ inclMatrix E (Y'.indexEquiv ∘ Sum.inl)) a b = 0 := by
+  revert a b
+  simp [reindex_equiv Y'.indexEquiv, inclMatrix, Matrix.one_apply]
+  grind [Z.incl_eq_zero]
+
+private lemma GradeZeroPart.hom_gram_incl (Z : GradeZeroPart V V'' w) :
+    (Z.incl ⊗ₖ inclMatrix E (Y'.indexEquiv ∘ Sum.inl))ᴴ * (V'.hom V).J *
+        (Z.incl ⊗ₖ inclMatrix E (Y'.indexEquiv ∘ Sum.inl)) =
+      ((stdSpace E X').hom V'').J := by
+  rw [hom_J, hom_J, conjTranspose_kronecker, ← mul_kronecker_mul, ← mul_kronecker_mul,
+    Z.gram_incl]
+  congr 1
+  refine Matrix.ext fun a b ↦ ?_
+  have h_imm : ((inclMatrix E (Y'.indexEquiv ∘ Sum.inl))ᴴ * V'.J⁻¹ᵀ *
+      inclMatrix E (Y'.indexEquiv ∘ Sum.inl)) a b =
+      V'.J⁻¹ᵀ (Y'.indexEquiv (Sum.inl a)) (Y'.indexEquiv (Sum.inl b)) := by
+    simp only [Matrix.mul_apply, Matrix.conjTranspose_apply, inclMatrix, Matrix.submatrix_apply,
+      id_eq, Function.comp_apply, Matrix.one_apply, apply_ite star, star_one, star_zero, ite_mul,
+      one_mul, zero_mul, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ,
+      ↓reduceIte]
+  rw [h_imm, Matrix.transpose_apply, Y'.J_inv_eq_gradedGram]
+  simp [gradedGram, gradedBlocks, Matrix.one_apply, eq_comm]
+
+private lemma GradeZeroPart.hom_grade_add_eq_zero (Z : GradeZeroPart V V'' w)
+    (a b : ι × ι') :
+    (V'.hom V).J a b ≠ 0 → (w a.1 - Y'.gradeOf a.2) + (w b.1 - Y'.gradeOf b.2) = 0 := by
+  revert a b
+  simp [hom_J, Y'.J_inv_eq_gradedGram, gradedGram, reindex_equiv Y'.indexEquiv]
+  grind [GradeZeroPart]
+
 end
 
 /-- The splitting of `V` over its weight-zero part `V''` whose isotropic frame `k` consists of the
@@ -672,53 +757,24 @@ def GradeZeroPart.splitting (Z : GradeZeroPart V V'' w) :
   k := inclMatrix E (Subtype.val : {i : ι // 0 < w i} → ι)
   l := V.J⁻¹ * inclMatrix E (Subtype.val : {i // 0 < w i} → ι)
   i := Z.incl
-  gram_kk := by
-    simp [inclMatrix, ← Matrix.ext_iff, Matrix.mul_apply, Matrix.one_apply]
-    grind [→ Z.grade_add_eq_zero]
-  gram_ll := by
-    simpa [Matrix.mul_assoc, V.isHermitian_J.inv.eq, ← ext_iff, inclMatrix, Matrix.mul_apply,
-      Matrix.one_apply] using fun a ha b hb ↦ Z.inv_J_apply_eq_zero_of_pos ha hb
-  gram_lk := by
-    simp [Matrix.mul_assoc, V.isHermitian_J.inv.eq, inclMatrix, ← Matrix.ext_iff, Matrix.mul_apply,
-      Matrix.one_apply]
+  gram_kk := by exact Z.splitting_gram_kk
+  gram_ll := by exact Z.splitting_gram_ll
+  gram_lk := by exact Z.splitting_gram_lk
   gram_ii := Z.gram_incl
-  gram_ik := by
-    simp [inclMatrix, ← Matrix.ext_iff, Matrix.mul_apply, Matrix.one_apply]
-    grind +splitImp [→ Z.grade_add_eq_zero, Z.incl_eq_zero, star_zero, Finset.sum_eq_zero]
-  gram_il := by
-    simp [Matrix.mul_assoc, inclMatrix, ← Matrix.ext_iff, Matrix.mul_apply, Matrix.one_apply]
-    grind [Z.incl_eq_zero]
-  card_eq := by
-    -- Count the indices by the sign of their weight.
-    have h_total : Fintype.card ι = Fintype.card {i : ι // w i = 0} +
-        (Fintype.card {i : ι // w i < 0} + Fintype.card {i : ι // 0 < w i}) := by
-      simp [SignType.univ_eq, sign_eq_one_iff, sign_eq_neg_one_iff, card_subtype,
-        ← card_congr (.sigmaFiberEquiv (SignType.sign ∘ w))]
-    have h_zero : Fintype.card {i : ι // w i = 0} = Fintype.card ι'' := by
-      simp [card_subtype, ← Z.mem_range_index, ← card_range Z.index]
-    have h_pos_neg : Fintype.card {i : ι // 0 < w i} = Fintype.card {i : ι // w i < 0} :=
-      Z.card_pos_eq_card_neg
-    omega
+  gram_ik := by exact Z.splitting_gram_ik
+  gram_il := by exact Z.splitting_gram_il
+  card_eq := by exact Z.splitting_card_eq
 
 /-- If `V''` is the weight-zero part of `V`, all weights are even and `Y'` has a string of even
 length, then `Hom(X', V'')` is the weight-zero part of `Hom(V', V)`. -/
 def GradeZeroPart.hom (Z : GradeZeroPart V V'' w) (hs' : Even s') (hw : ∀ i : ι, Even (w i)) :
     GradeZeroPart (V'.hom V) ((stdSpace E X').hom V'') fun r : ι × ι' ↦ w r.1 - Y'.gradeOf r.2 where
   index := Z.index.prodMap (.trans .inl Y'.indexEquiv.toEmbedding)
-  mem_range_index := by
-    -- On the string of `V'` the weights are odd, as `s'` is even, so they differ from those of `V`.
-    simp [reindex_equiv Y'.indexEquiv]
-    grind [GradeZeroPart]
+  mem_range_index r := by exact Z.hom_mem_range_index Y' hs' hw r
   incl := Z.incl ⊗ₖ inclMatrix E (Y'.indexEquiv ∘ Sum.inl)
-  incl_eq_zero := by
-    simp [reindex_equiv Y'.indexEquiv, inclMatrix, Matrix.one_apply]
-    grind [Z.incl_eq_zero]
-  gram_incl := by
-    simp [hom_J, Z.gram_incl, Y'.J_inv_eq_gradedGram, inclMatrix, conjTranspose_kronecker, eq_comm,
-      ← mul_kronecker_mul, ← Matrix.ext_iff, Matrix.mul_apply, Matrix.one_apply, gradedGram]
-  grade_add_eq_zero := by
-    simp [hom_J, Y'.J_inv_eq_gradedGram, gradedGram, reindex_equiv Y'.indexEquiv]
-    grind [GradeZeroPart]
+  incl_eq_zero a b := by exact Z.hom_incl_eq_zero Y' a b
+  gram_incl := by exact Z.hom_gram_incl Y'
+  grade_add_eq_zero a b := by exact Z.hom_grade_add_eq_zero Y' a b
 
 /-! ### Pairs of consecutive edges -/
 
@@ -871,24 +927,183 @@ lemma _root_.New.Seesaw.GradeZeroPart.zeroTerm_hom_omega (Z : GradeZeroPart V V'
     blockDiagonal (fun l ↦ if Y'.gradeOf l < 0 then V.ratCoordMatrix g else 1) *
       (blockDiagonal fun i ↦ if 0 < w i then (V'.ratCoordMatrix (Y'.inclX h⁻¹))ᵀ
         else 1).submatrix .swap .swap
+  have hC_entry (i i' : ι) (l l' : ι') :
+      C (i, l) (i', l') =
+        (if Y'.gradeOf l < 0 then V.ratCoordMatrix g i i' else if i = i' then 1 else 0) *
+        (if 0 < w i' then V'.ratCoordMatrix (Y'.inclX h⁻¹) l' l else if l = l' then 1 else 0) := by
+    dsimp only [C]
+    rw [Matrix.mul_apply, Fintype.sum_prod_type, Finset.sum_eq_single i']
+    · rw [Finset.sum_eq_single l]
+      · simp only [blockDiagonal_apply, Matrix.submatrix_apply, Prod.swap_prod_mk,
+          Matrix.ite_apply, Matrix.one_apply, Matrix.transpose_apply, ↓reduceIte]
+      · intro m _ hm
+        simp only [blockDiagonal_apply, hm.symm, ↓reduceIte, zero_mul]
+      · intro hmem; exact absurd (Finset.mem_univ l) hmem
+    · intro k _ hk
+      refine Finset.sum_eq_zero fun m _ ↦ ?_
+      simp only [blockDiagonal_apply, Matrix.submatrix_apply, Prod.swap_prod_mk, hk, ↓reduceIte,
+        mul_zero]
+    · intro hmem; exact absurd (Finset.mem_univ i') hmem
+  have h_h_id (l₁ l₂ : ι') (h_ne : Y'.gradeOf l₁ ≠ 0 ∨ Y'.gradeOf l₂ ≠ 0) :
+      V'.ratCoordMatrix (Y'.inclX h⁻¹) l₁ l₂ = if l₁ = l₂ then 1 else 0 := by
+    obtain ⟨a₁, rfl⟩ := Y'.indexEquiv.surjective l₁
+    obtain ⟨a₂, rfl⟩ := Y'.indexEquiv.surjective l₂
+    rw [ratCoordMatrix_inclX]
+    rcases a₁ with a₁ | a₁ <;> rcases a₂ with a₂ | a₂
+    · simp only [gradeOf_inl, ne_eq, not_true_eq_false, or_self] at h_ne
+    · simp [gradedBlocks]
+    · simp [gradedBlocks]
+    · simp [gradedBlocks, Matrix.one_apply]
   refine zeroTerm_omega_of_inclMatrix (Z.hom Y' hs' hw).splitting rfl (C := C) ?_ ?_ ?_ ?_ f
-  -- Split the indices of `V'` along `Y'.indexEquiv` and compare the entries by `h_id`. The second
-  -- goal says that `C - 1` vanishes where the row weight is at most `0` and at most the column's.
-  iterate 2
-    · simp [C, ↓reindex_equiv Y'.indexEquiv, ↓@Sum.forall X', ← map_inv, sum_prod_type, HasDegreeGe,
-        blockDiagonal_apply, Matrix.ite_apply, ratCoordMatrix_inclX, Matrix.mul_apply,
-        Matrix.one_apply, sub_eq_zero]
-      grind
+  · intro ⟨i, l⟩ ⟨i', l'⟩ hdeg
+    change (V'.hom V).ratCoordMatrix (G.onHom (Y'.inclX h, g)) (i, l) (i', l') -
+      C (i, l) (i', l') = 0
+    rw [sub_eq_zero, ratCoordMatrix_onHom, kroneckerMap_apply, Matrix.transpose_apply, ← map_inv,
+      hC_entry]
+    have hdeg' : Y'.gradeOf l' < w i' := by
+      dsimp only [Pi.zero_apply] at hdeg; omega
+    by_cases hl' : Y'.gradeOf l' = 0
+    · have hwi' : 0 < w i' := by omega
+      rw [ite_eq_left hwi']
+      by_cases hl : Y'.gradeOf l < 0
+      · rw [ite_eq_left hl]
+      · rw [ite_eq_right hl]
+        by_cases hl0 : Y'.gradeOf l = 0
+        · rw [h_id i i' (Or.inr (by omega))]
+        · have hne : l' ≠ l := fun heq ↦ hl0 (heq ▸ hl')
+          rw [h_h_id l' l (Or.inr hl0), ite_eq_right hne, mul_zero, mul_zero]
+    · rw [h_h_id l' l (Or.inl hl')]
+      by_cases hll' : l = l'
+      · subst hll'
+        simp only [↓reduceIte, ite_self, mul_one]
+        by_cases hl : Y'.gradeOf l < 0
+        · rw [ite_eq_left hl]
+        · rw [ite_eq_right hl, h_id i i' (Or.inr (by omega))]
+      · have hne : l' ≠ l := Ne.symm hll'
+        simp only [hll', hne, ↓reduceIte, ite_self, mul_zero]
+  · intro ⟨i, l⟩ ⟨i', l'⟩ hdeg
+    change C (i, l) (i', l') - (1 : Matrix (ι × ι') (ι × ι') (𝔸 E)) (i, l) (i', l') = 0
+    rw [sub_eq_zero, hC_entry, Matrix.one_apply]
+    have hdeg1 : w i - Y'.gradeOf l ≤ 0 := by
+      dsimp only [Pi.inf_apply, Pi.zero_apply] at hdeg; omega
+    have hdeg2 : w i - Y'.gradeOf l ≤ w i' - Y'.gradeOf l' := by
+      dsimp only [Pi.inf_apply, Pi.zero_apply] at hdeg; omega
+    have hf1 : (if Y'.gradeOf l < 0 then V.ratCoordMatrix g i i' else if i = i' then 1 else 0) =
+        if i = i' then 1 else 0 := by
+      by_cases hl : Y'.gradeOf l < 0
+      · rw [ite_eq_left hl, h_id i i' (Or.inl (by omega))]
+      · rw [ite_eq_right hl]
+    rw [hf1]
+    by_cases hii' : i = i'
+    · subst hii'
+      simp only [↓reduceIte, one_mul, Prod.mk.injEq, true_and]
+      by_cases hwi : 0 < w i
+      · rw [ite_eq_left hwi, h_h_id l' l (Or.inr (by omega))]
+        by_cases hll' : l = l' <;> simp [hll', eq_comm]
+      · rw [ite_eq_right hwi]
+    · simp [hii']
   · -- The weight of `Y'` is negative at `j = s' / 2` indices.
     obtain ⟨j, rfl⟩ := hs'
     simp (disch := omega) [C, det_blockDiagonal _, ↓reindex_equiv Y'.indexEquiv, ↓prod_sum_type,
       ↓Fin.prod_univ_add, prod_ite, ite_eq_right, ← two_mul, apply_ite Matrix.det,
       det_ratCoordMatrix, ← Equiv.coe_prodComm, -inv_pow, det_inclX]
   · -- On the rows of weight `≤ 0` the embedding of the zero part intertwines, by `h_comm`.
-    simp [← Matrix.ext_iff, Matrix.mul_apply] at h_comm
-    simp [HasDegreeGe, GradeZeroPart.splitting, GradeZeroPart.hom, ↓reindex_equiv Y'.indexEquiv,
-      ← map_inv, ← sum_mul, sum_prod_type, ← mul_right_comm _ (toAdele _), apply_ite toAdele,
-      ← mul_assoc, h_comm, ratCoordMatrix_inclX, inclMatrix, Matrix.mul_apply, Matrix.one_apply]
+    have h_inclX_comm : (V'.ratCoordMatrix (Y'.inclX h⁻¹))ᵀ *
+        (inclMatrix E (Y'.indexEquiv ∘ Sum.inl)).map toAdele =
+        (inclMatrix E (Y'.indexEquiv ∘ Sum.inl)).map toAdele *
+          ((stdSpace E X').ratCoordMatrix h⁻¹)ᵀ := by
+      rw [ratCoordMatrix_inclX]
+      refine Matrix.ext fun l a ↦ ?_
+      obtain ⟨u, rfl⟩ := Y'.indexEquiv.surjective l
+      cases u <;> simp [inclMatrix, Matrix.mul_apply, Matrix.one_apply, gradedBlocks]
+    have h_map : (Z.incl ⊗ₖ inclMatrix E (Y'.indexEquiv ∘ Sum.inl)).map toAdele =
+        Z.incl.map toAdele ⊗ₖ (inclMatrix E (Y'.indexEquiv ∘ Sum.inl)).map toAdele :=
+      Matrix.ext fun ⟨_, _⟩ ⟨_, _⟩ ↦ map_mul toAdele _ _
+    have h_zero : (V'.hom V).ratCoordMatrix (G.onHom (Y'.inclX h, g)) *
+        (Z.hom Y' hs' hw).splitting.i.map toAdele -
+        (Z.hom Y' hs' hw).splitting.i.map toAdele *
+          ((stdSpace E X').hom V'').ratCoordMatrix (G.onHom (h, g₀)) = 0 := by
+      rw [ratCoordMatrix_onHom, ratCoordMatrix_onHom, GradeZeroPart.splitting, GradeZeroPart.hom]
+      dsimp only
+      rw [← map_inv, h_map, ← Matrix.mul_kronecker_mul,
+        ← Matrix.mul_kronecker_mul, h_comm, h_inclX_comm, sub_self]
+    intro a b _
+    rw [h_zero]
+    rfl
+
+private lemma tripleWeil_circle_eq (ag ag' bk bg' ug ug' uk : Circle)
+    {cι cι' cι'' cX cX' cX'' cq s' r : ℕ}
+    (h_even_s' : Even s') (h_rank' : cX' + s' = cι')
+    (h_par : Even (cι + cι''))
+    (h_rank : cι + cι'' = cq + cq + (cX + cX'') + 2 * r) :
+    ag' * ag⁻¹ * ug' ^ (cι / 2) * (ug ^ (cι' / 2))⁻¹ *
+      (bk * bg'⁻¹ * uk ^ (cι' / 2) * (ug' ^ (cι'' / 2))⁻¹) *
+      (ug ^ cι' * (ug' ^ cι)⁻¹) *
+      ((ug ^ (s' / 2))⁻¹ * (uk ^ (s' / 2))⁻¹ * ug' ^ r) *
+      ug' ^ cq =
+    ag' * ag⁻¹ * ug' ^ (cX / 2) * (ug ^ (cX' / 2))⁻¹ *
+      (bk * bg'⁻¹ * uk ^ (cX' / 2) * (ug' ^ (cX'' / 2))⁻¹) *
+      (ug ^ cX' * (ug' ^ cX)⁻¹) := by
+  obtain ⟨k₀, hk₀⟩ := h_even_s'
+  obtain ⟨m₀, hm₀⟩ := h_par
+  have h_g : (ug ^ (cι' / 2))⁻¹ * ug ^ cι' * (ug ^ (s' / 2))⁻¹ =
+      (ug ^ (cX' / 2))⁻¹ * ug ^ cX' := by
+    simp only [← zpow_natCast, ← _root_.zpow_neg, ← _root_.zpow_add]
+    exact congrArg (ug ^ ·) (by omega)
+  have h_k : uk ^ (cι' / 2) * (uk ^ (s' / 2))⁻¹ = uk ^ (cX' / 2) := by
+    simp only [← zpow_natCast, ← _root_.zpow_neg, ← _root_.zpow_add]
+    exact congrArg (uk ^ ·) (by omega)
+  have h_g' : ug' ^ (cι / 2) * (ug' ^ (cι'' / 2))⁻¹ * (ug' ^ cι)⁻¹ * ug' ^ r * ug' ^ cq =
+      ug' ^ (cX / 2) * (ug' ^ (cX'' / 2))⁻¹ * (ug' ^ cX)⁻¹ := by
+    simp only [← zpow_natCast, ← _root_.zpow_neg, ← _root_.zpow_add]
+    exact congrArg (ug' ^ ·) (by omega)
+  calc
+    ag' * ag⁻¹ * ug' ^ (cι / 2) * (ug ^ (cι' / 2))⁻¹ *
+          (bk * bg'⁻¹ * uk ^ (cι' / 2) * (ug' ^ (cι'' / 2))⁻¹) *
+          (ug ^ cι' * (ug' ^ cι)⁻¹) *
+        ((ug ^ (s' / 2))⁻¹ * (uk ^ (s' / 2))⁻¹ * ug' ^ r) *
+        ug' ^ cq
+      = (ag' * ag⁻¹ * (bk * bg'⁻¹)) *
+          ((ug ^ (cι' / 2))⁻¹ * ug ^ cι' * (ug ^ (s' / 2))⁻¹) *
+          (uk ^ (cι' / 2) * (uk ^ (s' / 2))⁻¹) *
+          (ug' ^ (cι / 2) * (ug' ^ (cι'' / 2))⁻¹ * (ug' ^ cι)⁻¹ * ug' ^ r * ug' ^ cq) := by ac_rfl
+    _ = (ag' * ag⁻¹ * (bk * bg'⁻¹)) *
+          ((ug ^ (cX' / 2))⁻¹ * ug ^ cX') *
+          uk ^ (cX' / 2) *
+          (ug' ^ (cX / 2) * (ug' ^ (cX'' / 2))⁻¹ * (ug' ^ cX)⁻¹) := by
+        rw [h_g, h_k, h_g']
+    _ = ag' * ag⁻¹ * ug' ^ (cX / 2) * (ug ^ (cX' / 2))⁻¹ *
+          (bk * bg'⁻¹ * uk ^ (cX' / 2) * (ug' ^ (cX'' / 2))⁻¹) *
+          (ug ^ cX' * (ug' ^ cX)⁻¹) := by ac_rfl
+
+private lemma pairChar_rankTwist {m m' : Type} [Fintype m] [DecidableEq m] [Fintype m']
+    [DecidableEq m'] {sm : m → ℤˣ} {sm' : m' → ℤˣ}
+    (c : AutChar E) (x : G E sm) (y : G E sm') :
+    pairChar (rankTwist c m) (rankTwist c m') (x, y) =
+      Circle.coeHom (c.1 y.det * (c.1 x.det)⁻¹ *
+        WeilData.upsilonU1.1 y.det ^ (card m / 2) *
+        (WeilData.upsilonU1.1 x.det ^ (card m' / 2))⁻¹) := by
+  have hinv (φ : unitary (𝔸 E) →ₜ* Circle) (u : unitary (𝔸 E)) : φ⁻¹ u = (φ u)⁻¹ := rfl
+  have h : (rankTwist c m')⁻¹.1 x.det * (rankTwist c m).1 y.det =
+      c.1 y.det * (c.1 x.det)⁻¹ * WeilData.upsilonU1.1 y.det ^ (card m / 2) *
+        (WeilData.upsilonU1.1 x.det ^ (card m' / 2))⁻¹ := by
+    simp only [rankTwist, Subgroup.coe_inv, Subgroup.coe_mul, Subgroup.coe_pow,
+      hinv, ContinuousMonoidHom.mul_apply, ContinuousMonoidHom.pow_apply, mul_inv]
+    ac_rfl
+  exact congrArg Circle.coeHom h
+
+private lemma pairChar_upsilonU1_pow {m m' : Type} [Fintype m] [DecidableEq m] [Fintype m']
+    [DecidableEq m'] {sm : m → ℤˣ} {sm' : m' → ℤˣ}
+    (x : G E sm) (y : G E sm') :
+    pairChar (WeilData.upsilonU1 ^ card m) (WeilData.upsilonU1 ^ card m') (x, y) =
+      Circle.coeHom (WeilData.upsilonU1.1 y.det ^ card m *
+        (WeilData.upsilonU1.1 x.det ^ card m')⁻¹) := by
+  have hinv (φ : unitary (𝔸 E) →ₜ* Circle) (u : unitary (𝔸 E)) : φ⁻¹ u = (φ u)⁻¹ := rfl
+  have h : (WeilData.upsilonU1 ^ card m')⁻¹.1 x.det * (WeilData.upsilonU1 ^ card m).1 y.det =
+      WeilData.upsilonU1.1 y.det ^ card m * (WeilData.upsilonU1.1 x.det ^ card m')⁻¹ := by
+    simp only [Subgroup.coe_inv, Subgroup.coe_pow, hinv, ContinuousMonoidHom.pow_apply]
+    exact mul_comm _ _
+  exact congrArg Circle.coeHom h
 
 open Finset in
 /-- Let `Y`, `Y'`, `Y''` present hermitian spaces `V`, `V'`, `V''` as definite spaces on `X`, `X'`,
@@ -918,15 +1133,27 @@ lemma zeroTerm_splitting_tripleWeil (D : DoubleLiftData X'' q Y Y' Y'') (a b : A
   let r := G.sum (g.neg, D.embX k)
   let P := removePlanes q (flipSum (stdSpace E X) (stdSpace E X''))
   let r' := G.sum (s := hyperbolicSigns q) (1, r)
+  have hr' : r'.adeleMatrix =
+      fromBlocks (1 : Matrix (q ⊕ q) (q ⊕ q) (𝔸 E)) 0 0 r.adeleMatrix := by
+    simp only [r', G.adeleMatrix_sum, G.adeleMatrix_one]
   obtain ⟨h_k, h_i⟩ : r'.adeleMatrix * P.kAdelic = P.kAdelic ∧
       r'.adeleMatrix * P.iAdelic = P.iAdelic * r.adeleMatrix := by
-    constructor <;> simp [P, r', kAdelic, iAdelic, Space.ratMap, removePlanes, hyperbolicSum, sum,
-      blockGL, -coe_units_inv, fromRows_map, fromBlocks_mul_fromRows, fromBlocks_multiply]
+    have hmap0 {α β : Type} : (0 : Matrix α β E).map toAdele = 0 :=
+      Matrix.map_zero _ (RingHom.map_zero toAdele)
+    have hmap1 {α : Type} [DecidableEq α] : (1 : Matrix α α E).map toAdele = 1 :=
+      Matrix.map_one _ (RingHom.map_zero toAdele) (RingHom.map_one toAdele)
+    constructor <;>
+      simp [P, r', kAdelic, iAdelic, Space.ratMap, removePlanes, hyperbolicSum, hr', sum,
+        blockGL, -coe_units_inv, fromRows_map, hmap0, hmap1, fromBlocks_mul_fromRows,
+        fromBlocks_multiply]
   have h_planes : ∀ f, (P.homTarget (stdSpace E X')).zeroTerm (ω _ (.onHom (g', r')) f) =
       ((WeilData.upsilonU1.val g'.det).val : ℂ) ^ card q •
         ω _ (.onHom (g', r)) ((P.homTarget (stdSpace E X')).zeroTerm f) := by
-    simpa [pairWeil, inv_smul_eq_iff₀, r'] using P.homTarget_zeroTerm_pairWeil (stdSpace E X')
-      1 1 r' r 1 (by simp [ActsOnFrame, h_k]) (by simp [h_i]) g'
+    intro f
+    have h := P.homTarget_zeroTerm_pairWeil (stdSpace E X') 1 1 r' r 1
+      (by simp only [ActsOnFrame, h_k, Units.val_one, Matrix.mul_one])
+      (by simp [h_i]) g' f
+    simpa [pairWeil, inv_smul_eq_iff₀, r'] using h
   have h_det : (G.sum ((Y.inclX g).neg, Y''.inclX k)).det = (Y.inclX g).det * (Y''.inclX k).det :=
     Subtype.ext (by simp)
   simp only [splitting, homZeroPart, tripleWeil, _root_.smul_apply, map_smul, zeroTerm_comp]
@@ -936,18 +1163,46 @@ lemma zeroTerm_splitting_tripleWeil (D : DoubleLiftData X'' q Y Y' Y'') (a b : A
     have h_rank : card (ι ⊕ ι'') = card ((q ⊕ q) ⊕ X ⊕ X'') +
         2 * card {i // 0 < (Y.gradeOf ⊕ᵥ Y''.gradeOf) i} := D.zeroPart.splitting.card_eq
     have h_rank' : card (X' ⊕ Fin s') = card ι' := card_congr Y'.indexEquiv
-    obtain ⟨h_odd, h_middle, h_last, -⟩ := D.toHasConsecutiveStrings
-    have h_par : Even (card ι + card ι'') := D.even_card_add
-    simp [smul_smul, D.det_embX, rankTwist, Odd, Even, Fintype.card_subtype,
-      det_inclX] at h_rank h_rank' h_odd h_par ⊢
+    simp only [Fintype.card_sum, Fintype.card_fin, Fintype.card_subtype] at h_rank h_rank'
+    rw [smul_smul, smul_smul]
     congr 1
-    norm_cast
-    refine congrArg _ (Additive.ofMul.injective ?_)
-    simp
-    match_scalars <;> omega
+    rw [pairChar_rankTwist, pairChar_rankTwist, pairChar_upsilonU1_pow,
+      pairChar_rankTwist, pairChar_rankTwist, pairChar_upsilonU1_pow,
+      det_inclX, det_inclX, det_inclX, D.det_embX]
+    have h_u1 : (WeilData.upsilonU1.val ((g.det * k.det) ^ (s' / 2) *
+        g'.det⁻¹ ^ #{i | 0 < (Y.gradeOf ⊕ᵥ Y''.gradeOf) i}) : ℂ)⁻¹ =
+        Circle.coeHom ((WeilData.upsilonU1.1 g.det ^ (s' / 2))⁻¹ *
+          (WeilData.upsilonU1.1 k.det ^ (s' / 2))⁻¹ *
+          WeilData.upsilonU1.1 g'.det ^ #{i | 0 < (Y.gradeOf ⊕ᵥ Y''.gradeOf) i}) := by
+      let φ : unitary (𝔸 E) →* Circle := WeilData.upsilonU1.1.toMonoidHom
+      have h : (φ ((g.det * k.det) ^ (s' / 2) *
+          g'.det⁻¹ ^ #{i | 0 < (Y.gradeOf ⊕ᵥ Y''.gradeOf) i}))⁻¹ =
+          (φ g.det ^ (s' / 2))⁻¹ * (φ k.det ^ (s' / 2))⁻¹ *
+            φ g'.det ^ #{i | 0 < (Y.gradeOf ⊕ᵥ Y''.gradeOf) i} := by
+        rw [φ.map_mul, φ.map_pow, φ.map_mul, mul_pow, φ.map_pow, φ.map_inv, inv_pow,
+          mul_inv, mul_inv, inv_inv]
+      exact (Circle.coeHom.map_inv _).symm.trans (congrArg Circle.coeHom h)
+    have h_q : ((WeilData.upsilonU1.1 g'.det).1 : ℂ) ^ card q =
+        Circle.coeHom (WeilData.upsilonU1.1 g'.det ^ card q) :=
+      (Circle.coeHom.map_pow _ _).symm
+    rw [h_u1, h_q]
+    simp only [← Circle.coeHom.map_mul]
+    exact congrArg Circle.coeHom (tripleWeil_circle_eq _ _ _ _ _ _ _
+      D.even_length_middle h_rank' D.even_card_add h_rank)
   · -- The group element is the identity away from weight zero.
-    simp [reindex_equiv Y.indexEquiv, reindex_equiv Y''.indexEquiv, ratCoordMatrix_sum,
-      ratCoordMatrix_inclX, Matrix.one_apply]
+    intro x y hne
+    rw [flipSum, ratCoordMatrix_sum]
+    rcases x with x | x <;> rcases y with y | y
+    · obtain ⟨u, rfl⟩ := Y.indexEquiv.surjective x
+      obtain ⟨v, rfl⟩ := Y.indexEquiv.surjective y
+      rcases u with u | u <;> rcases v with v | v <;>
+        simp [ratCoordMatrix_inclX, gradedBlocks, Matrix.one_apply] at hne ⊢
+    · simp
+    · simp
+    · obtain ⟨u, rfl⟩ := Y''.indexEquiv.surjective x
+      obtain ⟨v, rfl⟩ := Y''.indexEquiv.surjective y
+      rcases u with u | u <;> rcases v with v | v <;>
+        simp [ratCoordMatrix_inclX, gradedBlocks, Matrix.one_apply] at hne ⊢
   · -- It is intertwined with `r'` by the embedding, which is `D.intertwines`.
     simp [hyperbolicSum, r', r, D.intertwines, ratCoordMatrix_sum]
 
@@ -989,12 +1244,29 @@ lemma finEval_arrowProduct_equivariant (D : DoubleLiftData X'' q Y Y' Y'') (a b 
   have h_point : finVec (stackedStringMapFin Y Y' Y'') = V'.homAtPoint (flipSum V V'')
       (fromRows (V.formAdjoint V' (((0, 1) : 𝔸 E) • Y.stringMap Y'))
         (((0, 1) : 𝔸 E) • Y'.stringMap Y'')) := by
-    ext <;> simp only [finVec, stackedStringMapFin, homAtPoint, matrixToVec, stackedStringMap,
-      formAdjoint, AddMonoidHom.mk'_apply, Units.mul_inv_cancel_left, Matrix.mul_apply, sum_sum_type,
-      fromRows_apply_inl, fromRows_apply_inr, conjTranspose_smul, Matrix.smul_apply, smul_eq_mul,
-      Prod.fst_sum, Prod.snd_sum, Prod.fst_mul, Prod.snd_mul, Prod.fst_add, Prod.snd_add,
-      Prod.fst_star, Prod.snd_star, Pi.zero_apply, star_zero, star_one, zero_mul, mul_zero, one_mul,
-      add_zero, Finset.sum_const_zero]
+    have h_mat : fromRows (V.formAdjoint V' (((0, 1) : 𝔸 E) • Y.stringMap Y'))
+        (((0, 1) : 𝔸 E) • Y'.stringMap Y'') =
+        ((0, 1) : 𝔸 E) • stackedStringMap Y Y' Y'' := by
+      have h_adj : V.formAdjoint V' (((0, 1) : 𝔸 E) • Y.stringMap Y') =
+          ((0, 1) : 𝔸 E) • V.formAdjoint V' (Y.stringMap Y') := by
+        simp only [formAdjoint, Matrix.conjTranspose_smul, Prod.star_def, star_zero, star_one,
+          Matrix.mul_smul, Matrix.smul_mul]
+      rw [h_adj, stackedStringMap]
+      refine Matrix.ext fun a b ↦ ?_
+      cases a <;> rfl
+    rw [h_mat]
+    funext p
+    have h_smul : V'.homAtPoint (flipSum V V'') (((0, 1) : 𝔸 E) • stackedStringMap Y Y' Y'') p =
+        ((0, 1) : 𝔸 E) * V'.homAtPoint (flipSum V V'') (stackedStringMap Y Y' Y'') p := by
+      change ((flipSum V V'').x⁻¹.val * (((0, 1) : 𝔸 E) • stackedStringMap Y Y' Y'') *
+        V'.x.val) p.1 p.2 = _
+      rw [Matrix.mul_smul, Matrix.smul_mul]
+      rfl
+    rw [h_smul]
+    apply Prod.ext
+    · simp only [finVec, Prod.fst_mul, zero_mul]
+    · simp only [finVec, stackedStringMapFin, finCoord, ← mul_assoc, Units.mul_inv,
+        Prod.snd_mul, one_mul]
   rw [← leftInverse_arrowTensor (TensorProduct.map _ _ _), arrowTensor_map_liftWeilFin,
     arrowTensor_finEval, h_equivariant]
   -- Split the translation over the two factors (`homHeisenbergOp_arrowProduct`,
@@ -1008,6 +1280,283 @@ variable (Y Y' Y'')
 
 /-! ### The two kinds of pairs -/
 
+omit [Fintype X] [Fintype X₀] in
+private lemma flipSum_grade_add_eq_zero (a b : ι ⊕ ι'') :
+    (flipSum V V'').J a b ≠ 0 → (Y.gradeOf ⊕ᵥ Y''.gradeOf) a + (Y.gradeOf ⊕ᵥ Y''.gradeOf) b = 0 := by
+  revert a b
+  simp [↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv, Y.gram_eq, Y''.gram_eq,
+    flipSpace, gradedGram]
+  grind
+
+omit [WeilData E] [Fintype X] [Fintype X'] [Fintype X₀] in
+private lemma middleDoubleLift_mem_range_index (h_string : HasConsecutiveStrings Y Y' Y'')
+    (hz : s / 2 < s) (hz' : s'' / 2 < s'') (incl : ι ⊕ ι'') :
+    incl ∈ Set.range ((fun _ : Unit ↦ Sum.inl (Y.indexEquiv (Sum.inr ⟨s / 2, hz⟩))) ⊕ᵥ
+        (fun _ : Unit ↦ Sum.inr (Y''.indexEquiv (Sum.inr ⟨s'' / 2, hz'⟩))) ⊕ᵥ
+        Sum.map (Y.indexEquiv ∘ Sum.inl) (Y''.indexEquiv ∘ Sum.inl)) ↔
+      (Y.gradeOf ⊕ᵥ Y''.gradeOf) incl = 0 := by
+  have h_odd : Odd s := h_string.odd_length
+  have h_middle : s' = s - 1 := h_string.length_middle
+  have h_last : s'' = s' - 1 := h_string.length_last
+  revert incl
+  simp [↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv, Fin.ext_iff, sub_eq_zero]
+  grind
+
+omit [WeilData E] [Fintype X] [Fintype X'] [Fintype X₀] in
+private lemma middleDoubleLift_incl_eq_zero (h_string : HasConsecutiveStrings Y Y' Y'')
+    (hz : s / 2 < s) (hz' : s'' / 2 < s'')
+    (a : ι ⊕ ι'') (b : (Unit ⊕ Unit) ⊕ X ⊕ X₀) :
+    (Y.gradeOf ⊕ᵥ Y''.gradeOf) a ≠ 0 →
+      (fromCols (fromCols ((2 * N)⁻¹ •
+          (inclMatrix E (fun _ : Unit ↦ Sum.inl (Y.indexEquiv (Sum.inr ⟨s / 2, hz⟩))) -
+            inclMatrix E (fun _ : Unit ↦ Sum.inr (Y''.indexEquiv (Sum.inr ⟨s'' / 2, hz'⟩)))))
+        (inclMatrix E (fun _ : Unit ↦ Sum.inl (Y.indexEquiv (Sum.inr ⟨s / 2, hz⟩))) +
+          inclMatrix E (fun _ : Unit ↦ Sum.inr (Y''.indexEquiv (Sum.inr ⟨s'' / 2, hz'⟩)))))
+        (inclMatrix E (Sum.map (Y.indexEquiv ∘ Sum.inl) (Y''.indexEquiv ∘ Sum.inl)))) a b = 0 := by
+  have h_odd : Odd s := h_string.odd_length
+  have h_middle : s' = s - 1 := h_string.length_middle
+  have h_last : s'' = s' - 1 := h_string.length_last
+  revert a b
+  simp [↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv, inclMatrix, Matrix.one_apply,
+    sub_eq_zero]
+  grind
+
+omit [Fintype X'] in
+private lemma middleDoubleLift_gram_incl (h_string : HasConsecutiveStrings Y Y' Y'')
+    (hz : s / 2 < s) (hz' : s'' / 2 < s'') :
+    let z (_ : Unit) : ι ⊕ ι'' := Sum.inl (Y.indexEquiv (Sum.inr ⟨s / 2, hz⟩))
+    let z' (_ : Unit) : ι ⊕ ι'' := Sum.inr (Y''.indexEquiv (Sum.inr ⟨s'' / 2, hz'⟩))
+    let j := Sum.map (Y.indexEquiv ∘ Sum.inl) (Y''.indexEquiv ∘ Sum.inl)
+    let A := fromCols (fromCols ((2 * N)⁻¹ • (inclMatrix E z - inclMatrix E z'))
+      (inclMatrix E z + inclMatrix E z')) (inclMatrix E j)
+    Aᴴ * (flipSum V V'').J * A =
+      (hyperbolicSum Unit (flipSum (stdSpace E X) (stdSpace E X₀))).J := by
+  intro z z' j A
+  have h_odd : Odd s := h_string.odd_length
+  have h_middle : s' = s - 1 := h_string.length_middle
+  have h_last : s'' = s' - 1 := h_string.length_last
+  have h_imm {α γ : Type} (f : α → ι ⊕ ι'') (g : γ → ι ⊕ ι'') (a : α) (b : γ) :
+      ((inclMatrix E f)ᴴ * (flipSum V V'').J * inclMatrix E g) a b =
+        (flipSum V V'').J (f a) (g b) := by
+    simp only [Matrix.mul_apply, Matrix.conjTranspose_apply, inclMatrix,
+      Matrix.submatrix_apply, id_eq, Matrix.one_apply, apply_ite star, star_one, star_zero,
+      ite_mul, one_mul, zero_mul, mul_ite, mul_one, mul_zero, Finset.sum_ite_eq',
+      Finset.mem_univ, ↓reduceIte]
+  have h_starN : star N = N := Y.N_ne_zero_and_star_eq.2
+  have h_Nne : N ≠ 0 := Y.N_ne_zero_and_star_eq.1
+  have hJ_zz : (flipSum V V'').J (z ()) (z ()) = N := by
+    have hrev : (⟨s / 2, hz⟩ : Fin s).rev = ⟨s / 2, hz⟩ := by
+      obtain ⟨k, hk⟩ := h_odd
+      exact Fin.ext (by dsimp [Fin.rev]; omega)
+    simp [z, flipSpace, Y.gram_eq, gradedGram, gradedBlocks, hrev]
+  have hJ_z'z' : (flipSum V V'').J (z' ()) (z' ()) = -N := by
+    have hrev : (⟨s'' / 2, hz'⟩ : Fin s'').rev = ⟨s'' / 2, hz'⟩ := by
+      obtain ⟨k, hk⟩ := h_odd
+      exact Fin.ext (by dsimp [Fin.rev]; omega)
+    simp [z', flipSpace, Y''.gram_eq, gradedGram, gradedBlocks, hrev]
+  have hJ_zz' : (flipSum V V'').J (z ()) (z' ()) = 0 := by simp [z, z', flipSpace]
+  have hJ_z'z : (flipSum V V'').J (z' ()) (z ()) = 0 := by simp [z, z', flipSpace]
+  have hJ_zj (x : X ⊕ X₀) : (flipSum V V'').J (z ()) (j x) = 0 := by
+    cases x <;> simp [z, j, flipSpace, Y.gram_eq, gradedGram, gradedBlocks]
+  have hJ_jz (x : X ⊕ X₀) : (flipSum V V'').J (j x) (z ()) = 0 := by
+    cases x <;> simp [z, j, flipSpace, Y.gram_eq, gradedGram, gradedBlocks]
+  have hJ_z'j (x : X ⊕ X₀) : (flipSum V V'').J (z' ()) (j x) = 0 := by
+    cases x <;> simp [z', j, flipSpace, Y''.gram_eq, gradedGram, gradedBlocks]
+  have hJ_jz' (x : X ⊕ X₀) : (flipSum V V'').J (j x) (z' ()) = 0 := by
+    cases x <;> simp [z', j, flipSpace, Y''.gram_eq, gradedGram, gradedBlocks]
+  have hJ_jj (x y : X ⊕ X₀) :
+      (flipSum V V'').J (j x) (j y) = (flipSum (stdSpace E X) (stdSpace E X₀)).J x y := by
+    cases x <;> cases y <;>
+      simp [j, flipSpace, Y.gram_eq, Y''.gram_eq, gradedGram, gradedBlocks, Matrix.one_apply]
+  let J := (flipSum V V'').J
+  let Ez := inclMatrix E z
+  let Ez' := inclMatrix E z'
+  let Ej := inclMatrix E j
+  let A₁ := (2 * N)⁻¹ • (Ez - Ez')
+  let A₂ := Ez + Ez'
+  have h11 : A₁ᴴ * J * A₁ = 0 := by
+    refine Matrix.ext fun () () ↦ ?_
+    simp only [A₁, Ez, Ez', J, Matrix.conjTranspose_smul, Matrix.conjTranspose_sub,
+      Matrix.smul_mul, Matrix.mul_smul, Matrix.sub_mul, Matrix.mul_sub, Matrix.smul_apply,
+      Matrix.sub_apply, Matrix.zero_apply, h_imm, hJ_zz, hJ_z'z', hJ_zz', hJ_z'z]
+    ring
+  have h12 : A₁ᴴ * J * A₂ = 1 := by
+    refine Matrix.ext fun () () ↦ ?_
+    simp only [A₁, A₂, Ez, Ez', J, Matrix.conjTranspose_smul, Matrix.conjTranspose_sub,
+      Matrix.smul_mul, Matrix.mul_add, Matrix.sub_mul, Matrix.smul_apply, Matrix.add_apply,
+      Matrix.sub_apply, Matrix.one_apply_eq, h_imm, hJ_zz, hJ_z'z', hJ_zz', hJ_z'z,
+      star_inv₀, star_mul', star_ofNat, h_starN, smul_eq_mul]
+    field_simp [h_Nne]
+    ring
+  have h21 : A₂ᴴ * J * A₁ = 1 := by
+    refine Matrix.ext fun () () ↦ ?_
+    simp only [A₁, A₂, Ez, Ez', J, Matrix.conjTranspose_add, Matrix.mul_smul,
+      Matrix.add_mul, Matrix.mul_sub, Matrix.smul_apply, Matrix.add_apply, Matrix.sub_apply,
+      Matrix.one_apply_eq, h_imm, hJ_zz, hJ_z'z', hJ_zz', hJ_z'z, smul_eq_mul]
+    field_simp [h_Nne]
+    ring
+  have h22 : A₂ᴴ * J * A₂ = 0 := by
+    refine Matrix.ext fun () () ↦ ?_
+    simp only [A₂, Ez, Ez', J, Matrix.conjTranspose_add, Matrix.add_mul, Matrix.mul_add,
+      Matrix.add_apply, Matrix.zero_apply, h_imm, hJ_zz, hJ_z'z', hJ_zz', hJ_z'z]
+    ring
+  have h13 : A₁ᴴ * J * Ej = 0 := by
+    refine Matrix.ext fun () x ↦ ?_
+    simp only [A₁, Ez, Ez', Ej, J, Matrix.conjTranspose_smul, Matrix.conjTranspose_sub,
+      Matrix.smul_mul, Matrix.sub_mul, Matrix.smul_apply, Matrix.sub_apply,
+      Matrix.zero_apply, h_imm, hJ_zj, hJ_z'j, sub_self, smul_zero]
+  have h23 : A₂ᴴ * J * Ej = 0 := by
+    refine Matrix.ext fun () x ↦ ?_
+    simp only [A₂, Ez, Ez', Ej, J, Matrix.conjTranspose_add, Matrix.add_mul,
+      Matrix.add_apply, Matrix.zero_apply, h_imm, hJ_zj, hJ_z'j, add_zero]
+  have h31 : Ejᴴ * J * A₁ = 0 := by
+    refine Matrix.ext fun x () ↦ ?_
+    simp only [A₁, Ez, Ez', Ej, J, Matrix.mul_smul, Matrix.mul_sub, Matrix.smul_apply,
+      Matrix.sub_apply, Matrix.zero_apply, h_imm, hJ_jz, hJ_jz', sub_self, smul_zero]
+  have h32 : Ejᴴ * J * A₂ = 0 := by
+    refine Matrix.ext fun x () ↦ ?_
+    simp only [A₂, Ez, Ez', Ej, J, Matrix.mul_add, Matrix.add_apply, Matrix.zero_apply,
+      h_imm, hJ_jz, hJ_jz', add_zero]
+  have h33 : Ejᴴ * J * Ej = (flipSum (stdSpace E X) (stdSpace E X₀)).J :=
+    Matrix.ext fun x y ↦ (h_imm j j x y).trans (hJ_jj x y)
+  change (fromCols (fromCols A₁ A₂) Ej)ᴴ * J * fromCols (fromCols A₁ A₂) Ej = _
+  simp only [conjTranspose_fromCols_eq_fromRows_conjTranspose, Matrix.fromRows_mul,
+    Matrix.mul_fromCols, h11, h12, h21, h22, h13, h23, h31, h32, h33]
+  refine Matrix.ext fun a b ↦ ?_
+  rcases a with (⟨⟩ | ⟨⟩) | a <;> rcases b with (⟨⟩ | ⟨⟩) | b <;>
+    simp [hyperbolicSum]
+
+omit [WeilData E] in
+private lemma middleDoubleLift_intertwines (hz : s / 2 < s) (hz' : s'' / 2 < s'')
+    (g : G E (1 : X → ℤˣ)) (k : G E (1 : X₀ → ℤˣ)) :
+    let z (_ : Unit) : ι ⊕ ι'' := Sum.inl (Y.indexEquiv (Sum.inr ⟨s / 2, hz⟩))
+    let z' (_ : Unit) : ι ⊕ ι'' := Sum.inr (Y''.indexEquiv (Sum.inr ⟨s'' / 2, hz'⟩))
+    let j := Sum.map (Y.indexEquiv ∘ Sum.inl) (Y''.indexEquiv ∘ Sum.inl)
+    let A := fromCols (fromCols ((2 * N)⁻¹ • (inclMatrix E z - inclMatrix E z'))
+      (inclMatrix E z + inclMatrix E z')) (inclMatrix E j)
+    fromBlocks (V.ratCoordMatrix (Y.inclX g)) 0 0 (V''.ratCoordMatrix (Y''.inclX k)) *
+        A.map toAdele =
+      A.map toAdele * (G.sum (s := hyperbolicSigns Unit) (1, G.sum (g.neg, k))).adeleMatrix := by
+  intro z z' j A
+  set M := fromBlocks (V.ratCoordMatrix (Y.inclX g)) 0 0 (V''.ratCoordMatrix (Y''.inclX k))
+  have hM_mul {α : Type} (f : α → ι ⊕ ι'') (a : ι ⊕ ι'') (b : α) :
+      (M * (inclMatrix E f).map toAdele) a b = M a (f b) := by
+    simp only [Matrix.mul_apply, Matrix.map_apply, inclMatrix, Matrix.submatrix_apply, id_eq,
+      Matrix.one_apply, apply_ite toAdele, map_one, map_zero, mul_ite, mul_one, mul_zero,
+      Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte]
+  have hM_z : M * (inclMatrix E z).map toAdele = (inclMatrix E z).map toAdele := by
+    refine Matrix.ext fun a () ↦ ?_
+    rw [hM_mul]
+    rcases a with a | a
+    · obtain ⟨u, rfl⟩ := Y.indexEquiv.surjective a
+      cases u <;> simp [M, z, ratCoordMatrix_inclX, gradedBlocks, inclMatrix, Matrix.one_apply]
+    · simp [M, z, inclMatrix]
+  have hM_z' : M * (inclMatrix E z').map toAdele = (inclMatrix E z').map toAdele := by
+    refine Matrix.ext fun a () ↦ ?_
+    rw [hM_mul]
+    rcases a with a | a
+    · simp [M, z', inclMatrix]
+    · obtain ⟨u, rfl⟩ := Y''.indexEquiv.surjective a
+      cases u <;> simp [M, z', ratCoordMatrix_inclX, gradedBlocks, inclMatrix, Matrix.one_apply]
+  have hM_j : M * (inclMatrix E j).map toAdele =
+      (inclMatrix E j).map toAdele * (G.sum (g.neg, k)).adeleMatrix := by
+    refine Matrix.ext fun a b ↦ ?_
+    rw [hM_mul]
+    rcases a with a | a <;> rcases b with b | b
+    · obtain ⟨u, rfl⟩ := Y.indexEquiv.surjective a
+      cases u <;> simp [M, j, ratCoordMatrix_inclX, gradedBlocks, inclMatrix, Matrix.mul_apply,
+        Matrix.one_apply]
+    · simp [M, j, inclMatrix, Matrix.mul_apply, Matrix.one_apply]
+    · simp [M, j, inclMatrix, Matrix.mul_apply, Matrix.one_apply]
+    · obtain ⟨u, rfl⟩ := Y''.indexEquiv.surjective a
+      cases u <;> simp [M, j, ratCoordMatrix_inclX, gradedBlocks, inclMatrix, Matrix.mul_apply,
+        Matrix.one_apply]
+  have h_rhs : (G.sum (s := hyperbolicSigns Unit) (1, G.sum (g.neg, k))).adeleMatrix =
+      fromBlocks (1 : Matrix (Unit ⊕ Unit) (Unit ⊕ Unit) (𝔸 E)) 0 0
+        (G.sum (g.neg, k)).adeleMatrix := by
+    simp
+  have h_map_A₁ : ((2 * N)⁻¹ • (inclMatrix E z - inclMatrix E z')).map toAdele =
+      toAdele (2 * N)⁻¹ • ((inclMatrix E z).map toAdele - (inclMatrix E z').map toAdele) :=
+    Matrix.ext fun _ _ ↦ by simp
+  have h_map_A₂ : (inclMatrix E z + inclMatrix E z').map toAdele =
+      (inclMatrix E z).map toAdele + (inclMatrix E z').map toAdele :=
+    Matrix.ext fun _ _ ↦ map_add toAdele _ _
+  dsimp only [A]
+  rw [h_rhs, fromCols_map, fromCols_map, h_map_A₁, h_map_A₂, Matrix.mul_fromCols,
+    Matrix.mul_fromCols, Matrix.fromCols_mul_fromBlocks, Matrix.mul_one, Matrix.mul_zero,
+    Matrix.mul_zero, add_zero, zero_add, Matrix.mul_smul, Matrix.mul_sub, Matrix.mul_add,
+    hM_z, hM_z', hM_j]
+
+omit [WeilData E] [Fintype X₀] in
+private lemma middleDoubleLift_stackedStringMap_apply (h_string : HasConsecutiveStrings Y Y' Y'')
+    (hz : s / 2 < s) (hz' : s'' / 2 < s'') (hg : s'' / 2 < s')
+    (a : (Unit ⊕ Unit) ⊕ X ⊕ X₀) (l : ι') :
+    let z (_ : Unit) : ι ⊕ ι'' := Sum.inl (Y.indexEquiv (Sum.inr ⟨s / 2, hz⟩))
+    let z' (_ : Unit) : ι ⊕ ι'' := Sum.inr (Y''.indexEquiv (Sum.inr ⟨s'' / 2, hz'⟩))
+    let j := Sum.map (Y.indexEquiv ∘ Sum.inl) (Y''.indexEquiv ∘ Sum.inl)
+    let A := fromCols (fromCols ((2 * N)⁻¹ • (inclMatrix E z - inclMatrix E z'))
+      (inclMatrix E z + inclMatrix E z')) (inclMatrix E j)
+    stackedStringMap Y Y' Y'' ((z ⊕ᵥ z' ⊕ᵥ j) a) l =
+      ∑ k : Unit, if l = Y'.indexEquiv (Sum.inr ⟨s'' / 2, hg⟩) then
+        toAdele (A ((z ⊕ᵥ z' ⊕ᵥ j) a) (Sum.inl (Sum.inr k)) * Y'.genericConst) else 0 := by
+  intro z z' j A
+  have h_odd : Odd s := h_string.odd_length
+  have h_middle : s' = s - 1 := h_string.length_middle
+  have h_last : s'' = s' - 1 := h_string.length_last
+  have h_const : Y'.genericConst = Y.genericConst := h_string.c_eq
+  have h_starN : star N = N := Y.N_ne_zero_and_star_eq.2
+  have h_Nne : N ≠ 0 := Y.N_ne_zero_and_star_eq.1
+  have h0 : toAdele (0 : E) = 0 := RingHom.map_zero toAdele
+  obtain ⟨k₀, hk₀⟩ := h_string.odd_length
+  obtain ⟨u, rfl⟩ := Y'.indexEquiv.surjective l
+  rcases a with (⟨⟩ | ⟨⟩) | x | x₀ <;> rcases u with u | u
+  · simp [z, stackedStringMap, Y.formAdjoint_apply Y', stringMap, gradedBlocks,
+      stringReversal, h0]
+  · have hrev_z : (⟨s / 2, hz⟩ : Fin s).rev = ⟨s / 2, hz⟩ :=
+      Fin.ext (by dsimp [Fin.rev]; omega)
+    have hrev_u : (u.rev : ℕ) = s / 2 ↔ (u : ℕ) = s'' / 2 := by
+      dsimp [Fin.rev]; omega
+    simp only [Sum.elim_inl, stackedStringMap, fromRows_apply_inl,
+      Y.formAdjoint_apply Y', stringMap, stringReversal, gradedGram, gradedBlocks,
+      Matrix.map_apply, Matrix.submatrix_apply, Equiv.symm_apply_apply, Sum.map_inr,
+      fromBlocks_apply₂₂, Matrix.of_apply, Equiv.apply_eq_iff_eq, Sum.inr.injEq, Fin.ext_iff,
+      Finset.univ_unique, Finset.sum_singleton, z, z', A, fromCols_apply_inl,
+      fromCols_apply_inr, Matrix.add_apply, inclMatrix, Matrix.one_apply, id_eq, hrev_z, hrev_u,
+      h_const, reduceCtorEq, ↓reduceIte, add_zero, one_mul]
+    by_cases hu : (u : ℕ) = s'' / 2
+    · have h2 : 2 * (s / 2) + 1 = s := by omega
+      have hiff : ¬(Odd s ↔ s < s) := by simp [h_odd]
+      have h_eq : (u.rev : ℕ) ≠ s'' / 2 := by dsimp [Fin.rev]; omega
+      simp only [hu, ↓reduceIte, h2, star_toAdele, ← RingHom.map_mul]
+      refine congrArg toAdele ?_
+      have h_star_c : star (Y.genericConst : E) = Y.genericConst := Y.genericConst.2.2
+      simp only [star_mul', star_neg, h_starN]
+      rw [ite_eq_right hiff, ite_eq_right h_eq, h_star_c]
+      field_simp [h_Nne]
+    · simp only [hu, ↓reduceIte, h0, star_zero, mul_zero, zero_mul]
+  · simp [z', stackedStringMap, stringMap, gradedBlocks, h0]
+  · simp only [Sum.elim_inl, Sum.elim_inr, stackedStringMap, fromRows_apply_inr,
+      stringMap, Matrix.map_apply, Matrix.submatrix_apply, Equiv.symm_apply_apply,
+      fromBlocks_apply₂₂, Matrix.of_apply, Equiv.apply_eq_iff_eq, Sum.inr.injEq,
+      Fin.ext_iff, Finset.univ_unique, Finset.sum_singleton, z, z', A,
+      fromCols_apply_inl, fromCols_apply_inr, Matrix.add_apply, inclMatrix,
+      Matrix.one_apply, id_eq, reduceCtorEq, ↓reduceIte, zero_add, one_mul]
+    by_cases hu : (u : ℕ) = s'' / 2
+    · have h1 : 2 * (s'' / 2) + 1 ≠ s' := by omega
+      have h2 : ¬(Odd s' ↔ 2 * (s'' / 2) + 1 < s') := by
+        have hlt : 2 * (s'' / 2) + 1 < s' := by omega
+        have hev : ¬Odd s' := by rw [Nat.not_odd_iff_even]; exact ⟨k₀, by omega⟩
+        simp [hlt, hev]
+      simp only [hu, ↓reduceIte, h1, h2, mul_one]
+    · have hu' : s'' / 2 ≠ (u : ℕ) := Ne.symm hu
+      simp only [hu, hu', ↓reduceIte, h0]
+  · simp [j, z, z', stackedStringMap, Y.formAdjoint_apply Y', stringMap, gradedBlocks,
+      stringReversal, h0]
+  · simp [A, j, z, z', stackedStringMap, Y.formAdjoint_apply Y', stringMap, gradedBlocks,
+      stringReversal, inclMatrix, h0]
+  · simp [j, z, z', stackedStringMap, stringMap, gradedBlocks, h0]
+  · simp [A, j, z, z', stackedStringMap, stringMap, gradedBlocks, inclMatrix, h0]
+
 /-- The pair data for strings of lengths s (odd, s ≠ 1), s − 1 and s − 2, with
 `Y'.genericConst = Y.genericConst` and `card ι + card ι''` even: one hyperbolic plane, spanned by
 the middle vectors z of Y and z' of Y'', is removed. -/
@@ -1016,94 +1565,226 @@ def middleDoubleLift (h_string : HasConsecutiveStrings Y Y' Y'') (h_card : Even 
   have h_odd : Odd s := h_string.odd_length
   have h_middle : s' = s - 1 := h_string.length_middle
   have h_last : s'' = s' - 1 := h_string.length_last
-  have h_const : Y'.genericConst = Y.genericConst := h_string.c_eq
+  have hz : s / 2 < s := by obtain ⟨k, hk⟩ := h_odd; omega
+  have hz' : s'' / 2 < s'' := by obtain ⟨k, hk⟩ := h_odd; omega
+  have hg : s'' / 2 < s' := by obtain ⟨k, hk⟩ := h_odd; omega
   -- `z` and `z'` are the middle string vectors of `V` and `V''`; `j` lists `X` and `X₀`.
-  let z (_ : Unit) : ι ⊕ ι'' := Sum.inl (Y.indexEquiv (Sum.inr ⟨s / 2, by grind⟩))
-  let z' (_ : Unit) : ι ⊕ ι'' := Sum.inr (Y''.indexEquiv (Sum.inr ⟨s'' / 2, by grind⟩))
+  let z (_ : Unit) : ι ⊕ ι'' := Sum.inl (Y.indexEquiv (Sum.inr ⟨s / 2, hz⟩))
+  let z' (_ : Unit) : ι ⊕ ι'' := Sum.inr (Y''.indexEquiv (Sum.inr ⟨s'' / 2, hz'⟩))
   let j := Sum.map (Y.indexEquiv ∘ Sum.inl) (Y''.indexEquiv ∘ Sum.inl)
   { zeroPart :=
       { index := ⟨z ⊕ᵥ z' ⊕ᵥ j, by simp [j, z, z', Injective]⟩
-        mem_range_index := by
-          simp [j, z, z', ↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv, Fin.ext_iff,
-            ← Embedding.toFun_eq_coe, sub_eq_zero]
-          grind
+        mem_range_index incl := by
+          exact middleDoubleLift_mem_range_index Y Y' Y'' h_string hz hz' incl
         -- The hyperbolic plane has the basis `(z - z') / (2 N)`, `z + z'`.
         incl := fromCols (fromCols ((2 * N)⁻¹ • (inclMatrix E z - inclMatrix E z'))
           (inclMatrix E z + inclMatrix E z')) (inclMatrix E j)
-        incl_eq_zero := by
-          simp [j, z, z', ↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv, inclMatrix,
-            Matrix.one_apply, sub_eq_zero]
-          grind
+        incl_eq_zero a b := by
+          exact middleDoubleLift_incl_eq_zero Y Y' Y'' h_string hz hz' a b
         -- `z` has norm `N` in `V⁻` and `z'` has norm `-N`.
         gram_incl := by
-          simp [j, z, z', Y.gram_eq, Y''.gram_eq, inclMatrix,
-            conjTranspose_fromCols_eq_fromRows_conjTranspose, flipSpace, gradedGram, hyperbolicSum,
-            ← Matrix.ext_iff, Matrix.mul_apply, Matrix.one_apply]
-          grind [Y.N_ne_zero_and_star_eq]
-        grade_add_eq_zero := by
-          simp [↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv, Y.gram_eq, Y''.gram_eq,
-            flipSpace, gradedGram]
-          grind }
+          exact middleDoubleLift_gram_incl Y Y' Y'' h_string hz hz'
+        grade_add_eq_zero a b := by exact flipSum_grade_add_eq_zero Y Y'' a b }
     toHasConsecutiveStrings := h_string
     even_card_add := h_card
     embX := MonoidHom.id (G E (1 : X₀ → ℤˣ))
     det_embX := by simp
-    intertwines := by
-      simp [j, z, z', ↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv,
-        ratCoordMatrix_inclX, inclMatrix, fromCols_map, ← Matrix.ext_iff, Matrix.mul_apply,
-        Matrix.one_apply]
-    gradeOne := ⟨fun _ ↦ ⟨Y'.indexEquiv (Sum.inr ⟨s'' / 2, by grind⟩), by grind [gradeOf]⟩,
+    intertwines g k := by exact middleDoubleLift_intertwines Y Y'' hz hz' g k
+    gradeOne := ⟨fun _ ↦ ⟨Y'.indexEquiv (Sum.inr ⟨s'' / 2, hg⟩), by
+        simp only [gradeOf, Equiv.symm_apply_apply, Sum.elim_inr]
+        obtain ⟨k, hk⟩ := h_odd; omega⟩,
       by simp [Injective]⟩
-    stackedStringMap_apply := by
-      simp [j, z, z', ↓reindex_equiv Y'.indexEquiv, ↓Y.formAdjoint_apply Y', apply_ite star,
-        stackedStringMap, stringMap, ← Embedding.toFun_eq_coe, inclMatrix, Matrix.one_apply,
-        gradedGram, stringReversal]
-      grind [Y.N_ne_zero_and_star_eq] }
+    stackedStringMap_apply a l := by
+      exact middleDoubleLift_stackedStringMap_apply Y Y' Y'' h_string hz hz' hg a l }
+
+omit [WeilData E] [Fintype X] [Fintype X'] [Fintype X₀] in
+private lemma lastDoubleLift_mem_range_index (h_string : HasConsecutiveStrings Y Y' Y'')
+    (hs : s = 1) (incl : ι ⊕ ι'') :
+    let j := (isEmptyElim : Empty ⊕ Empty → ι ⊕ ι'') ⊕ᵥ (Sum.inl ∘ Y.indexEquiv ∘ Sum.inl ⊕ᵥ
+      (Sum.inr ∘ Y''.indexEquiv ∘ Sum.inl ⊕ᵥ
+        fun _ : Unit ↦ Sum.inl (Y.indexEquiv (Sum.inr ⟨0, hs.ge⟩))))
+    incl ∈ Set.range j ↔ (Y.gradeOf ⊕ᵥ Y''.gradeOf) incl = 0 := by
+  have h_middle : s' = s - 1 := h_string.length_middle
+  have h_last : s'' = s' - 1 := h_string.length_last
+  revert incl
+  simp [↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv, sub_eq_zero]
+  grind
+
+omit [WeilData E] [Fintype X] [Fintype X'] [Fintype X₀] in
+private lemma lastDoubleLift_incl_eq_zero (h_string : HasConsecutiveStrings Y Y' Y'')
+    (hs : s = 1) (a : ι ⊕ ι'') (b : (Empty ⊕ Empty) ⊕ X ⊕ X₀ ⊕ Unit) :
+    let j := (isEmptyElim : Empty ⊕ Empty → ι ⊕ ι'') ⊕ᵥ (Sum.inl ∘ Y.indexEquiv ∘ Sum.inl ⊕ᵥ
+      (Sum.inr ∘ Y''.indexEquiv ∘ Sum.inl ⊕ᵥ
+        fun _ : Unit ↦ Sum.inl (Y.indexEquiv (Sum.inr ⟨0, hs.ge⟩))))
+    (Y.gradeOf ⊕ᵥ Y''.gradeOf) a ≠ 0 →
+      (of fun a b ↦ if a = j b then if b = Sum.inr (Sum.inr (Sum.inr ())) then p⁻¹ else 1 else 0)
+        a b = 0 := by
+  have h_middle : s' = s - 1 := h_string.length_middle
+  have h_last : s'' = s' - 1 := h_string.length_last
+  revert a b
+  simp [↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv, sub_eq_zero]
+  grind
+
+private lemma lastDoubleLift_gram_incl (hp : p * star p = N) (hs : s = 1) :
+    let j := (isEmptyElim : Empty ⊕ Empty → ι ⊕ ι'') ⊕ᵥ (Sum.inl ∘ Y.indexEquiv ∘ Sum.inl ⊕ᵥ
+      (Sum.inr ∘ Y''.indexEquiv ∘ Sum.inl ⊕ᵥ
+        fun _ : Unit ↦ Sum.inl (Y.indexEquiv (Sum.inr ⟨0, hs.ge⟩))))
+    let A : Matrix (ι ⊕ ι'') ((Empty ⊕ Empty) ⊕ X ⊕ X₀ ⊕ Unit) E :=
+      of fun a b ↦ if a = j b then if b = Sum.inr (Sum.inr (Sum.inr ())) then p⁻¹ else 1 else 0
+    Aᴴ * (flipSum V V'').J * A =
+      (hyperbolicSum Empty (flipSum (stdSpace E X) (stdSpace E (X₀ ⊕ Unit)))).J := by
+  intro j A
+  let c : (Empty ⊕ Empty) ⊕ X ⊕ X₀ ⊕ Unit → E :=
+    fun b ↦ if b = Sum.inr (Sum.inr (Sum.inr ())) then p⁻¹ else 1
+  have h_entry (a b : (Empty ⊕ Empty) ⊕ X ⊕ X₀ ⊕ Unit) :
+      ((of fun r c' ↦ if r = j c' then c c' else 0)ᴴ * (flipSum V V'').J *
+        (of fun r c' ↦ if r = j c' then c c' else 0)) a b =
+        star (c a) * (flipSum V V'').J (j a) (j b) * c b := by
+    simp only [Matrix.mul_apply, Matrix.conjTranspose_apply, Matrix.of_apply,
+      apply_ite star, star_zero, ite_mul, zero_mul, mul_ite, mul_zero,
+      Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte]
+  refine Matrix.ext fun a b ↦ ?_
+  change ((of fun r c' ↦ if r = j c' then c c' else 0)ᴴ * (flipSum V V'').J *
+    (of fun r c' ↦ if r = j c' then c c' else 0)) a b = _
+  rw [h_entry]
+  rcases a with (e | e) | a | a | ⟨⟩
+  · exact e.elim
+  · exact e.elim
+  · rcases b with (e | e) | b | b | ⟨⟩
+    · exact e.elim
+    · exact e.elim
+    · simp [c, j, flipSpace, Y.gram_eq, gradedGram, gradedBlocks, hyperbolicSum,
+        Matrix.one_apply]
+    · simp [c, j, flipSpace, hyperbolicSum]
+    · simp [c, j, flipSpace, Y.gram_eq, gradedGram, gradedBlocks, hyperbolicSum]
+  · rcases b with (e | e) | b | b | ⟨⟩
+    · exact e.elim
+    · exact e.elim
+    · simp [c, j, flipSpace, hyperbolicSum]
+    · simp [c, j, flipSpace, Y''.gram_eq, gradedGram, gradedBlocks, hyperbolicSum,
+        Matrix.one_apply]
+    · simp [c, j, flipSpace, hyperbolicSum]
+  · rcases b with (e | e) | b | b | ⟨⟩
+    · exact e.elim
+    · exact e.elim
+    · simp [c, j, flipSpace, Y.gram_eq, gradedGram, gradedBlocks, hyperbolicSum]
+    · simp [c, j, flipSpace, hyperbolicSum]
+    · have hp_ne : p ≠ 0 := by
+        intro h0; rw [h0, zero_mul] at hp; exact Y.N_ne_zero_and_star_eq.1 hp.symm
+      have hsp_ne : star p ≠ 0 := by
+        intro h0; rw [h0, mul_zero] at hp; exact Y.N_ne_zero_and_star_eq.1 hp.symm
+      simp [c, j, flipSpace, Y.gram_eq, gradedGram, gradedBlocks, Fin.rev, hyperbolicSum,
+        hs, ← hp]
+      field_simp [hp_ne, hsp_ne]
+
+omit [WeilData E] in
+private lemma lastDoubleLift_intertwines (hs : s = 1)
+    (g : G E (1 : X → ℤˣ)) (k : G E (1 : X₀ → ℤˣ)) :
+    let j := (isEmptyElim : Empty ⊕ Empty → ι ⊕ ι'') ⊕ᵥ (Sum.inl ∘ Y.indexEquiv ∘ Sum.inl ⊕ᵥ
+      (Sum.inr ∘ Y''.indexEquiv ∘ Sum.inl ⊕ᵥ
+        fun _ : Unit ↦ Sum.inl (Y.indexEquiv (Sum.inr ⟨0, hs.ge⟩))))
+    let A : Matrix (ι ⊕ ι'') ((Empty ⊕ Empty) ⊕ X ⊕ X₀ ⊕ Unit) E :=
+      of fun a b ↦ if a = j b then if b = Sum.inr (Sum.inr (Sum.inr ())) then p⁻¹ else 1 else 0
+    fromBlocks (V.ratCoordMatrix (Y.inclX g)) 0 0 (V''.ratCoordMatrix (Y''.inclX k)) *
+        A.map toAdele =
+      A.map toAdele *
+        (G.sum (s := hyperbolicSigns Empty) (1, G.sum (g.neg,
+          ((G.blockEmb (e := Equiv.refl (X₀ ⊕ Unit)) Sum.elim_one_one.symm).comp
+            (MonoidHom.inl (G E (1 : X₀ → ℤˣ)) (G E (1 : Unit → ℤˣ)))) k))).adeleMatrix := by
+  intro j A
+  let c : (Empty ⊕ Empty) ⊕ X ⊕ X₀ ⊕ Unit → E :=
+    fun b ↦ if b = Sum.inr (Sum.inr (Sum.inr ())) then p⁻¹ else 1
+  have h_mul_incl (M : Matrix (ι ⊕ ι'') (ι ⊕ ι'') (𝔸 E)) (a : ι ⊕ ι'')
+      (b : (Empty ⊕ Empty) ⊕ X ⊕ X₀ ⊕ Unit) :
+      (M * (of fun r c' ↦ if r = j c' then c c' else 0).map toAdele) a b =
+        M a (j b) * toAdele (c b) := by
+    simp only [Matrix.mul_apply, Matrix.map_apply, Matrix.of_apply, apply_ite toAdele,
+      map_zero, mul_ite, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte]
+  have h_rhs :
+      (G.sum (s := hyperbolicSigns Empty) (1, G.sum (g.neg,
+        ((G.blockEmb (e := Equiv.refl (X₀ ⊕ Unit)) Sum.elim_one_one.symm).comp
+          (MonoidHom.inl (G E (1 : X₀ → ℤˣ)) (G E (1 : Unit → ℤˣ)))) k))).adeleMatrix =
+        fromBlocks (1 : Matrix (Empty ⊕ Empty) (Empty ⊕ Empty) (𝔸 E)) 0 0
+          (fromBlocks g.adeleMatrix 0 0 (fromBlocks k.adeleMatrix 0 0 1)) := by
+    simp [G.blockEmb]
+  rw [h_rhs]
+  refine Matrix.ext fun a b ↦ ?_
+  change (fromBlocks (V.ratCoordMatrix (Y.inclX g)) 0 0 (V''.ratCoordMatrix (Y''.inclX k)) *
+    (of fun r c' ↦ if r = j c' then c c' else 0).map toAdele) a b = _
+  rw [h_mul_incl]
+  rcases b with (e | e) | b | b | ⟨⟩
+  · exact e.elim
+  · exact e.elim
+  · rcases a with a | a
+    · obtain ⟨u, rfl⟩ := Y.indexEquiv.surjective a
+      cases u <;> simp [A, c, j, ratCoordMatrix_inclX, gradedBlocks, Matrix.mul_apply,
+        Finset.univ_eq_empty]
+    · simp [A, c, j, Matrix.mul_apply, Finset.univ_eq_empty]
+  · rcases a with a | a
+    · simp [A, c, j, Matrix.mul_apply, Finset.univ_eq_empty]
+    · obtain ⟨u, rfl⟩ := Y''.indexEquiv.surjective a
+      cases u <;> simp [A, c, j, ratCoordMatrix_inclX, gradedBlocks, Matrix.mul_apply,
+        Finset.univ_eq_empty]
+  · rcases a with a | a
+    · obtain ⟨u, rfl⟩ := Y.indexEquiv.surjective a
+      cases u <;> simp [A, c, j, ratCoordMatrix_inclX, gradedBlocks, Matrix.mul_apply,
+        Matrix.one_apply, apply_ite toAdele, Finset.univ_eq_empty]
+    · simp [A, c, j, Matrix.mul_apply, Finset.univ_eq_empty]
+
+omit [WeilData E] [Fintype X₀] in
+private lemma lastDoubleLift_stackedStringMap_apply (h_string : HasConsecutiveStrings Y Y' Y'')
+    (hs : s = 1) (a : (Empty ⊕ Empty) ⊕ X ⊕ X₀ ⊕ Unit) (l : ι') :
+    let j := (isEmptyElim : Empty ⊕ Empty → ι ⊕ ι'') ⊕ᵥ (Sum.inl ∘ Y.indexEquiv ∘ Sum.inl ⊕ᵥ
+      (Sum.inr ∘ Y''.indexEquiv ∘ Sum.inl ⊕ᵥ
+        fun _ : Unit ↦ Sum.inl (Y.indexEquiv (Sum.inr ⟨0, hs.ge⟩))))
+    let A : Matrix (ι ⊕ ι'') ((Empty ⊕ Empty) ⊕ X ⊕ X₀ ⊕ Unit) E :=
+      of fun a b ↦ if a = j b then if b = Sum.inr (Sum.inr (Sum.inr ())) then p⁻¹ else 1 else 0
+    stackedStringMap Y Y' Y'' (j a) l =
+      ∑ k : Empty, if l = (Function.Embedding.ofIsEmpty (β := {l // Y'.gradeOf l = 1}) k).1 then
+        toAdele (A (j a) (Sum.inl (Sum.inr k)) * Y'.genericConst) else 0 := by
+  intro j A
+  have h_middle : s' = s - 1 := h_string.length_middle
+  obtain ⟨u, rfl⟩ := Y'.indexEquiv.surjective l
+  rcases u with u | u
+  · rcases a with (e | e) | a | a | ⟨⟩
+    · exact e.elim
+    · exact e.elim
+    · simp [j, stackedStringMap, Y.formAdjoint_apply Y', stringMap, gradedBlocks,
+        stringReversal, Finset.univ_eq_empty]
+    · simp [j, stackedStringMap, stringMap, gradedBlocks, Finset.univ_eq_empty]
+    · simp [j, stackedStringMap, Y.formAdjoint_apply Y', stringMap, gradedBlocks,
+        stringReversal, Finset.univ_eq_empty]
+  · exact absurd u.2 (by omega)
 
 /-- The pair data for s = 1 (so Y' and Y'' have no string), N = pp̄,
 `Y'.genericConst = Y.genericConst` and `card ι + card ι''` even: no plane is removed, and z/p, z the
 string vector of Y, is adjoined to X₀ as last basis vector of X''. -/
 def lastDoubleLift (h_string : HasConsecutiveStrings Y Y' Y'') (h_card : Even (card ι + card ι''))
     (hp : p * star p = N) (hs : s = 1) : DoubleLiftData (X₀ ⊕ Unit) Empty Y Y' Y'' :=
-  have h_middle : s' = s - 1 := h_string.length_middle
-  have h_last : s'' = s' - 1 := h_string.length_last
   -- All indices have weight zero here: those of `X`, those of `X₀` and the string vector of `V`.
   let j := isEmptyElim ⊕ᵥ (Sum.inl ∘ Y.indexEquiv ∘ Sum.inl ⊕ᵥ (Sum.inr ∘
     Y''.indexEquiv ∘ Sum.inl ⊕ᵥ fun _ : Unit ↦ Sum.inl (Y.indexEquiv (Sum.inr ⟨0, hs.ge⟩))))
   { zeroPart :=
       { index := ⟨j, by simp [j, Injective]⟩
-        mem_range_index := by
-          simp [j, ↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv,
-            ← Embedding.toFun_eq_coe, sub_eq_zero]
-          grind
+        mem_range_index incl := by
+          exact lastDoubleLift_mem_range_index Y Y' Y'' h_string hs incl
         incl :=
           of fun a b ↦ if a = j b then if b = Sum.inr (Sum.inr (Sum.inr ())) then p⁻¹ else 1 else 0
-        incl_eq_zero := by
-          simp [j, ↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv, sub_eq_zero]
-          grind
+        incl_eq_zero a b := by
+          exact lastDoubleLift_incl_eq_zero Y Y' Y'' h_string hs a b
         -- The string vector has norm `N = p * star p` in `V⁻`; divided by `p` it has norm `1`.
-        gram_incl := by
-          simp [j, Y.gram_eq, Y''.gram_eq, apply_ite star, flipSpace, gradedGram, hyperbolicSum,
-            ← Matrix.ext_iff, Matrix.mul_apply, Matrix.one_apply]
-          grind [Y.N_ne_zero_and_star_eq]
-        grade_add_eq_zero := by
-          simp [↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv, Y.gram_eq, Y''.gram_eq,
-            flipSpace, gradedGram]
-          grind }
+        gram_incl := by exact lastDoubleLift_gram_incl Y Y'' hp hs
+        grade_add_eq_zero a b := by exact flipSum_grade_add_eq_zero Y Y'' a b }
     toHasConsecutiveStrings := h_string
     even_card_add := h_card
     -- `k` acts on `X₀` and fixes the last basis vector.
     embX := MonoidHom.comp (G.blockEmb (e := Equiv.refl (X₀ ⊕ Unit)) Sum.elim_one_one.symm)
       (MonoidHom.inl (G E (1 : X₀ → ℤˣ)) (G E (1 : Unit → ℤˣ)))
     det_embX := by simp [G.blockEmb, Subtype.ext_iff]
-    intertwines := by
-      simp [j, ↓reindex_equiv Y.indexEquiv, ↓reindex_equiv Y''.indexEquiv, Finset.univ_eq_empty,
-        ratCoordMatrix_inclX, G.blockEmb, ← Matrix.ext_iff, Matrix.mul_apply, Matrix.one_apply]
+    intertwines g k := by exact lastDoubleLift_intertwines Y Y'' hs g k
     gradeOne := .ofIsEmpty
-    stackedStringMap_apply := by
-      simp [j, ↓reindex_equiv Y'.indexEquiv, ↓Y.formAdjoint_apply Y', Finset.univ_eq_empty,
-        stackedStringMap, stringMap, ← Embedding.toFun_eq_coe, gradedGram, stringReversal]
-      grind }
+    stackedStringMap_apply a l := by
+      exact lastDoubleLift_stackedStringMap_apply Y Y' Y'' h_string hs a l }
 
 end EdgePair
 
@@ -1141,19 +1822,38 @@ def lastGrading {M : ℕ} (e : D.m = M) : Grading (D.spaceY M) D.N (D.InitIndex 
         N_ne_zero_and_star_eq := by simp [ne]
         genericConst := ⟨1, by simp⟩ }
 
+private lemma doubleLiftEvalY_even_card_middle (D : Data P) {i : ℕ} (_hi : i < D.ϱ) :
+    Even (Fintype.card (D.Y (2 * i)) + Fintype.card (D.Y (2 * i + 2))) := by
+  simp; grind
+
+private lemma doubleLiftEvalY_even_card_last (D : Data P) {i : ℕ} (hi : D.ϱ = i) :
+    Even (Fintype.card (D.Y (2 * i)) + Fintype.card (D.Y (2 * i + 2))) := by
+  simp; grind
+
+private lemma doubleLiftEvalY_m_eq (D : Data P) {i : ℕ} (hi : D.ϱ = i) : D.m = 2 * i + 2 := by
+  grind
+
+private lemma doubleLiftEvalY_piN_mul_star (D : Data P) :
+    (D.piN : D.E) * star (D.piN : D.E) = D.N := by
+  exact_mod_cast D.piN_mul_star
+
 /-- The finite evaluation `New.Seesaw.DoubleLiftData.finEval` of the double lift
 Y_{2i} → Y_{2i+1} → Y_{2i+2}: for the middle double lift if i < ϱ, the last double lift if i = ϱ,
 and 0 beyond. -/
 def doubleLiftEvalY (i : ℕ) :=
-  if _ : i < D.ϱ then
-    (middleDoubleLift (D.gradingY (2 * i)) (D.gradingY (2 * i + 1)) (D.gradingY (2 * i + 2))
-      ⟨by grind, by grind, by grind, by simp [gradingY]⟩ (by simp; grind) (by grind)).finEval
-  else if _ : D.ϱ = i then
+  if hi : i < D.ϱ then
+    (middleDoubleLift (D.gradingY (2 * i) (by omega)) (D.gradingY (2 * i + 1) (by omega))
+      (D.gradingY (2 * i + 2) (by omega))
+      ⟨⟨D.ϱ - i, by omega⟩, by omega, by omega, rfl⟩
+      (by exact doubleLiftEvalY_even_card_middle D hi) (by omega)).finEval
+  else if hi : D.ϱ = i then
     -- the last pair, which ends in the space with the trivial grading
-    (lastDoubleLift (p := (D.piN : D.E)) (D.gradingY (2 * i)) (D.gradingY (2 * i + 1))
-      (D.lastGrading (M := 2 * i + 2) (by grind))
-      ⟨by grind, by grind, by grind, by simp [gradingY]⟩ (by simp; grind)
-      (by exact_mod_cast D.piN_mul_star) (by grind)).finEval
+    (lastDoubleLift (p := (D.piN : D.E)) (D.gradingY (2 * i) (by omega))
+      (D.gradingY (2 * i + 1) (by omega))
+      (D.lastGrading (M := 2 * i + 2) (by exact doubleLiftEvalY_m_eq D hi))
+      ⟨⟨0, by omega⟩, by omega, by omega, rfl⟩
+      (by exact doubleLiftEvalY_even_card_last D hi)
+      (by exact doubleLiftEvalY_piN_mul_star D) (by omega)).finEval
   else 0
 
 /-- The natural number `M ^ (f n²)`, with `M = p₀ p₁`, `f` the number of infinite places of `E` and
