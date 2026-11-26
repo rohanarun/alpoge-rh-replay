@@ -79,7 +79,12 @@ lemma IsRelAffine.preimage (h : IsRelAffine U.ι) (f : X ⟶ Y) : IsRelAffine (U
   -- the preimage of `U` is its pull-back along `f`
   refine h.baseChange (?_ : IsPullback (fromPreimage U f) (U.preimage f).ι U.ι f)
   rw [isPullback_iff]
-  aesop (add simp [ExistsUnique, toFunctor])
+  refine ⟨fun _ _ ↦ rfl, fun B w ⟨x, hx⟩ hwx ↦ ?_⟩
+  have hw : w ∈ (U.preimage f).obj B := by
+    change f.app B w ∈ U.obj B
+    rw [← hwx]
+    exact hx
+  exact ⟨⟨w, hw⟩, ⟨rfl, Subtype.ext hwx.symm⟩, fun z hz ↦ Subtype.ext hz.1⟩
 
 /-- Pull-back along `(f, -g) : M ⟶ N ⊞ N'` sends the class with components `x`, `y` to
 `f^* x - g^* y`. -/
@@ -378,6 +383,24 @@ private lemma bijective_prod_map_sup_span_of_isCohomDense {U : Ideal R → Subfu
       (hU.mem_sup_iff.mp hz_e).right (hU.mem_sup_iff.mp hz_e').right
     exact Subsingleton.elim 0 1
 
+private lemma bijective_prod_map_sup_span_self {U : Ideal R → Subfunctor Y}
+    (hU : IsZeroLocusFamily U) {e : R}
+    (h_dense : IsCohomDense (locConstCoeff Λ) ((U (span {e}) ⊔ U (span {1 - e})).whisker testIncl))
+    (a : Ideal R) (n : ℕ) :
+    Bijective
+      ((TestCohomology.map Λ
+          (homOfLe (hU.antitone (le_sup_left : a ≤ a ⊔ span {e}))) n).prod
+        (TestCohomology.map Λ
+          (homOfLe (hU.antitone (le_sup_left : a ≤ a ⊔ span {1 - e}))) n)) := by
+  refine TestCohomology.mayer_vietoris_bijective _ _ ?_ n ?_
+  · refine h_dense.of_preimage_le (mapOnTests (U a).ι) fun A z hz ↦ ?_
+    exact hz.imp (fun hz_e ↦ hU.mem_sup_iff.mpr ⟨z.property, hz_e⟩)
+      fun hz_e' ↦ hU.mem_sup_iff.mpr ⟨z.property, hz_e'⟩
+  · rintro B ⟨z, hz_e, hz_e'⟩
+    have h_subsingleton : Subsingleton B := hU.subsingleton_of_mem_span_of_mem_span_one_sub
+      (hU.mem_sup_iff.mp hz_e).right (hU.mem_sup_iff.mp hz_e').right
+    exact Subsingleton.elim 0 1
+
 /-- Over a zero locus `U a`, either the pull-back `Hⁿ(U a) → Hⁿ(u⁻¹(U a))` along `u : X ⟶ Y` is
 bijective, or an idempotent `e` splits `a`: neither `e` nor `1 - e` lies in `a`. The first case
 holds for `a = ⊤`, where both groups vanish, and, by `h_conn`, for proper `a` that no idempotent
@@ -432,14 +455,16 @@ lemma IsTestCohomEquiv.of_connected (hX : IsCohomContinuous Λ X)
   let K : Ideal R ⥤ AddCommGrpCat := TestCohomology.antitoneFamily (hU.antitone_preimage u) Λ n
   let π (a : Ideal R) : G.obj a →+ K.obj a := TestCohomology.map Λ (fromPreimage (U a) u) n
   change Bijective (π ⊥)
-  have h_nat {a b : Ideal R} (f : a ⟶ b) (x : G.obj a) : K.map f (π a x) = π b (G.map f x) :=
-    -- both sides are the pull-back along the composite `u⁻¹(U b) → U a`
-    calc K.map f (π a x)
-      _ = TestCohomology.map Λ
-            (homOfLe (hU.antitone_preimage u f.le) ≫ fromPreimage (U a) u) n x :=
-        (TestCohomology.map_comp ..).symm
-      _ = TestCohomology.map Λ (fromPreimage (U b) u ≫ homOfLe (hU.antitone f.le)) n x := rfl
-      _ = π b (G.map f x) := TestCohomology.map_comp ..
+  have h_nat {a b : Ideal R} (f : a ⟶ b) (x : G.obj a) : K.map f (π a x) = π b (G.map f x) := by
+    have h_sq : homOfLe (hU.antitone_preimage u f.le) ≫ fromPreimage (U a) u =
+        fromPreimage (U b) u ≫ homOfLe (hU.antitone f.le) := by
+      ext A z
+      rfl
+    change TestCohomology.map Λ (homOfLe (hU.antitone_preimage u f.le)) n
+        (TestCohomology.map Λ (fromPreimage (U a) u) n x) =
+      TestCohomology.map Λ (fromPreimage (U b) u) n
+        (TestCohomology.map Λ (homOfLe (hU.antitone f.le)) n x)
+    rw [← TestCohomology.map_comp, h_sq, TestCohomology.map_comp]
   -- For directed `c`, the vertex is `sSup c`: `U (sSup c)` contains the intersection of the
   -- `U a`, so continuity makes the cohomology over it the colimit.
   have h_colim : ∀ {c : Set (Ideal R)} [IsDirectedOrder c] [Nonempty c],
@@ -458,14 +483,13 @@ lemma IsTestCohomEquiv.of_connected (hX : IsCohomContinuous Λ X)
     obtain h_bij | ⟨e, he_idem, he_notMem, he'_notMem⟩ :=
       bijective_map_fromPreimage_or_exists_isIdempotentElem hU u h_conn a n
     · exact (map_eq_zero_iff (π a) h_bij.injective).mp hx
-    · -- `x` dies on both pieces, whose ideals are strictly larger than `a`; the preimage of
-      -- `U a` along `𝟙 Y` is `U a` itself
+    · -- `x` dies on both pieces, whose ideals are strictly larger than `a`
       have h_lt_e : a < a ⊔ span {e} := by simpa using he_notMem
       have h_lt_e' : a < a ⊔ span {1 - e} := by simpa using he'_notMem
       have h_restrict_zero : (G.map h_lt_e.le.hom x, G.map h_lt_e'.le.hom x) = 0 :=
         Prod.ext (h_later _ h_lt_e) (h_later _ h_lt_e')
       exact (map_eq_zero_iff _
-        (bijective_prod_map_sup_span_of_isCohomDense hU (h_dense e he_idem) (𝟙 Y) a n).injective
+        (bijective_prod_map_sup_span_self hU (h_dense e he_idem) a n).injective
         (x := x)).mp h_restrict_zero
   · refine surjective_of_isFilteredColimit_of_exists_lift h_nat h_colim (fun a y h_later ↦ ?_) ⊥
     obtain h_bij | ⟨e, he_idem, he_notMem, he'_notMem⟩ :=
@@ -480,7 +504,7 @@ lemma IsTestCohomEquiv.of_connected (hX : IsCohomContinuous Λ X)
       obtain ⟨x₂, hx₂⟩ : ∃ x₂ : G.obj (a ⊔ span {1 - e}), π _ x₂ = K.map h_lt_e'.le.hom y :=
         h_later _ h_lt_e'
       obtain ⟨x, hx⟩ : ∃ x : G.obj a, (G.map h_lt_e.le.hom x, G.map h_lt_e'.le.hom x) = (x₁, x₂) :=
-        (bijective_prod_map_sup_span_of_isCohomDense hU (h_dense e he_idem) (𝟙 Y) a n).surjective
+        (bijective_prod_map_sup_span_self hU (h_dense e he_idem) a n).surjective
           (x₁, x₂)
       obtain ⟨rfl, rfl⟩ := Prod.mk.inj hx
       refine ⟨x,
@@ -758,6 +782,13 @@ lemma hasCohomDenseImage_of_surjective (h : IsProperOver s) (hY : IsProperOver (
     exact ⟨⟨u⟩, h.injective_map_valuationSubring O h_generic⟩
   exact h_dense.mono fun A _ ⟨u, hu⟩ ↦ ⟨_, (c.naturality_apply _ a).trans hu⟩
 
+private lemma lift_algebraicClosure {F L : Type} [Field F] [Field L] [IsAlgClosed L]
+    (l : F →+* L) :
+    ∃ k : AlgebraicClosure F →+* L, ∀ x : F, k (algebraMap F (AlgebraicClosure F) x) = l x := by
+  let : Algebra F L := l.toAlgebra
+  let k : AlgebraicClosure F →ₐ[F] L := IsAlgClosed.lift (R := F)
+  exact ⟨k.toRingHom, k.commutes⟩
+
 /-- Let `Z` be proper over `D` via `s`. Then there are a ring `P`, a point `ξ ∈ Z(P)` and a
 valuative lift `z` of `ξ`, meaning a point of `Z` over the product of the valuation rings of all
 places of `P` (a place is a prime of `P` with a valuation ring of its residue field containing the
@@ -787,7 +818,19 @@ lemma exists_valuativeLift_hasCohomDenseImage (h : IsProperOver s) :
         a := by
     have h_mem (d : D) :
         baseRingMap s (Z.map (ofHom (algebraMap T j.PlaceField)) a) d ∈ j.valuationSubring := by
-      simpa [ξ, IsScalarTower.algebraMap_apply T P j.PlaceField] using j.base_mem d
+      have h_eq : baseRingMap s (Z.map (ofHom (algebraMap T j.PlaceField)) a) d =
+          algebraMap P j.PlaceField (baseRingMap s ξ d) := by
+        have h1 : baseRingMap s (Z.map (ofHom (algebraMap T j.PlaceField)) a) d =
+            algebraMap T j.PlaceField (baseRingMap s a d) :=
+          congrFun (congrArg (fun f : D ⟶ of j.PlaceField ↦ ⇑f.hom)
+            (baseRingMap_map s (ofHom (algebraMap T j.PlaceField)) a)) d
+        have h2 : baseRingMap s ξ d = algebraMap T P (baseRingMap s a d) :=
+          congrFun (congrArg (fun f : D ⟶ P ↦ ⇑f.hom)
+            (baseRingMap_map s (ofHom (algebraMap T P)) a)) d
+        rw [h1, h2]
+        exact IsScalarTower.algebraMap_apply T P j.PlaceField (baseRingMap s a d)
+      rw [h_eq]
+      exact j.base_mem d
     exact ha _ _ h_mem
   choose u hu using h_lift
   let z : Z.obj (prodValuationRing (baseRingMap s ξ)) := Z.map (ofHom (.pi fun j ↦ (u j).hom)) a
@@ -811,11 +854,10 @@ lemma exists_valuativeLift_hasCohomDenseImage (h : IsProperOver s) :
   choose v hv using ha ⊤ y (by simp)
   choose q l hl using exists_algebraMap_residueField_comp_eq
     (v ≫ ofHom (ValuationSubring.subtype _))
-  algebraize [l.hom]
   -- `k` extends the map `l` from the residue field at `q` to its algebraic closure `K q`
-  let k : K q →ₐ[_] L := IsAlgClosed.lift (R := q.asIdeal.ResidueField)
+  obtain ⟨k, hk⟩ := lift_algebraicClosure l.hom
   choose p m hm using
-    exists_algebraMap_residueField_comp_eq (P := P) (ofHom (k.toRingHom.comp (evalRingHom K q)))
+    exists_algebraMap_residueField_comp_eq (P := P) (ofHom (k.comp (evalRingHom K q)))
   -- The place is the kernel `p` of that extension, with the trivial valuation ring.
   let j : ResiduePlace (baseRingMap s ξ) := ⟨p, ⊤, by simp⟩
   let π : of (∀ i : ResiduePlace (baseRingMap s ξ), i.PlaceField) ⟶ of L :=
@@ -824,9 +866,11 @@ lemma exists_valuativeLift_hasCohomDenseImage (h : IsProperOver s) :
   calc Z.map (toFieldProd ≫ π) z
     _ = Z.map π (Z.map (ofHom (algebraMap P _)) ξ) := by rw [map_comp_apply, hz]
     _ = y := by
-      simp_rw [ξ, ← hv, ← map_comp_apply, ← hl]
-      congr 3 with x
-      exact congr($hm _).trans (k.commutes _)
+      rw [← hv, ← map_comp_apply, ← map_comp_apply]
+      refine congrArg (fun f ↦ Z.map f a) ?_
+      rw [← hl]
+      ext x
+      exact congr($hm _).trans (hk _)
 
 /-- A functor of points that is proper over `D` has the continuity property `IsCohomContinuous`
 for filtered limits, with locally constant `Λ`-valued coefficients. -/
@@ -883,7 +927,16 @@ lemma New.Variety.IsProperOver.isCohomDense_of_coincidences {Λ : Ab}
         ∀ a ∈ I R ((P i).app R y) ((P j).app R y), f a = 0 :=
       (hI R _ _ B f).trans IsConcreteLE.le_iff
     -- both sides say that `f` kills `I (P i y) (P j y)` whenever `j ∈ ε i`
-    aesop (add simp [V, h_pair])
+    refine ⟨fun hy ↦ ⟨fun a ha ↦ ?_, fun _ h ↦ h.elim⟩, fun ⟨hy, _⟩ i j hij ↦ ?_⟩
+    · rcases Set.mem_iUnion.mp ha with ⟨i, ha⟩
+      rcases Set.mem_iUnion₂.mp ha with ⟨j, hij, ha'⟩
+      have h_eq : Z.map f ((P i).app R y) = Z.map f ((P j).app R y) := by
+        rw [← NatTrans.naturality_apply, ← NatTrans.naturality_apply]
+        exact hy i j hij
+      exact (h_pair i j).mp h_eq a ha'
+    · rw [NatTrans.naturality_apply, NatTrans.naturality_apply]
+      exact (h_pair i j).mpr fun a ha ↦
+        hy a (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion₂.mpr ⟨j, hij, ha⟩⟩)
   · -- A point `y` over `O` has the coincidences of its generic point `z`, as points of `Z` over `O`
     -- inject into points over the field; the locus of this pattern lies in `U` by `h_pattern`.
     let z : Y.obj (CommRingCat.of K) := Y.map (CommRingCat.ofHom O.subtype) y
@@ -955,6 +1008,39 @@ lemma New.Variety.IsGaloisCovering.isCohomDense_permutedPairs {R : CommRingCat}
   exact (hx (0, g * d) (1, g) h_z).symm
 
 open TensorProduct in
+private lemma New.Variety.ellAdicPull_transfer_alg {ℓ : ℕ} [ThePrime ℓ] (n : ℕ) {Δ : Type}
+    [Fintype Δ] [Nonempty Δ] {A B Q : AbFunctor TestRing} (fc : A ⟶ B) (m : A ⟶ Q) (l : Q ⟶ B)
+    (ν : Q ⟶ A) (fa : Δ → (A ⟶ A)) (h_ml : m ≫ l = fc) (h_mν : m ≫ ν = ∑ g : Δ, fa g)
+    (h_νc : ν ≫ fc = card Δ • l) (h_bij : Function.Bijective (ellAdicPull (ℓ := ℓ) n l)) :
+    Function.Injective (ellAdicPull (ℓ := ℓ) n fc) ∧
+      ∀ y : ℚ_[ℓ] ⊗[ℤ_[ℓ]] H A ellAdicCoeff n,
+        (∀ g : Δ, ellAdicPull (ℓ := ℓ) n (fa g) y = y) →
+        y ∈ range (ellAdicPull (ℓ := ℓ) n fc) := by
+  have hcard_ne : (card Δ : ℚ_[ℓ]) ≠ 0 := Nat.cast_ne_zero.mpr Fintype.card_ne_zero
+  let N := (card Δ : ℚ_[ℓ])⁻¹ • ellAdicPull (ℓ := ℓ) n ν
+  have h_left (x : ℚ_[ℓ] ⊗[ℤ_[ℓ]] H B ellAdicCoeff n) :
+      N (ellAdicPull (ℓ := ℓ) n fc x) = ellAdicPull (ℓ := ℓ) n l x := by
+    change (card Δ : ℚ_[ℓ])⁻¹ • ellAdicPull (ℓ := ℓ) n ν (ellAdicPull (ℓ := ℓ) n fc x) = _
+    rw [ellAdicPull.comp, h_νc, map_nsmul, LinearMap.smul_apply, ← Nat.cast_smul_eq_nsmul ℚ_[ℓ],
+      smul_smul, inv_mul_cancel₀ hcard_ne, one_smul]
+  refine ⟨fun x x' hx ↦ h_bij.injective ?_, fun y hy ↦ ?_⟩
+  · exact (h_left x).symm.trans ((congrArg N hx).trans (h_left x'))
+  · obtain ⟨x, hx⟩ := h_bij.surjective (N y)
+    refine ⟨x, ?_⟩
+    calc ellAdicPull (ℓ := ℓ) n fc x
+      _ = ellAdicPull (ℓ := ℓ) n m (ellAdicPull (ℓ := ℓ) n l x) := by
+          rw [ellAdicPull.comp, h_ml]
+      _ = ellAdicPull (ℓ := ℓ) n m (N y) := by rw [hx]
+      _ = (card Δ : ℚ_[ℓ])⁻¹ • ellAdicPull (ℓ := ℓ) n m (ellAdicPull (ℓ := ℓ) n ν y) :=
+          map_smul (ellAdicPull (ℓ := ℓ) n m) (card Δ : ℚ_[ℓ])⁻¹ _
+      _ = (card Δ : ℚ_[ℓ])⁻¹ • (∑ g : Δ, ellAdicPull (ℓ := ℓ) n (fa g) y) := by
+          rw [ellAdicPull.comp, h_mν, map_sum, LinearMap.sum_apply]
+      _ = (card Δ : ℚ_[ℓ])⁻¹ • (card Δ • y) := by
+          simp only [hy, Finset.sum_const, Finset.card_univ]
+      _ = y := by
+          rw [← Nat.cast_smul_eq_nsmul ℚ_[ℓ], smul_smul, inv_mul_cancel₀ hcard_ne, one_smul]
+
+open TensorProduct in
 /-- Let `c : W ⟶ Y` be a Galois covering of proper `R`-schemes with finite group `Δ` acting through
 `a` (`IsGaloisCovering`: `Δ` acts over `Y`, `c` is onto, and `Δ` acts simply transitively on the
 fibres over fields of characteristic zero), `Ω` the fixed algebraic closure of `ℚ` as an `R`-algebra
@@ -967,41 +1053,18 @@ lemma New.Variety.ellAdicCohom.transfer {R : CommRingCat} [Algebra R.carrier Ω]
     ∀ y : (ellAdicCohom (ℓ := ℓ) R Ω n).obj (Opposite.op W),
       (∀ g : Δ.toGrp, (ellAdicCohom (ℓ := ℓ) R Ω n).map (a g).asHom.op y = y) →
         y ∈ range ((ellAdicCohom (ℓ := ℓ) R Ω n).map c.op) := by
-  -- On the free abelian functors of points, `exists_transfer_map` factors `c = m ≫ l` and
-  -- `∑ g = m ≫ ν` with `ν ≫ c = |Δ| • l`. Two density conditions make `l^*` bijective; then
-  -- `N = |Δ|⁻¹ ν^*` has `N ∘ c^* = l^*`, and `m^* ∘ N` is the average over `Δ`.
-  -- each element of `Δ` acts over `Y`
   have h_comm (g : Δ.toGrp) :
       (geomPoints R Ω ⋙ onTests).map (a g).asHom ≫ (geomPoints R Ω ⋙ onTests).map c =
         (geomPoints R Ω ⋙ onTests).map c := by
     rw [← Functor.map_comp, h.comp_eq g]
   obtain ⟨Q, m, l, ν, h_ml, h_mν, h_νc, h_eqv⟩ := exists_transfer_map h_comm
-  dsimp [ellAdicCohom] at *
-  -- By `h_eqv`, `l` is an equivalence for `𝔽_ℓ`-coefficients, as two subfunctors are dense: the
-  -- image of `c`, and the pairs in `W ×_Y W` whose `Δ`-orbits agree up to a permutation.
   have h_bij : Function.Bijective (ellAdicPull (ℓ := ℓ) n l) :=
     (h_eqv (locConstCoeff ⟨ZMod ℓ⟩) (h.hasCohomDenseImage_geomPoints _)
       (h.isCohomDense_permutedPairs _)).bijective_ellAdicPull
-  let N : ℚ_[ℓ] ⊗[ℤ_[ℓ]] H (freeAb.obj (testIncl ⋙ (geomPoints R Ω).obj W)) ellAdicCoeff n →ₗ[ℚ_[ℓ]]
-      ℚ_[ℓ] ⊗[ℤ_[ℓ]] H Q ellAdicCoeff n :=
-    (card Δ : ℚ)⁻¹ • ellAdicPull n ν
-  have h_left
-      (x : ℚ_[ℓ] ⊗[ℤ_[ℓ]] H (freeAb.obj (testIncl ⋙ (geomPoints R Ω).obj Y)) ellAdicCoeff n) :
-      N (ellAdicPull n (freeAb.map (mapOnTests ((geomPoints R Ω).map c))) x) =
-        ellAdicPull n l x := by
-    simp [N, ellAdicPull.comp, ← Nat.cast_smul_eq_nsmul ℚ, h_νc]
-  refine ⟨fun x x' hx ↦ h_bij.injective ?_, fun y hy ↦ ?_⟩
-  · -- `l^* x = N (c^* x) = N (c^* x') = l^* x'`
-    exact (h_left x).symm.trans ((congrArg N hx).trans (h_left x'))
-  obtain ⟨x, hx⟩ : N y ∈ range (ellAdicPull n l) := h_bij.surjective (N y)
-  -- `c^* x = m^* (l^* x) = m^* (N y)` is the average of the `g^* y = y`
-  have h_pull : ellAdicPull n m (ellAdicPull n l x) = ellAdicPull n (m ≫ l) x :=
-    ellAdicPull.comp m l x
-  rw [h_ml] at h_pull
-  refine ⟨x, h_pull.symm.trans ?_⟩
-  have hy_fixed : ∀ g : Δ.toGrp,
-      ellAdicPull n (freeAb.map (testIncl.whiskerLeft ((geomPoints R Ω).map (a g).asHom))) y =
-        y := hy
-  simp [N, ellAdicPull.comp, ← Nat.cast_smul_eq_nsmul ℚ, hx, h_mν, hy_fixed]
+  dsimp only [ellAdicCohom, Functor.comp_obj, Functor.comp_map, Functor.op_obj, Functor.op_map,
+    Opposite.unop_op, Quiver.Hom.unop_op, ModuleCat.hom_ofHom]
+  let fc := freeAb.map (mapOnTests ((geomPoints R Ω).map c))
+  let fa : Δ.toGrp → _ := fun g ↦ freeAb.map (mapOnTests ((geomPoints R Ω).map (a g).asHom))
+  exact New.Variety.ellAdicPull_transfer_alg (ℓ := ℓ) n fc m l ν fa h_ml h_mν h_νc h_bij
 
 end Transfer
