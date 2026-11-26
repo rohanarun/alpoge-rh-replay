@@ -166,7 +166,7 @@ instance isAppellHumbert_hermitianForm : IsAppellHumbert L.hermitianForm (sigmaS
         (if Even a ∧ Even b then 1 else -1) * (if Even c ∧ Even d then 1 else -1) *
           (if Even ((c * b - d * a) * k) then 1 else -1) := by
       grind [Int.even_add, Int.even_sub]
-    rw [h_det, ofReal_intCast, mul_comm (_ * I), exp_int_mul, exp_pi_mul_I]
+    rw [h_det, ofReal_intCast, mul_comm (_ * I), Complex.exp_intCast_mul, exp_pi_mul_I]
     simpa only [sigmaSign, h_sum, half_mem_lattice_iff_even, neg_one_zpow_eq_ite] using h_parity
 
 /-- If multiplication by the complex number a maps the lattice of L into the lattice of M, then
@@ -315,7 +315,7 @@ lemma weierstrassPMulSq_mem_thetaSpace (hf : f ∈ L.hermitianForm.thetaSpace χ
   have periodic : ℘[L] (z + l) = ℘[L] z := L.weierstrassP_add_coe z ⟨l, hl⟩
   have factor_sq : exp (L.hermitianForm l z + L.hermitianForm l l / 2) ^ 2 =
       exp ((2 • L.hermitianForm) l z + (2 • L.hermitianForm) l l / 2) := by
-    simp only [two_nsmul_hermitianForm_apply, ← exp_nat_mul]
+    simp only [two_nsmul_hermitianForm_apply, ← Complex.exp_natCast_mul]
     ring_nf
   rw [weierstrassPMulSq_of_notMem (by rwa [add_mem_cancel_right hl]), periodic, hf.2 l hl z,
     weierstrassPMulSq_of_notMem hz, Pi.pow_apply, ← factor_sq]

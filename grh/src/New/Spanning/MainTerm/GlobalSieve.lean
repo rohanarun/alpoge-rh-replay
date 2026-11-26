@@ -187,7 +187,7 @@ theorem sum_frequencies_le (B : ℝ) (k : ℕ) (X : Finset E) (c : InfinitePlace
       ∏ v : InfinitePlace E, |x v| ^ k * (S.b * B ^ 2) ^ 3 := by
   -- The inverse cubes of the heights have sum at most `64 * 38 * exp 4` per infinite place.
   have h_const : 64 * 38 * Real.exp 4 ≤ S.b ^ 3 := by
-    have h_exp : Real.exp 4 = Real.exp 1 ^ 4 := by simp [← Real.exp_nat_mul]
+    have h_exp : Real.exp 4 = Real.exp 1 ^ 4 := by simp [← Real.exp_natCast_mul]
     grw [h_exp, Real.exp_one_lt_three.le, ← S.thousand_le_b]
     norm_num
   calc

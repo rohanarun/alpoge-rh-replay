@@ -435,7 +435,7 @@ lemma New.Parameters.norm_omega_vac_le {P : Parameters} {s : ℕ} {n : Type} [Fi
     grw [← Core.numInfPlaces, numInfPlaces_E, Nat.totient_le, mul_comm (towerDeg s)]
   rw [show V.ω g V.vacElem y = V.θ f from (theta_rho ..).symm]
   refine le_of_sq_le_sq (h_theta.trans ?_) (exp_nonneg _)
-  rw [← exp_nat_mul, ← exp_add, ← exp_add, ← exp_nat_mul, exp_le_exp]
+  rw [← Real.exp_natCast_mul, ← exp_add, ← exp_add, ← Real.exp_natCast_mul, exp_le_exp]
   simpa [D] using sqrt_mul_sq_add_le_of_le (d := P.d) h_dim
 
 namespace New.Parameters.IsJetConjugation
@@ -487,7 +487,7 @@ theorem norm_map_intVacuum_le {P : Parameters} {s : ℕ} {n : Type} [Fintype n] 
     _ ≤ exp (C * P.q₁ s ^ 2) ^ card n * exp ((2 * P.d + 6) * (P.q₁ s * card n + 1) ^ 2) := by
         grw [ha, norm_omega_vac_le]
     _ ≤ exp ((C + (2 * P.d + 6)) * (P.q₁ s * card n + 1) ^ 2) := by
-        grw [← exp_nat_mul, ← exp_add, add_mul (C : ℝ), mul_left_comm, h_rank]
+        grw [← Real.exp_natCast_mul, ← exp_add, add_mul (C : ℝ), mul_left_comm, h_rank]
     _ ≤ exp (P.constantBound * (P.q₁ s * card n + 1) ^ 2) := by
         gcongr
         -- the remaining summand of `P.constantBound` is nonnegative
@@ -710,7 +710,7 @@ lemma Parameters.jetSizeBound_eq (B : ℝ) (L : ℕ) (w : ℝ) :
     P.jetSizeBound s n n' B L w =
       B * (exp (P.constantBound * (P.q₁ s * card (n' × n) + 1) ^ 2 + w) *
         (2 * L + 2) ^ card (P.Φ s × n' × n)) := by
-  simp only [jetSizeBound, exp_add, exp_nat_mul, exp_log (show 0 < (2 * L + 2 : ℝ) by positivity)]
+  simp only [jetSizeBound, exp_add, Real.exp_natCast_mul, exp_log (show 0 < (2 * L + 2 : ℝ) by positivity)]
   ring
 
 /-- Let `a` and `b` be automorphic characters of the norm-one adeles that have a weight: on points

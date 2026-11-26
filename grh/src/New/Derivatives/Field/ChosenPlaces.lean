@@ -412,9 +412,9 @@ lemma rootDisc_mem_Icc : D.rootDisc ∈ Set.Icc (D.x ^ 10) (D.x ^ 12) := by
   have h_prod : D.rootDisc ^ D.f = ∏ v : D.Φ, v (P.deltaE D.towerExp) :=
     prod_deltaE_eq_rootDiscr_pow.symm
   have h_lower (v : D.Φ) : D.x ^ 10 ≤ v (P.deltaE D.towerExp) := by
-    simpa [← exp_nat_mul] using D.hasLogLower_iff.1 (D.hasLogBound_deltaE v false)
+    simpa [← Real.exp_natCast_mul] using D.hasLogLower_iff.1 (D.hasLogBound_deltaE v false)
   have h_upper (v : D.Φ) : v (P.deltaE D.towerExp) ≤ D.x ^ 12 := by
-    simpa [← exp_nat_mul] using le_of_abs_le (D.hasLogUpper_iff.1 (D.hasLogBound_deltaE v true))
+    simpa [← Real.exp_natCast_mul] using le_of_abs_le (D.hasLogUpper_iff.1 (D.hasLogBound_deltaE v true))
   -- Compare `f`-th powers, `f` the number of infinite places.
   constructor
   · refine le_of_pow_le_pow_left₀ (ne D.f) (rootDiscr_pos D.E).le ?_

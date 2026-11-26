@@ -980,7 +980,7 @@ lemma FrobeniusCycle.index_mul_finrank_defectConditions_le (T : FrobeniusCycle N
           (by positivity) ?_).trans_eq ?_
         · rw [ENNReal.ofReal_pow (by positivity), ← enorm_of_nonneg (by positivity)]
           exact volume_degreeSlab_le h_deg
-        · rw [mul_pow, mul_div_assoc, mul_pow, ← exp_nat_mul, ← exp_nat_mul]
+        · rw [mul_pow, mul_div_assoc, mul_pow, ← Real.exp_natCast_mul, ← Real.exp_natCast_mul]
     _ ≤ (1 + θ) * Fintype.card (Monomials (Fin (k' + 1)) n) ^ N := by
         gcongr
         · exact (exp_pos _).le.trans h_exp

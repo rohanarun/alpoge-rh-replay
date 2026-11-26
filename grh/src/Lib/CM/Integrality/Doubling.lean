@@ -158,7 +158,7 @@ lemma sigma_two_mul_eq {z : ℂ} (hz : z + C.t ∉ C.Λ) :
       rw [two_mul z, map_add]
       push_cast
       ring
-    rw [mul_add, two_mul C.t, C.sigma_add_two_t, h_exponent, exp_nat_mul]
+    rw [mul_add, two_mul C.t, C.sigma_add_two_t, h_exponent, Complex.exp_natCast_mul]
   have h_fourth : C.σ (z + C.t) ^ 4 = e ^ 4 * C.θ z ^ 4 := by
     rw [C.sigma_add_t, mul_pow, mul_pow, C.twistedTranslate_t_sigma_zero_pow_four, one_mul]
   have h_deriv : deriv C.translatedX z = ℘'[C.periodPair] (z + C.t) := by

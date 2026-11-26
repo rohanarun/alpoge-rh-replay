@@ -109,7 +109,7 @@ theorem New.Fock.norm_fockInner_realHeisenbergOp_le {ι : Type} [Fintype ι] [De
   have norm_v (x : ι → ℂ) :
       ‖v x‖ = ‖v_scaled (c⁻¹ • x)‖ / exp (‖toLp 2 x‖ ^ 2 / (n + A) / 2) ^ n := by
     simp (disch := positivity) [v_scaled, *, realVac, star_dotProduct_self_eq_norm_sq, sq, c,
-      ← exp_nat_mul, mul_assoc, ← exp_add, field, star_trivial, Complex.norm_exp]
+      ← Real.exp_natCast_mul, mul_assoc, ← exp_add, field, star_trivial, Complex.norm_exp]
   have G_int : Integrable G (normalizedVolume ι) :=
     (integrable_norm_sq v_scaled).comp_smul (by positivity)
   have preserving : MeasurePreserving (σ • · + y) (normalizedVolume ι) (normalizedVolume ι) :=
@@ -120,7 +120,7 @@ theorem New.Fock.norm_fockInner_realHeisenbergOp_le {ι : Type} [Fintype ι] [De
       grw [add_comm, hA]
       simp [field]
     have c_pow : (c ^ 2) ^ (card ι + d) ≤ exp n := by
-      grw [sq_sqrt (by positivity), add_one_le_exp, ← exp_nat_mul, exponent_le]
+      grw [sq_sqrt (by positivity), add_one_le_exp, ← Real.exp_natCast_mul, exponent_le]
     calc _ = (c ^ 2) ^ card ι * ((c ^ 2) ^ d * ∫ x, ‖v x‖ ^ 2 ∂normalizedVolume ι) := by
           -- ↓ changes variables before simp rewrites inside the integral.
           simp [G, ↓(normalizedVolume ι).integral_comp_inv_smul (‖v_scaled ·‖ ^ 2), v_scaled,

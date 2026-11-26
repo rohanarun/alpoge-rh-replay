@@ -837,7 +837,7 @@ lemma besselHaar₀_homogeneousBall_add_le {t : ℝ} (ht : 0 < t) :
     nlinarith
   have h_factor : ((𝔰.r ^ 2 : ℝ)⁻¹ + 1) ^ d ≤ 3 :=
     calc ((𝔰.r ^ 2 : ℝ)⁻¹ + 1) ^ d ≤ Real.exp (d * (𝔰.r ^ 2 : ℝ)⁻¹) := by
-          grw [Real.add_one_le_exp, Real.exp_nat_mul]
+          grw [Real.add_one_le_exp, Real.exp_natCast_mul]
       _ ≤ Real.exp 1 := Real.exp_le_exp.2 (mul_inv_le_one_of_le₀ (mod_cast hd) (by positivity))
       _ ≤ 3 := Real.exp_one_lt_three.le
   rw [besselHaar₀_homogeneousBall (by positivity),

@@ -369,7 +369,7 @@ lemma exists_norm_eval_le_exp (P : MvPolynomial ι ℂ) :
     _ ≤ ∑ d ∈ P.support, ‖P.coeff d‖ * Real.exp ‖l‖ ^ ∑ i, P.degreeOf i := by
       gcongr with d hd_support
       exact h_mono d hd_support
-    _ ≤ _ := by grw [← sum_mul, ← le_abs_self, Real.exp_nat_mul]
+    _ ≤ _ := by grw [← sum_mul, ← le_abs_self, Real.exp_natCast_mul]
 
 end New.Fock
 

@@ -276,7 +276,7 @@ lemma exists_mul_vacElem_integral_bounded (P : Parameters) : ∃ C : ℕ, ∀ s 
       _ ≤ rexp N ^ (2 * N) * rexp ⌈M⌉₊ ^ (N * N) := by
         grw [h_card, sq_q₁_pow_card_infinitePlace_le P s, ← Nat.le_ceil M]
       _ = rexp ((⌈M⌉₊ + 2 : ℕ) * N ^ 2) := by
-        simp only [← exp_nat_mul, ← exp_add]
+        simp only [← Real.exp_natCast_mul, ← exp_add]
         grind
 
 /-- The constant `C` in the bound `exp (C q₁²)` for the conjugates of the values of the integral

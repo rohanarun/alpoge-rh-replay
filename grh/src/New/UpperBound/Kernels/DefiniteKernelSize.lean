@@ -242,7 +242,7 @@ lemma hasConjugateGrowth_of_isHomogeneous {P : Parameters} {D : Data P} {d : ℕ
       gcongr
       · nlinarith [add_one_le_exp R]
       · exact norm_map_sq_div_bigOmega_mul_le hd σ
-  rw [zero_add, exp_nat_mul]
+  rw [zero_add, Real.exp_natCast_mul]
   exact norm_map_eval_le_of_isHomogeneous hQ σ hB (exp_pos R)
     fun i ↦ le_of_sq_le_sq (coord_le i) (by positivity)
 
@@ -267,7 +267,7 @@ lemma M_pow_mul_card_mul_exp_le {P : Parameters} {D : Data P} {d : ℕ} {𝔪 : 
     rw [card_fun, card_eq_nat_card (α := 𝔪.ResidueRing), pow_mul]
     exact_mod_cast Nat.pow_le_pow_left (𝔪.card_residueRing_le h𝔪 one_le) _
   have h_pow : ((D.M : ℝ) ^ 2) ^ k = exp (k * (2 * log D.M)) := by
-    simp [exp_nat_mul, two_mul, sq, exp_add, exp_log, NeZero.pos]
+    simp [Real.exp_natCast_mul, two_mul, sq, exp_add, exp_log, NeZero.pos]
   -- Insert the three size bounds; the rest is a comparison of logarithmic sizes.
   have h_log : k * (2 * log D.M) + k * (2 * log D.M) + e ≤ D.x₁ := by
     simp only [k, e, card_prod]

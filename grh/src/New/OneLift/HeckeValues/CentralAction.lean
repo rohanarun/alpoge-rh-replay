@@ -344,7 +344,7 @@ lemma Selmer.DenominatorLe.norm_inner_starProjection_le {ℓ : ℕ} [Fact ℓ.Pr
     h_denom.norm_card_mul_inner_starProjection_le Y h_aut hΞ hΞ'
   rw [map_mul, norm_mul, h_norm, inv_pow, inv_mul_le_iff₀ (by positivity)] at h_bound
   rwa [inner_starProjection_left_eq_right,
-    starProjection_eq_self_iff.2 (starProjection_apply_mem _ Ξ'), exp_add, exp_nat_mul,
+    starProjection_eq_self_iff.2 (starProjection_apply_mem _ Ξ'), exp_add, Real.exp_natCast_mul,
     exp_log hℓ, mul_comm]
 
 end New

@@ -152,7 +152,7 @@ lemma fockMoment_polyVector_ne_top (P : MvPolynomial ι ℂ) :
     _ ≤ Real.exp ‖y‖ ^ N * (|C| * Real.exp (k * ‖holomorphicCoord ε y‖)) * ‖realVac y‖ := by
       grw [h_eval, add_comm, add_one_le_exp]
     _ = |C| * (Real.exp ((N + k) * ‖y‖) * ‖realVac y‖) := by
-      simp only [norm_holomorphicCoord, add_mul, Real.exp_add, Real.exp_nat_mul]
+      simp only [norm_holomorphicCoord, add_mul, Real.exp_add, Real.exp_natCast_mul]
       ring
 
 lemma isSchwartzVector_vacVector : Exchange.IsSchwartzVector (vacVector : fockSpace ε) := fun N ↦ by

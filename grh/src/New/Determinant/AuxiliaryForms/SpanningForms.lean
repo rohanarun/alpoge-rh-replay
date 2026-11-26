@@ -736,7 +736,7 @@ lemma exists_lowerChain_integral_and_weylNormSq_le : ∃ c : D.MFoldTwist → �
           √(weylNormSq (σ ∘ v)) := by ring
       _ ≤ _ := by grw [D.dualHook_mul_exp_le]
   refine (D.weylNormSq_le_of_dualPairing σ (by positivity) h_pair_le).trans_eq ?_
-  rw [mul_pow, sq_sqrt ((weylNormSq_nonneg _).trans (hB 1)), ← exp_nat_mul, Nat.cast_ofNat,
+  rw [mul_pow, sq_sqrt ((weylNormSq_nonneg _).trans (hB 1)), ← Real.exp_natCast_mul, Nat.cast_ofNat,
     ← mul_assoc]
 
 /-- The space `gridLevelForms` of forms of level `J(𝔟)` on `Ỹ^m_0`, the space at the outer end of

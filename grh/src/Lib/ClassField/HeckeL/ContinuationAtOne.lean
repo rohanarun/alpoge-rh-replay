@@ -245,7 +245,7 @@ lemma ne_one (hψ : IsHeckeOfType ψ n) [IsCMField K] (hn : n ≠ 0) : ψ ≠ 1 
   have h_val_neg : F y₀ = -1 := calc
     F y₀ = (y₀ w / ‖y₀ w‖ : ℂ) ^ n w := Fintype.prod_eq_single w fun u hu ↦ by simp [y₀, hu]
     -- The factor at `w` is `exp (π i / n w) ^ n w = exp (π i) = -1`.
-    _ = -1 := by simp [y₀, log, norm_exp, ← exp_int_mul, mul_div_cancel₀, hw]
+    _ = -1 := by simp [y₀, log, norm_exp, ← Complex.exp_intCast_mul, mul_div_cancel₀, hw]
   norm_num [h_val_one] at h_val_neg
 
 open HeightOneSpectrum UniqueFactorizationMonoid in

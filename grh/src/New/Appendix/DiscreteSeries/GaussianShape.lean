@@ -183,7 +183,7 @@ lemma exists_weightMinors_conj_reducedExp_eq_cexp (hl : Function.Injective l)
         ← ofReal_sum, ← sum_div, sum_norm_lie_coordProj_sq h_range,
         sum_trace_coordProj_mul h_range, Int.cast_neg, neg_mul, sub_neg_eq_add]
     rw [weightMinors_eq_det_zpow_mul_prod (h_det.trans_ne (exp_ne_zero _)) _ _ h_range, h_det,
-      h_prod, ← exp_int_mul, ← exp_add, Int.cast_neg]
+      h_prod, ← Complex.exp_intCast_mul, ← exp_add, Int.cast_neg]
     exact congrArg cexp (by ring)
   · refine (norm_sum_le_of_le _ fun t _ ↦ hr_le t).trans_eq ?_
     simp only [← mul_sum, sum_add_distrib, sum_norm_lie_coordProj_sq h_range]

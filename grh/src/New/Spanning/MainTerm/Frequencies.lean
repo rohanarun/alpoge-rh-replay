@@ -279,7 +279,7 @@ theorem sum_height_inv_cube_le [IsTotallyComplex E] (X : Finset E) :
         rw [finrank_eq_two_mul_card_infinitePlace]
         push_cast
         ring
-      rw [h_rank, Real.exp_nat_mul, ← mul_pow]
+      rw [h_rank, Real.exp_natCast_mul, ← mul_pow]
 
 end New
 

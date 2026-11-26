@@ -199,7 +199,7 @@ lemma New.pow_le_exp_log_factorial_add (l : ℕ) (x : NNReal) (v : ℝ) :
         gcongr
         exact pow_div_factorial_le_exp _ (by positivity) l
     _ = exp (log l.factorial + l * v + x / exp v) := by
-        simp [exp_add, exp_log, l.factorial_pos, exp_nat_mul]
+        simp [exp_add, exp_log, l.factorial_pos, Real.exp_natCast_mul]
 
 end PowerExpBound
 

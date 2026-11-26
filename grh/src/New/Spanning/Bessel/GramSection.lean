@@ -432,7 +432,7 @@ lemma IsBoundedInCell.gramDiscReal_div_two_le {Z : 𝔰.FrameMatrix} {T : ℝ} {
     norm_num
   have h_pow : (x + 1) ^ 𝔰.n ≤ 9 / 8 :=
     calc (x + 1) ^ 𝔰.n ≤ Real.exp x ^ 𝔰.n := by grw [Real.add_one_le_exp x]
-      _ ≤ Real.exp (1 / 9) := by grw [← Real.exp_nat_mul, h_small]
+      _ ≤ Real.exp (1 / 9) := by grw [← Real.exp_natCast_mul, h_small]
       _ ≤ 1 / (1 - 1 / 9) := Real.exp_bound_div_one_sub_of_interval (by norm_num) (by norm_num)
       _ = 9 / 8 := by norm_num
   have h_det : ‖Z.det‖ ≤ 9 / 8 * ‖Y.det‖ := by

@@ -717,7 +717,7 @@ lemma hasLogUpper_pow_ceilLogQ₁ :
   have hd : (P.d : ℝ) ≤ exp P.d := (le_add_of_nonneg_right zero_le_one).trans (add_one_le_exp _)
   rw [hasLogUpper_iff, abs_of_nonneg (by positivity)]
   calc (P.d : ℝ) ^ P.ceilLogQ₁ D.towerExp ≤ exp P.d ^ P.ceilLogQ₁ D.towerExp := by gcongr
-    _ = exp (P.ceilLogQ₁ D.towerExp * P.d) := (exp_nat_mul _ _).symm
+    _ = exp (P.ceilLogQ₁ D.towerExp * P.d) := (Real.exp_natCast_mul _ _).symm
     _ ≤ exp ((P.q₀ + 3 * D.towerExp + 10 : ℕ) * P.d) := by grw [ceilLogQ₁_le]
     _ ≤ exp (D.logB / 100) := exp_le_exp.2 h_exponent
 

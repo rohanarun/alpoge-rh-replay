@@ -356,7 +356,7 @@ lemma norm_regularL_le_sq (hl : 10 ^ 10 ≤ l) (hN : N ≤ rexp l) (h_re : 1 - 1
       (fun z hz ↦ g_le_exp_cube z hz.ge) right_edge
   have left_factor : (rexp l ^ 3) ^ (1 - (1 - 6 / l)) ≤ 3 ^ 18 := by
     have h_exp : ((3 : ℕ) * l) * (1 - (1 - 6 / l)) = (18 : ℕ) * 1 := by field
-    rw [← Real.exp_nat_mul, ← Real.exp_mul, h_exp, Real.exp_nat_mul]
+    rw [← Real.exp_natCast_mul, ← Real.exp_mul, h_exp, Real.exp_natCast_mul]
     exact pow_le_pow_left₀ (exp_nonneg 1) exp_one_lt_three.le 18
   have right_factor : (1 + l) ^ (1 - 6 / l) ≤ 1 + l :=
     rpow_le_self_of_one_le (by linarith) (sub_le_self 1 (by positivity))

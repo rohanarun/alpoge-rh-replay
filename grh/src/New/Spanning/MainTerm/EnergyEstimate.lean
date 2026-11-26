@@ -110,7 +110,7 @@ lemma one_add_inv_pow_ten_pow_le [S.IsAdmissible] :
   have h_exp : |rexp u - 1| ≤ 2 * |u| := abs_exp_sub_one_le (abs_le.2 ⟨by linarith, by linarith⟩)
   calc (1 + S.b⁻¹ ^ 10) ^ Core.numInfPlaces E
       ≤ rexp (S.b⁻¹ ^ 10) ^ Core.numInfPlaces E := by grw [add_comm, add_one_le_exp]
-    _ = rexp (Core.numInfPlaces E * S.b⁻¹ ^ 10) := (Real.exp_nat_mul _ _).symm
+    _ = rexp (Core.numInfPlaces E * S.b⁻¹ ^ 10) := (Real.exp_natCast_mul _ _).symm
     _ ≤ rexp (S.b / 1000 * S.b⁻¹ ^ 10) := by grw [S.numInfPlaces_le_div]
     _ = rexp u := by simp [u, field]
     _ ≤ 1 + S.b⁻¹ ^ 9 := by linarith [le_abs_self (rexp u - 1), abs_of_nonneg hu]

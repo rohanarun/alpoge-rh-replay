@@ -167,7 +167,7 @@ lemma thetaShift_thetaProduct {p : K → 𝓞 E × 𝓞 E} (hp : IsRiemannTuple 
   -- `exp (π i r c) = exp (π i c) ^ r`, and `exp (2 π i m) = 1` drops out.
   have h_pow (c : ℂ) : cexp (Real.pi * I * (D.paddedNorm * c)) = cexp (Real.pi * I * c) ^
     D.paddedNorm := by
-    simp [← exp_nat_mul, mul_left_comm]
+    simp [← Complex.exp_natCast_mul, mul_left_comm]
   have h_int (c : ℂ) : cexp (2 * Real.pi * I * (c + m)) = cexp (2 * Real.pi * I * c) := by
     simp [mul_add, exp_add, mul_comm _ (m : ℂ)]
   -- By adjunction and `h_chi` the multipliers give `χ(u) ^ r`; by `hm` the phases give

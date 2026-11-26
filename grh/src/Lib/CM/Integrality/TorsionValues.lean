@@ -136,7 +136,7 @@ lemma torsionValue_eq (n : ℕ) (G : ℂ → ℂ) (u : ℂ) :
     change -(n • C.hermitianForm u u / 2) = _
     rw [nsmul_eq_mul, hermitianForm_apply, mul_conj']
     ring
-  simp only [torsionValue, thetaShift_apply, zero_add, neg_zero, add_zero, map_zero, ← exp_nat_mul,
+  simp only [torsionValue, thetaShift_apply, zero_add, neg_zero, add_zero, map_zero, ← Complex.exp_natCast_mul,
     ← h_exponent, mul_comm (G u)]
 
 /-- Products: degrees add and torsion values multiply. -/

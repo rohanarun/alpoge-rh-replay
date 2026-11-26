@@ -215,7 +215,7 @@ lemma norm_taylorCoeff_dslope_le {H η M : ℝ} (hη : 0 < η) (hηH : η ≤ H)
         field
     _ ≤ 2 * M / η * (H + H) * rexp (-(η / (2 * H))) ^ (k + 1) := by gcongr
     _ = 4 * M * H / η * rexp (-((k + 1) * (η / (2 * H)))) := by
-        rw [← Real.exp_nat_mul, Nat.cast_succ]
+        rw [← Real.exp_natCast_mul, Nat.cast_succ]
         ring_nf
 
 /-- If `|R v - R u| ≤ L (v - u)` for all steps `0 ≤ u ≤ v ≤ u + 1`, then `R` is Lipschitz with
@@ -369,7 +369,7 @@ theorem eventually_abs_le_inv_pow_of_transform (hR : Measurable R)
       DifferentiableAt ℂ F s ∧ ‖F s‖ ≤ l ^ A := by
     obtain ⟨h_re, h_norm⟩ := one_sub_le_re_and_norm_le_of_mem_closedBall (by positivity) hs
     refine hF_region s h_re (h_norm.trans ?_)
-    rw [l_def, Real.exp_nat_mul, Real.exp_log hu_pos, pow_succ']
+    rw [l_def, Real.exp_natCast_mul, Real.exp_log hu_pos, pow_succ']
     linarith
   have h_small : ‖coeff‖ ≤ 1 / u ^ (B + 1) :=
     norm_taylorCoeff_dslope_le_inv_pow hu_pos hl_one rfl hH_gt (by linarith) h_log_pow_le

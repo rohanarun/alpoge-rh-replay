@@ -406,7 +406,7 @@ lemma IsLaplaceDatum.norm_laplaceIntegrand_le_two_mul_re_add_mul_pow
   have h_gap : 18 * N ≤ h := eighteen_mul_le_of_mul_pow_three_le
     (Nat.one_le_pow _ _ (Nat.add_pos_left card_pos _)) hβ (by rwa [hN_cast])
   have h_err : rexp (-100 * ((card n + card m : ℝ) ^ 2 * β.log)) = (β⁻¹ ^ (50 * N)) ^ 2 := by
-    rw [← hN_cast, ← pow_mul, ← exp_log (inv_pos.2 hβ_pos), ← Real.exp_nat_mul, Real.log_inv]
+    rw [← hN_cast, ← pow_mul, ← exp_log (inv_pos.2 hβ_pos), ← Real.exp_natCast_mul, Real.log_inv]
     push_cast
     ring_nf
   have h_cone : ‖l.laplaceIntegrand k j φ s‖ ≤

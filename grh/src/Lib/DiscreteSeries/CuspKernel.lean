@@ -244,7 +244,7 @@ lemma eq_zero_of_mem_fixed_invariant {G : Type*} [Group G] [TopologicalSpace G]
     simp [hU, hS, hT, ← integral_const_mul, hχ_shift, mul_left_comm, mul_assoc]
   have h_anti : U * S ^ n = -(S ^ n * U) := by
     have h_exp : exp (1 / n * Real.pi * I) ^ n = -1 := by
-      simp [← exp_nat_mul, hn_pos.ne', field, mul_assoc]
+      simp [← Complex.exp_natCast_mul, hn_pos.ne', field, mul_assoc]
     rw [(h_semi.pow_right n).eq, smul_pow, h_exp, neg_one_smul, neg_mul]
   have h_nil : S ^ n = 0 :=
     eq_zero_of_anticommute (norm_one_sub_left_translation_le he hT hV ha hb hb_dist hU) h_anti

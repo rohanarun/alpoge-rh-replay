@@ -465,7 +465,7 @@ lemma card_prod_mul_card_tightFrameIndex_mul_sq_le (j : D.LiftIndex) :
       _ ≤ exp A := M_pow_denominatorExponent_sq_mul_le_exp j
   have h_root : N * D.chosenGroupOrder ≤ exp (A / 2) := by
     refine le_of_sq_le_sq ?_ (exp_pos _).le
-    rwa [← exp_nat_mul, Nat.cast_two, mul_div_cancel₀ _ two_ne_zero]
+    rwa [← Real.exp_natCast_mul, Nat.cast_two, mul_div_cancel₀ _ two_ne_zero]
   have h_card : N ≤ exp (A / 2) := (le_mul_of_one_le_right (Nat.cast_nonneg _) h_aut).trans h_root
   have h_pow_x_le : 6 * D.x ^ 999 ≤ A / 2 := by simpa [hA] using D.le_of_hasLogBound
   calc
@@ -476,7 +476,7 @@ lemma card_prod_mul_card_tightFrameIndex_mul_sq_le (j : D.LiftIndex) :
     _ ≤ exp (A / 2) * exp A * (exp (D.x ^ 999) * exp (D.x ^ 999) ^ 2) ^ 2 := by
       grw [h_classes, h_card, card_columnFilling_colsMinus_le, hookNumberMinus_le]
     _ = exp (A / 2 + A + 6 * D.x ^ 999) := by
-      simp only [← exp_nat_mul, ← exp_add]
+      simp only [← Real.exp_natCast_mul, ← exp_add]
       ring_nf
     _ ≤ exp (2 * A) := exp_le_exp.2 (by linarith)
 
@@ -542,7 +542,7 @@ lemma normSqAt_comparisonOp_le (j : D.LiftIndex) (φ : (D.descentPair (1 : D.Twi
     _ ≤ exp (2 * A) * (exp (2 * A) * S) := by
       grw [normSqAt_glue_le, h_tupleNormSq, card_prod_mul_card_tightFrameIndex_mul_sq_le]
     _ = _ := by
-      simp only [S, ← exp_nat_mul, ← mul_assoc, ← exp_add]
+      simp only [S, ← Real.exp_natCast_mul, ← mul_assoc, ← exp_add]
       ring_nf
 
 /-- The operators `U_ϑ = comparisonOp j ϑ = n_Aut hk² glue_ϑ glue_ϑ*` on the forms on `V_j`, one for
@@ -701,7 +701,7 @@ lemma IsComparisonOperator.norm_map_det_liftCompression_le {j : D.LiftIndex}
     (σ : ℂ ≃+* ℂ) :
     ‖σ (liftCompression U 1).det‖ ≤
       exp (finrank ℂ (D.goodForms (D.spaceW j)) * (3 * (D.f * D.m * D.b * D.logB ^ 2))) := by
-  rw [exp_nat_mul, ← finrank_range_goodLift j 1]
+  rw [Real.exp_natCast_mul, ← finrank_range_goodLift j 1]
   refine norm_map_det_le_pow σ.toRingHom _ fun α z hz ↦ ?_
   have hz_pos : 0 < normSqAt z.1 σ := normSqAt_pos (Subtype.coe_ne_coe.2 hz.2) σ
   -- `U_1 z` is orthogonal to the false lifts, so projecting it does not raise its norm at `σ`.

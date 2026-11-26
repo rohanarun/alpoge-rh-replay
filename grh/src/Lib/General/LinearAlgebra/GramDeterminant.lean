@@ -125,7 +125,7 @@ lemma norm_det_formGram_le (hG : G.PosSemidef) {n : ℕ} {v : Fin n → I → �
     _ ≤ ∏ _i : Fin n, exp h := by
         gcongr with i
         simpa [formGram, Complex.re_eq_norm.mpr (hG.dotProduct_mulVec_nonneg (v i))] using hv i
-    _ = exp (n * h) := by rw [Fin.prod_const, exp_nat_mul]
+    _ = exp (n * h) := by rw [Fin.prod_const, Real.exp_natCast_mul]
 
 /-- The Cauchy–Schwarz inequality in the exterior power, where the product of `v₁ ∧ ⋯ ∧ vₙ` and
 `w₁ ∧ ⋯ ∧ wₙ` is `det (v_i* G w_k)`: for `G` positive semidefinite,

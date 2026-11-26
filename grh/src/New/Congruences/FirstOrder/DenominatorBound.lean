@@ -1234,7 +1234,7 @@ lemma exp_le_norm_det_smul_of_ellVal_le {ℓ : ℕ} [ThePrime ℓ] [PadicIso ℓ
     rw [h_rpow]
     exact ellVal_le_iff.1 (h_eig μ hμ)
   have h_pow : exp (-(finrank ℂ Z * (B * log ℓ))) = exp (-(B * log ℓ)) ^ finrank ℂ Z := by
-    rw [← exp_nat_mul, mul_neg]
+    rw [← Real.exp_natCast_mul, mul_neg]
   rw [h_pow, LinearMap.det_smul, map_mul, map_pow, map_natCast]
   exact_mod_cast pow_finrank_le_nnnorm_det Λ _ h_eig'
 

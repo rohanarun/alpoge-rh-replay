@@ -345,7 +345,7 @@ lemma norm_map_mul_intVacuum_le {P : Parameters} (D : Data P) {l : D.Φ → ℕ}
     have h_const : (P.vacuumBoundConst : ℝ) ≤ P.constantBound := by
       rw [Parameters.constantBound, add_assoc]
       exact le_add_of_nonneg_right (by positivity)
-    grw [norm_ringEquiv_intVacuum_le, ← exp_nat_mul, h_const]
+    grw [norm_ringEquiv_intVacuum_le, ← Real.exp_natCast_mul, h_const]
     simp
   have h_loss (τ : D.Φ) : (D.lossProduct (l τ) : ℝ) ≤ lossBase ^ D.lossFactorCount := by
     grw [lossProduct, ascFactorial_le_pow_add, tsub_le_self, cast_pow, cast_add, hl τ,
@@ -360,7 +360,7 @@ lemma norm_map_mul_intVacuum_le {P : Parameters} (D : Data P) {l : D.Φ → ℕ}
             (exp (Real.log lossBase) ^ D.lossFactorCount) ^ (2 * D.f) := by
           simp [exp_log, NeZero.pos D.M, h_lossBase_pos, ← pow_mul, mul_assoc]
       _ = _ := by
-          simp only [← exp_nat_mul, ← exp_add]
+          simp only [← Real.exp_natCast_mul, ← exp_add]
           congr 1
           push_cast
           ring

@@ -397,7 +397,7 @@ lemma exists_semichar_finiteImage_eq_neg_one_zpow {γ : n → E} (hγ : γ ∈ i
     simp only [Int.cast_neg]
     linear_combination -hk
   refine ⟨-k, mod_cast h_r, ?_⟩
-  rw [h_exp, h_r, exp_neg, mul_comm, exp_int_mul, exp_pi_mul_I, ← inv_zpow, inv_neg_one]
+  rw [h_exp, h_r, exp_neg, mul_comm, Complex.exp_intCast_mul, exp_pi_mul_I, ← inv_zpow, inv_neg_one]
 
 variable (E n) in
 /-- The image of `𝔞₀ⁿ` in `ℂ^(Φ × n)`. -/
