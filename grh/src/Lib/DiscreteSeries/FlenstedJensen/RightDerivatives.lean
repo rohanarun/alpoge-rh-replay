@@ -206,9 +206,19 @@ def rightDerivMatrix : GlModule n (smoothMatrixFunctions n E) where
         mulRightDeriv (n := n) E (unitaryLiePart ε X) +
           I • mulRightDeriv (n := n) E (unitaryLiePart ε (-I • X))
       map_add' X Y := by
-        ext f
-        simp [mulRightDeriv, unitaryLiePart, smul_sub, mul_add, add_mul]
-        module
+        have h_part (Z W : Matrix n n ℂ) :
+            (unitaryLiePart ε (Z + W) : Matrix n n ℂ) =
+              (unitaryLiePart ε Z : Matrix n n ℂ) + unitaryLiePart ε W := by
+          simp only [unitaryLiePart, conjTranspose_add, mul_add, add_mul, smul_sub, smul_add]
+          abel
+        have h_deriv (Z W : Matrix n n ℂ) :
+            mulRightDeriv E (Z + W) = mulRightDeriv E Z + mulRightDeriv E W := by
+          ext f x
+          change fderiv ℝ f.val x (x * (Z + W)) =
+            fderiv ℝ f.val x (x * Z) + fderiv ℝ f.val x (x * W)
+          rw [mul_add, map_add]
+        simp only [smul_add, h_part, h_deriv]
+        abel
       map_smul' := fun ⟨a, b⟩ X ↦ by
         -- Write the scalar as `a + b * I` and expand.
         ext f
