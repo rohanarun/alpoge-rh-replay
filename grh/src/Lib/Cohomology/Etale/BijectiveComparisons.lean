@@ -333,10 +333,8 @@ lemma map_cocycleClass (Φ : AbFunctor C ⥤ AbFunctor C') [IsExactFunctor Φ] (
     | succ n ih =>
       have hS := (shortExact_boundaryFromCoker (R := R) (m := n)).2
       have hS' := (shortExact_boundaryFromCoker (R := R') (m := n)).2
-      have h_nat : hS'.extClass.comp (mk₀ (k (n + 1))) rfl =
-          (mk₀ (k n)).comp (hS.map_of_exact Φ).extClass rfl :=
-        hS'.extClass_naturality (hS.map_of_exact Φ)
-          ⟨k (n + 1), q n, k n, (cancel_epi (π _)).1 (h_bd n).symm, rfl⟩
+      have h_nat := hS'.extClass_naturality (hS.map_of_exact Φ)
+        ⟨k (n + 1), q n, k n, (cancel_epi (π (boundary R' (n + 1)))).1 (h_bd n).symm, rfl⟩
       have h_ih : (mk₀ α).comp ((universalClass hU n).mapExactFunctor Φ) n.zero_add =
           (universalClass hU' n).comp (mk₀ (k n)) rfl := ih
       -- Unfold one splicing step on both sides; `h_nat` moves `k` past the extension class.
@@ -376,8 +374,9 @@ lemma pull_cocycleClass (c : Comparison F F') (u : V' ⟶ c.functor ⋙ V) (v : 
       (α ≫ (restrictAlong c.functor).map (fromRel hU)).app A (relFreeAb.mk U' x) =
         (freeAbMap (q 0) ≫ (restrictAlong c.functor).map (π _)).app A
           (of ((noWitness R').inv A x)) := by
-    refine (congrArg _ (hα A x)).trans
-      (congrArg (fun t ↦ (π (boundary R 0)).app _ (FreeAddCommGroup.of t)) ?_)
+    change (fromRel hU).app (c.functor.obj A) (α.app A (relFreeAb.mk U' x)) = _
+    rw [hα]
+    refine congrArg (fun t ↦ (π (boundary R 0)).app (c.functor.obj A) (of t)) ?_
     exact Subtype.ext (Prod.ext rfl (funext nofun))
   obtain ⟨z, hz, h_coc⟩ :=
     map_cocycleClass hU hU' (restrictAlong c.functor) c.coeffHom (fun m ↦ freeAbMap (q m))
