@@ -776,7 +776,10 @@ private lemma isCover_reprMap_of_forall_subsingleton {b b' : PerfectAlg OFlat} (
         rfl
     · -- `x ↦ 1 ⊗ x` is bijective onto `b ⊗[b] –`
       let e_lid := TensorProduct.lid b.obj (perfectAlmostCoeff N (perfectAlgAlong w.down))
-      exact map_bijective.mpr (e_lid.symm.bijective.comp (map_bijective bijective_id bijective_id))
+      have h_map := TensorProduct.map_bijective
+        (f := (u w.down).hom.hom'.toLinearMap) (g := LinearMap.id (M := N ⊗[OFlat] MaxIdealFlat))
+        bijective_id bijective_id
+      exact ULift.map_bijective.mpr (e_lid.symm.bijective.comp h_map)
   refine (h_univ.isCohomEquiv_incl_iff _ ?_).mpr
     ((relFreeAb.isCohomEquiv_iff_subsingleton_rel _).mpr fun n ↦ h_van n (perfectAlgAlong (𝟙 b)))
   -- a point of a `b`-algebra factors through `⟨structureMap⟩` if and only if it factors through `y`
