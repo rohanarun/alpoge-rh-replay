@@ -220,7 +220,8 @@ lemma New.padicModel_one_ne_zero {ℓ : ℕ} {E : Type} {a : ℕ} [ThePrime ℓ]
   have h_apply :
       (weylRep κ.1 κ.2 (padicComponents g) *ᵥ
         fun j : WeylIndex (Fin a) κ.1 ↦ padicModel (l := ℓ) κ κ 1 f ⟨g, j⟩) i = ιℓ (f g i) := by
-    simp [padicModel, ← map_mul]
+    simp only [padicModel, mulVec_mulVec, one_mul, LinearMap.coe_mk, AddHom.coe_mk, ← map_mul,
+      mul_inv_cancel, map_one, one_mulVec, Function.comp_apply]
   simpa [h_zero, ← Pi.zero_def] using h_apply.symm
 
 /-- A free family of integers (`New.HasNoSmallRelations`: for small `d`, two choices of `d` entries
