@@ -337,7 +337,7 @@ lemma Cancels.mono {m : I → ℤ} {v : I → V} {v' : I → V'} (h : Cancels m 
   unfold Cancels at h ⊢
   calc ∑ i : I, m i • of (v' i)
       = lift g (∑ i : I, m i • of (v i)) := by
-        simp [_root_.map_sum, _root_.map_zsmul, lift_apply_of, hg]
+        simp only [_root_.map_sum, _root_.map_zsmul, lift_apply_of, hg]
     _ = 0 := by rw [h, map_zero]
 
 /-- For a family `F : ι → AbFunctor C` of abelian-group-valued functors on C (here `ι` is an index
@@ -612,9 +612,12 @@ lemma IsTest.isComparableRing_of_associated (h : IsTest A)
   obtain ⟨e, he_idem, h_dvd_ab, h_dvd_ba⟩ :
       ∃ e : A, IsIdempotentElem e ∧ a ∣ e * b ∧ b ∣ (1 - e) * a := h.isComparableRing a b
   have h_dvd_yz : f a * u ∣ f e * (f b * v) := by
-    simpa [← mul_assoc] using f.map_dvd h_dvd_ab
+    rw [← mul_assoc, u.isUnit.mul_right_dvd, v.isUnit.dvd_mul_right, ← f.map_mul]
+    exact f.map_dvd h_dvd_ab
   have h_dvd_zy : f b * v ∣ (1 - f e) * (f a * u) := by
-    simpa [← mul_assoc] using f.map_dvd h_dvd_ba
+    rw [← mul_assoc, v.isUnit.mul_right_dvd, u.isUnit.dvd_mul_right, ← f.map_one,
+      ← f.map_sub, ← f.map_mul]
+    exact f.map_dvd h_dvd_ba
   exact ⟨e, he_idem, h_dvd_yz, h_dvd_zy⟩
 
 /-- If any two elements of `B` are comparable by an idempotent `e` of `A` through `f`, then they are
@@ -1189,7 +1192,7 @@ instance : Projective (freeAb (reprBy A)) where
 /-- The value at `x ∈ N(A)` of a finite sum of maps `N ⟶ F` is the sum of their values. -/
 lemma sum_app_apply {ι : Type*} {A : C} {x : N.obj A} [Fintype ι] {g : ι → (N ⟶ F)} :
     (∑ i : ι, g i) A x = ∑ i : ι, g i A x := by
-  simp [← homAddEquiv_apply]
+  simp only [app_sum, ← homAddEquiv_apply, map_sum, AddMonoidHom.finsetSum_apply]
 
 /-! ### Cokernels and relative chains -/
 
