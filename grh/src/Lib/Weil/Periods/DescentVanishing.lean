@@ -254,11 +254,15 @@ lemma integral_pairTheta_radicalCentre_mul (h_int : D.HasIntegrableTerms V a b f
       ∑' x : Matrix m p E, χ x * (D.thetaTerm V a b f g x h * y h) := by
     simp_rw [← (D.hasSum_thetaTerm h).tsum_eq, D.thetaTerm_radicalCentre_mul, ← tsum_mul_right,
       mul_assoc, χ]
+  have h_cont (x : Matrix m p E) : Continuous (fun h : G E t ↦ D.thetaTerm V a b f g x h * y h) := by
+    fun_prop [thetaTerm]
+  have h_norm (x : Matrix m p E) : ‖χ x‖ₑ = 1 := Circle.eNorm_coe _
   have h_swap : ∑' x : Matrix m p E, ∫ h, χ x * (D.thetaTerm V a b f g x h * y h) ∂V.quotMeasure =
       ∫ h, ∑' x : Matrix m p E, χ x * (D.thetaTerm V a b f g x h * y h) ∂V.quotMeasure :=
     (hasSum_integral_of_lintegral_tsum_lt_top
-      (by simpa [← ofReal_norm, χ, Circle.norm_coe] using h_int) -- since `|χ x| = 1`
-      fun x ↦ .const_mul (by fun_prop [thetaTerm]) (χ x)).tsum_eq
+      (k := fun x h ↦ χ x * (D.thetaTerm V a b f g x h * y h)) (ν := V.quotMeasure)
+      (by simpa only [HasIntegrableTerms, eNorm_mul, h_norm, one_mul] using h_int)
+      (fun x ↦ (h_cont x).aestronglyMeasurable.const_mul (χ x))).tsum_eq
   simp_rw [h_expand, ← h_swap, integral_const_mul, χ]
 
 /-- Let `D` split `W`, and take the theta kernel of the datum `f` twisted by the characters `a`,
@@ -273,9 +277,13 @@ lemma centreCoeff_integral_eq_tsum (h_int : D.HasIntegrableTerms V a b f g y)
         (fun k : G E s ↦ ∫ h : G E t, pairTheta W V a b f (k, h) * y h ∂V.quotMeasure) g =
       ∑' x : {x : Matrix m p E | xᴴ * V.J * x = β},
         ∫ h : G E t, D.thetaTerm V a b f g (x : Matrix m p E) h * y h ∂V.quotMeasure := by
+  have h_cont (x : Matrix m p E) : Continuous (fun h : G E t ↦ D.thetaTerm V a b f g x h * y h) := by
+    fun_prop [thetaTerm]
   have h_summable :
       Summable fun x : Matrix m p E ↦ ∫ h, D.thetaTerm V a b f g x h * y h ∂V.quotMeasure :=
-    (hasSum_integral_of_lintegral_tsum_lt_top h_int (by fun_prop [thetaTerm])).summable
+    (hasSum_integral_of_lintegral_tsum_lt_top
+      (k := fun x h ↦ D.thetaTerm V a b f g x h * y h) (ν := V.quotMeasure)
+      h_int (fun x ↦ (h_cont x).aestronglyMeasurable)).summable
   -- With the character of `j • β` from `centreCoeff`, the frequency of `x` is zero exactly when
   -- `x` has Gram matrix `β`. So the right side is the mean over `z` of a sum over all `x`.
   have h_freq (x : Matrix m p E) : -H.j • (xᴴ * V.J * x) + H.j • β = 0 ↔
@@ -284,8 +292,10 @@ lemma centreCoeff_integral_eq_tsum (h_int : D.HasIntegrableTerms V a b f g y)
   rw [isDualFamily_ratMatrices.tsum_coeff_eq_quotMean _ h_freq h_summable, centreCoeff]
   congr with z
   -- The means over `z` have the same integrand: the characters of `j β` and of `x` multiply.
-  simp_rw [D.integral_pairTheta_radicalCentre_mul h_int hy, ← tsum_mul_left,
-    isDualFamily_ratMatrices.add_left, mul_assoc, mul_left_comm]
+  rw [D.integral_pairTheta_radicalCentre_mul h_int hy, ← tsum_mul_left]
+  refine tsum_congr fun x ↦ ?_
+  rw [isDualFamily_ratMatrices.add_left, mul_assoc]
+  exact mul_left_comm _ _ _
 
 /-- Unfolding. Let `y` be continuous on `U(V)(𝔸)` and left invariant under the rational points, and
 let the terms of the theta kernel at `g` be absolutely integrable against `y`. Let `x` be a rational
