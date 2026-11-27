@@ -267,8 +267,18 @@ lemma dataInner_heisenbergCombination (c c' : (n → 𝔸f E) →₀ ℂ) (f f' 
           boxIndicator n S.conjClosure (idem S.conjClosure • z) •
             V.finHeisenbergOp (idem S.conjClosure • z) (V.projOn S f') :=
       V.projOn_finHeisenbergOp (V.projOn_projOn f') _
-    simp_all [dataInner_projOn, schrodingerAct, integralBox, apply_ite,
-      finHeisenbergOp, ← heisenbergRep_right_rho, smul_smul, idem_mul_self, Heisenberg.Rep.mul]
+    have hz_cut : idem S.conjClosure • z ∉ integralBox n S.conjClosure := by
+      simpa only [mem_integralBox, Pi.smul_apply, smul_eq_mul, ← mul_assoc, idem_mul_self] using hz
+    rw [boxIndicator_apply, ite_eq_right hz_cut, zero_smul, finHeisenbergOp, _root_.smul_apply,
+      map_smul] at proj
+    have h_proj :
+        V.projOn S (V.ϱ (finVec (idem S.conjClosure • z)) (V.projOn S f')) = 0 :=
+      (smul_eq_zero.mp proj).resolve_left (semichar_ne_zero _)
+    have h_rho (v : 𝒮 V) : V.ϱ (finVec (0 : n → 𝔸f E)) v = v := by
+      rw [← V.heisenbergRep_right_rho, Heisenberg.Rep.rho_zero_apply]
+    simp only [boxIndicator_apply, ite_eq_right hz, zero_mul, mul_zero, V.heisenbergRep_right_rho,
+      V.rho_finVec_rho_finVec, ← smul_add, neg_add_cancel, neg_add_cancel_left, smul_zero, h_rho,
+      ContinuousLinearMap.map_smulₛₗ, map_smul, _root_.smul_apply, dataInner_projOn, h_proj, map_zero]
 
 /-- The name does not depend on the choice of coefficients: for `S` disjoint from its conjugate,
 the combination of translates of the indicator with coefficients `c` names
