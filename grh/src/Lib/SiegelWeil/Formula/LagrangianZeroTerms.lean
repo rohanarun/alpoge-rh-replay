@@ -589,9 +589,16 @@ lemma exists_zeroTerm_normalisedTorus_le {K : Set (G E s)} (Z : Matrix r n (𝔸
   have h_schur : a.val = Z * g.adeleMatrix * (P.lAdelic * δx⁻¹.valᴴ * P.lCoord) * κ.adeleMatrix *
     P'.kAdelic +
       Z * g.adeleMatrix * P.kAdelic * δu.val * P.kCoord * κ.adeleMatrix * P'.kAdelic := by
-    rw [← Matrix.one_mul a.val, ← hZ, Matrix.mul_assoc, ← ha]
-    simp [δx, δu, ← hu, Splitting.levi, add_comm, Matrix.mul_add, Matrix.add_mul,
-      eq_zero iAdelic, ← Matrix.mul_assoc]
+    have h_levi : (P.levi (δx, 1)).adeleMatrix =
+        P.kAdelic * δx.val * P.kCoord + P.lAdelic * δx⁻¹.valᴴ * P.lCoord := by
+      simp only [Splitting.levi, MonoidHom.mk'_apply, adeleMatrix_ofMatrix,
+        eq_zero iAdelic, Pi.zero_apply, Matrix.zero_mul, add_zero]
+    change Z * g.adeleMatrix * P.kAdelic * δx.val =
+      Z * g.adeleMatrix * P.kAdelic * δu.val at hu
+    rw [← Matrix.one_mul a.val, ← hZ, Matrix.mul_assoc, ← ha, adeleMatrix_mul,
+      adeleMatrix_mul, h_levi]
+    simp only [Matrix.mul_add, Matrix.add_mul, ← Matrix.mul_assoc]
+    rw [hu, add_comm]
   have h_mem : (δu.det⁻¹ * a.det).val ∈ blockDet '' K ×ˢ maxCompact E s ×ˢ box ×ˢ box :=
     ⟨(g, κ, δu⁻¹.val, δx⁻¹.val), ⟨hg, hκ, dyadicDiag_inv_mem u, dyadicDiag_inv_mem x⟩,
       by simp [blockDet, h_schur, det_fromBlocks₂₂ .., ← Matrix.mul_assoc]⟩
