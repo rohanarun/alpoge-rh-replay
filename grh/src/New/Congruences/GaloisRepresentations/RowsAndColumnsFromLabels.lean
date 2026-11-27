@@ -215,7 +215,7 @@ lemma exists_isInertiaSpectrum_chosenPlace (m : Type) [Fintype m] [DecidableEq m
   let μ : Multiset (PadicAlgCl ℓ) := roots.map fun x ↦ ιℓ ((T ^ a) x)
   have h_roots (x : K) (hx : x ∈ roots) : aeval x (scaledTypePoly O c i) = 0 ∨ x = 1 ∧ t ≠ 0 := by
     simpa only [ne_eq, map_mul, map_pow, aeval_sub, aeval_X, map_one, mul_eq_zero, pow_eq_zero_iff',
-      sub_eq_zero] using (mem_aroots.1 hx).2
+      sub_eq_zero] using (mem_aroots'.1 hx).2
   -- every root is killed by `D.levelPrime l ^ (card r)! - 1` and by some `D.levelPrime l ^ d - 1`
   have h_order (x : K) (hx : x ∈ roots) : x ^ (D.levelPrime l ^ (card r).factorial - 1) = 1 ∧
       ∃ d ∈ Set.Icc 1 D.r, x ^ (D.levelPrime l ^ d - 1) = 1 := by
@@ -792,15 +792,18 @@ lemma isFiniteTypeAt_and_polyKillsAt_of_mem_conjClosure [DecidableEq n] [Nonempt
   · -- the roots of the label are `1` and the name of `(ϑ.tamePart)⁻¹`, whose images are the roots
     -- of the quadratic
     rw [invAvatar_eq_of_isTameExponent hw h_split h_val ha]
-    simp +contextual only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.prod_univ_two, Fin.isValue,
-      cons_val_zero, map_one, Units.val_one, cons_val_one, cons_val_fin_one, map_inv,
-      Units.val_inv_eq_inv_val, one_mul, IsRoot.def, eval_multiset_prod, Multiset.map_map,
-      Function.comp_apply, eval_sub, eval_X, eval_C, prod_eq_zero_iff, mem_map, mem_roots',
-      Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_sub, map_X, Polynomial.map_one, map_C,
-      map_inv₀, ne_eq, mul_eq_zero, pow_eq_zero_iff', sub_eq_zero, not_or, not_and,
-      Decidable.not_not, eval_mul, eval_pow, eval_one, forall_exists_index,
-      EmbeddingLike.apply_eq_iff_eq, and_imp, or_imp, or_true, implies_true, true_or, and_self, K,
-      T]
+    intro x hx
+    simp only [IsRoot.def, eval_multiset_prod, Multiset.map_map, Multiset.prod_eq_zero_iff,
+      Multiset.mem_map, Function.comp_apply, eval_sub, eval_X, eval_C, sub_eq_zero] at hx
+    obtain ⟨y, hy, rfl⟩ := hx
+    have hy' := (Polynomial.mem_aroots'.1 hy).2
+    simp only [one_mul, Fin.prod_univ_two, cons_val_zero, map_one, Units.val_one, cons_val_one,
+      cons_val_fin_one, map_inv, Units.val_inv_eq_inv_val, map_mul, map_pow, map_sub, aeval_X,
+      aeval_C, map_inv₀, mul_eq_zero, pow_eq_zero_iff', sub_eq_zero] at hy'
+    rcases hy' with ⟨rfl, _⟩ | ⟨rfl, _⟩
+    · simp only [IsRoot.def, map_one, eval_mul, eval_sub, eval_X, eval_C, eval_one, sub_self,
+        mul_zero]
+    · simp only [IsRoot.def, eval_mul, eval_sub, eval_X, eval_C, sub_self, zero_mul, K, T]
   · -- `A` is not above `ℓ`, so no embedding in `ℚ̄_ℓ` induces it
     obtain ⟨⟨h_comap, -⟩, -⟩ := L.inducesPlace
     rw [← h_comap] at h_val
