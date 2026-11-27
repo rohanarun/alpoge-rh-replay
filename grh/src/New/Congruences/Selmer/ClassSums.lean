@@ -105,14 +105,14 @@ lemma integralAlgebraicPart_insert {p : D.CriticalPair} {n : Type} [Fintype n] [
       star v ∉ ϑ'.Q ∧ ¬D.IsChosen v ∧ ¬D.IsChosen (star v) := by
     -- `↓` rewrites `star v ∉ ϑ'.Q` before `hQ` changes the set.
     simp [IsChosen, D.normQ_mem_and_notMem_of_mem_Q ϑ', ↓ϑ'.star_notMem, hQ]
+  have hv_star : star v ∉ ϑ.Q := fun h_mem ↦ hv_star' (by simp [hQ, h_mem])
   have at_star :
       (p.character * ϑ.toAutChar).baseChange.atUniformizer (star v) =
         ((p.character * ϑ.toAutChar).baseChange.atUniformizer v)⁻¹ := by
     apply (p.hasWeight.mul ϑ.hasWeight).atUniformizer_star
     · exact p.tamePart_mul_tamePart_apply_eq_one_of_notMem ϑ v
         (by simp [places_twistModulus, hv, hv_chosen])
-    · have hv_star : star v ∉ ϑ.Q := fun h_mem ↦ hv_star' (by simp [hQ, h_mem])
-      exact p.tamePart_mul_tamePart_apply_eq_one_of_notMem ϑ (star v)
+    · exact p.tamePart_mul_tamePart_apply_eq_one_of_notMem ϑ (star v)
         (by simp [places_twistModulus, hv_star, hv_star_chosen])
   let φ := (p.character * ϑ.toAutChar)⁻¹.baseChange.finPart
   let S (Q : Finset (FinPlace D.E)) : Set (FinPlace D.E) :=
@@ -125,14 +125,34 @@ lemma integralAlgebraicPart_insert {p : D.CriticalPair} {n : Type} [Fintype n] [
     (p.hasWeight.mul ϑ.hasWeight).inv.isHeckeOfType.norm_heckeCoeff_le {v, star v}
   have h_coeff : heckeCoeff φ (S ϑ'.Q) = Set.indicator {v, star v}ᶜ (heckeCoeff φ (S ϑ.Q)) := by
     -- The places removed for `ϑ'` are those for `ϑ` together with `v` and `star v`.
-    simp [φ, funext_iff, heckeCoeff, Set.indicator, hQ]
-    grind [star_star]
+    have h_places : S ϑ'.Q = S ϑ.Q ∪ {v, star v} := by
+      ext w
+      simp only [S, hQ, Finset.coe_insert, Set.conjClosure, Set.mem_union,
+        Set.mem_preimage, Set.mem_insert_iff, Set.mem_singleton_iff]
+      have h_star : star w = v ↔ w = star v := star_eq_iff_star_eq.trans eq_comm
+      rw [h_star]
+      have h_or (A B C D E F : Prop) :
+          ((A ∨ B ∨ C) ∨ (D ∨ E ∨ F)) ↔ ((A ∨ C) ∨ (D ∨ F)) ∨ (B ∨ E) := by
+        simp only [or_left_comm, or_comm]
+      exact h_or _ _ _ _ _ _
+    rw [h_places]
+    simp only [heckeCoeff, Set.compl_union, Set.indicator_indicator, Set.inter_comm]
   have h_factors :
       ∏ w ∈ {v, star v}, (1 - heckeCoeff φ (S ϑ.Q) w * (w.q : ℂ) ^ (-(p.z : ℂ))) =
         ∏ ε : ℤˣ, (1 - (p.character * ϑ.toAutChar).baseChange.atUniformizer v ^ ε.val / v.q ^
           p.z) := by
-    simp_all [φ, S, HeckeChar.atUniformizer, heckeCoeff, cpow_neg, Ne.symm]
-    grind
+    have hv_ne : v ≠ star v := fun h ↦ hv_star' (by rw [← h, hQ]; exact Finset.mem_insert_self _ _)
+    have hv_off : v ∉ S ϑ.Q := by simp [S, hv, hv_star, hv_chosen, hv_star_chosen]
+    have hv_star_off : star v ∉ S ϑ.Q := by simp [S, hv, hv_star, hv_chosen, hv_star_chosen]
+    have h_at (w : FinPlace D.E) (hw : w ∉ S ϑ.Q) : heckeCoeff φ (S ϑ.Q) w =
+        ((p.character * ϑ.toAutChar).baseChange.atUniformizer w)⁻¹ := by
+      rw [heckeCoeff, Set.indicator_of_mem (Set.mem_compl hw)]
+      simp only [φ, HeckeChar.atUniformizer, map_inv, MonoidHom.inv_apply, Units.val_inv_eq_inv_val]
+    rw [Finset.prod_pair hv_ne, UnitsInt.univ, Finset.prod_pair (by decide : (1 : ℤˣ) ≠ -1),
+      h_at v hv_off, h_at (star v) hv_star_off, q_star, at_star, inv_inv]
+    simp only [cpow_neg, cpow_natCast, Units.val_one, Units.val_neg, zpow_one, _root_.zpow_neg_one,
+      div_eq_mul_inv]
+    exact mul_comm _ _
   rw [h_coeff, ← h_factors]
   simpa [φ] using h_erase p.z (mod_cast H.2)
 
