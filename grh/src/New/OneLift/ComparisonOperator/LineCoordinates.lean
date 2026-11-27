@@ -134,8 +134,12 @@ lemma New.eval_weylKernel_single_eq_det {N : Type} [Fintype N] (τ : Φ) {h : �
     (weylKernel (fun _ : Φ ↦ N) (Pi.single τ (Pi.single h 1)) y).eval x =
       (of fun a b : Fin h ↦ ∑ u : N, y (⟨τ, u⟩, a) * x (⟨τ, u⟩, b)).det := by
   -- Of the leading minors in `highestPoly`, only the one of size `h` at `τ` has nonzero exponent.
-  simp [weylKernel, highestPoly, tableauPoly, minor, det_apply, rowSubst,
+  simp [weylKernel, highestPoly, tableauPoly, minor, rowSubst, AlgHom.map_det, RingHom.map_det,
     Fin.val_eq_val _ ⟨h, h_lt⟩, Pi.single_apply, ite_apply, apply_ite]
+  congr 1
+  ext a b
+  simp only [Matrix.map_apply, Matrix.of_apply, Function.comp_apply, MvPolynomial.aeval_X,
+    map_sum, MvPolynomial.smul_eval, MvPolynomial.eval_X, Fin.val_castLE]
 
 open Matrix in
 /-- Let a function `F` of `h` columns be the sum, over the `h`-subsets `S` of `N`, of the minor on
@@ -370,12 +374,37 @@ lemma card_detIndex_eq_sum (j : D.LiftIndex) (τ : NumberField.InfinitePlace D.E
     Fintype.card (DetIndex j τ) =
       ∑ h ∈ range (Fintype.card (FirstFactorIndex j)), (untwistedDescentPair j).colsPlus τ h := by
   -- The weight is `D.reducedHalfGap` at the height `D.posRank j` and vanishes beyond.
+  have hk := D.k_pos
+  have hj : 1 ≤ (j : ℕ) ∧ (j : ℕ) ≤ D.m := j.property
   have h_lt : D.posRank j < Fintype.card (FirstFactorIndex j) := by
-    grind [card_sum, Fintype.card_fin, card_rowIndex, targetParameter_eq]
+    rw [card_firstFactorIndex]
+    have hkr := D.k_le_r
+    exact show D.k + (j : ℕ) - 1 < D.r + 9 * D.m + 1 by omega
+  have h_below (i : ℕ) (hi : D.posRank j ≤ i) :
+      D.targetParameter τ i ≤ (D.t : ℤ) / 2 - D.liftWeight j τ := by
+    have h_gap := D.targetParameter_add_liftWeight_le_neg_halfGap (j := (j : ℕ)) τ hi
+    omega
   have h_zero : ∀ h ≥ D.posRank j + 1, (untwistedDescentPair j).colsPlus τ h = 0 := by
-    grind [descentPair]
+    intro h hh
+    have h_bound := h_below (h - 1) (by omega)
+    change (D.targetParameter τ (h - 1) -
+      (D.targetParameter τ h ⊔ ((D.t : ℤ) / 2 - D.liftWeight j τ)) - 1).toNat = 0
+    apply Int.toNat_eq_zero.mpr
+    have h_sup : (D.t : ℤ) / 2 - D.liftWeight j τ ≤
+        D.targetParameter τ h ⊔ ((D.t : ℤ) / 2 - D.liftWeight j τ) := le_sup_right
+    omega
   have h_top : (untwistedDescentPair j).colsPlus τ (D.posRank j) = D.reducedHalfGap := by
-    grind [descentPair, reducedHalfGap, targetParameter_eq]
+    have h_prev : D.targetParameter τ (D.posRank j - 1) = D.halfGap - D.liftWeight j τ := by
+      have h_idx : D.posRank j - 1 = D.k - 1 + ((j : ℕ) - 1) := by
+        change D.k + (j : ℕ) - 1 - 1 = _
+        omega
+      rw [h_idx, targetParameter_sub_one_add, Nat.sub_add_cancel hj.1]
+    change (D.targetParameter τ (D.posRank j - 1) -
+      (D.targetParameter τ (D.posRank j) ⊔ ((D.t : ℤ) / 2 - D.liftWeight j τ)) - 1).toNat = _
+    rw [h_prev, sup_eq_right.mpr (h_below _ le_rfl)]
+    obtain ⟨s, hs⟩ := D.t_odd
+    simp only [reducedHalfGap]
+    omega
   calc Fintype.card (DetIndex j τ)
     _ = ∑ h ∈ range (D.posRank j), (untwistedDescentPair j).colsPlus τ h + D.reducedHalfGap := by
         simp [← sum_range]
