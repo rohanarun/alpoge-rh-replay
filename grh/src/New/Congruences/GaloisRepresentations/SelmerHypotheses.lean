@@ -152,16 +152,16 @@ lemma avatar_conjGal_mul_frob {a : AutChar D.E} {e : NumberField.InfinitePlace D
       cyclotomicCharIn (PadicAlgCl ℓ) Ω ℓ x.frob ^ (2 * j - k) := by
   -- `conjGal x.frob` is a Frobenius at `star x.place`. The avatar at a Frobenius is `ιℓ` of the
   -- value of the Hecke character at the uniformiser.
-  let coeff : FinPlace D.E → ℂ := heckeCoeff (ha.toAlgebraic k j).val.1 ∅
+  let θ := ha.toAlgebraic k j
+  let coeff : FinPlace D.E → ℂ := heckeCoeff θ.character ∅
   -- In the product of the values at `star x.place` and `x.place` the factors from `a.baseChange`
   -- and `υ` cancel.
   have value_mul : coeff (star x.place) * coeff x.place = (x.place.q : ℂ) ^ (k - 2 * j) := by
-    have bc_star : a.baseChange.atUniformizer (star x.place) =
-      (a.baseChange.atUniformizer x.place)⁻¹ := atUniformizer_star hψ hψ_star
+    have bc_star := ha.atUniformizer_star hψ hψ_star
     have value (v : FinPlace D.E) :
         coeff v = a.baseChange.atUniformizer v * (υ.atUniformizer v ^ k)⁻¹ *
           (√v.q : ℂ) ^ (k - 2 * j) := by
-      simp [coeff, HeckeChar.atUniformizer, heckeCoeff, toAlgebraic]
+      simp [coeff, θ, HeckeChar.atUniformizer, heckeCoeff, toAlgebraic]
     have bc_ne : a.baseChange.atUniformizer x.place ≠ 0 := Units.ne_zero _
     have υ_cancel : υ.atUniformizer (star x.place) * υ.atUniformizer x.place = 1 := by
       rw [mul_comm, upsilon_atUniformizer_mul_star]
@@ -169,12 +169,11 @@ lemma avatar_conjGal_mul_frob {a : AutChar D.E} {e : NumberField.InfinitePlace D
   have cyc_eq : (cyclotomicCharIn (PadicAlgCl ℓ) Ω ℓ x.frob).val =
       (x.place.q : PadicAlgCl ℓ)⁻¹ := by
     simp [← cyclotomicInv_frob x hℓ, cyclotomicInv]
-  have avatar_at : ((ha.toAlgebraic k j).avatar x.frob).val = ιℓ (coeff x.place) :=
-    avatar_frob _ x.isPlaceOver hℓ (charUnramifiedAt_toAlgebraic hψ hψ_star k j) x.isFrob_inv
-  have avatar_at_star :
-      ((ha.toAlgebraic k j).avatar (conjGal x.frob)).val = ιℓ (coeff (star x.place)) :=
-    avatar_frob _ x.isPlaceOver.conjPlace_star (by simpa)
-      (charUnramifiedAt_toAlgebraic hψ_star (by rwa [star_star]) k j)
+  have avatar_at :=
+    θ.avatar_frob x.isPlaceOver hℓ (ha.charUnramifiedAt_toAlgebraic hψ hψ_star k j) x.isFrob_inv
+  have avatar_at_star :=
+    θ.avatar_frob (s := conjGal x.frob) x.isPlaceOver.conjPlace_star (by simpa)
+      (ha.charUnramifiedAt_toAlgebraic hψ_star (by rwa [star_star]) k j)
       (by simpa using x.isFrob_inv.conjPlace_conjGal)
   ext
   rw [val_mul, avatar_at, avatar_at_star, ← map_mul, value_mul, val_zpow_eq_zpow_val, cyc_eq]
@@ -220,15 +219,13 @@ lemma isLabelledAt_avatar {a : AutChar D.E} {e : NumberField.InfinitePlace D.E �
   -- the residue of `x`, which `IsTameExponent.pow_apply_charName` expresses by the label.
   intro T s y hy
   have ⟨hA, _, hs, _⟩ := hy
-  obtain ⟨-, -, weil⟩ := avatarCompatAt_of_hasPrimitiveRoot5040 (ha.toAlgebraic k j) hA
-  obtain ⟨x, hx : Valued.v x.val = 1, hxs,
-      (kills : PolyKillsAt ((scalar (Fin 1)).comp (ha.toAlgebraic k j).avatar) A s
-        (X - C (ιℓ ((ha.toAlgebraic k j).val.1 (locIdele w x) : ℂ))))⟩ :=
-    weil s 0 bot_le (inv_mem hs)
-  have value : ((ha.toAlgebraic k j).val.1 (locIdele w x) : ℂ) =
+  let θ := ha.toAlgebraic k j
+  obtain ⟨-, -, weil⟩ := avatarCompatAt_of_hasPrimitiveRoot5040 (w := w) θ hA
+  obtain ⟨x, hx : Valued.v x.val = 1, hxs, kills⟩ := weil s 0 bot_le (inv_mem hs)
+  have value : (θ.character (locIdele w x) : ℂ) =
       (T ^ y) (algebraMap _ (AlgebraicClosure (ResField w)) (charName T (ψ w)).val) := by
     rw [hy.pow_apply_charName _ hx hxs (ψ w)]
-    simp [toAlgebraic, ha.baseChange_finPart_locIdele hw hψ_star hx,
+    simp [θ, toAlgebraic, ha.baseChange_finPart_locIdele hw hψ_star hx,
       charUnramifiedAt_upsilon w x hx, hx]
   -- The only root of `X - C (charName T (ψ w))` is that name.
   simpa [T, value] using kills
