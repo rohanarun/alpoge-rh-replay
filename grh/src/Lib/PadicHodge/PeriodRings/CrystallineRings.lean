@@ -324,7 +324,8 @@ def thetaBPlus : BPlus →ₐ[ℚ_[p]] ℂ_[p] :=
 
 /-- On `A_inf`, `θ` of the period ring A is Fontaine's `θ`. -/
 @[simp]
-lemma thetaAmax_algebraMap : thetaAmax a = theta a := by grind [thetaAmax]
+lemma thetaAmax_algebraMap : thetaAmax a = theta a :=
+  (Amax.exists_lift theta 0 (by simp)).choose_spec.1 a
 
 /-- On A, `θ` of B⁺ is `θ` of A followed by the inclusion of `O_C` into `ℂ_p`. -/
 @[simp]
@@ -422,7 +423,10 @@ lemma p_pow_dvd_of_dvd_aeval_mul (hf_monic : f.Monic) (y : Amax) (m : ℕ)
     pow_dvd_of_map (mul_left_comm _ _) p_mem_nonZeroDivisors h_one h_dvd
   -- modulo `p` we are in a polynomial ring, where the monic image of `f` is regular
   obtain ⟨F, hF, h_ker⟩ := exists_reduction_mod_p (p := p)
-  simp [hF, h_ker, (hf_monic.map _).isRegular]
+  intro z hz
+  have h_zero := (h_ker (aeval xiDivP f * z)).1 hz
+  rw [map_mul, hF f] at h_zero
+  exact (h_ker z).2 ((hf_monic.map (mk (span {(p : Ainf), xi}))).mul_right_eq_zero_iff.1 h_zero)
 
 /-- Let `Amax` be the period ring A, the p-adic completion of A_inf[X]/(pX − ξ), and let `ν ∈ A_inf`
 with `ξ` in the ideal `(p, ν)`, that is, `ν ∣ ξ - p b` for some `b ∈ A_inf`. For every `n` and every
@@ -483,13 +487,16 @@ lemma mem_span_pow_of_p_pow_dvd {a : Ainf} {m : ℕ} (h_dvd : (p : Amax) ^ m ∣
     obtain ⟨c, hc⟩ :
         ∃ c : Ainf, thetaAmax (a : Amax) = thetaAmax ((p : Amax) ^ (m + 1)) * theta c :=
       theta_surjective.exists.mp (map_dvd thetaAmax h_dvd)
-    have h_theta : theta (a - p ^ (m + 1) * c) = 0 := by aesop
+    have h_theta : theta (a - p ^ (m + 1) * c) = 0 := by
+      rw [map_sub, sub_eq_zero, map_mul, map_pow, map_natCast]
+      simpa only [thetaAmax_algebraMap, map_pow, map_natCast] using hc
     obtain ⟨w, hw⟩ : xi ∣ a - p ^ (m + 1) * c := theta_eq_zero_iff_xi_dvd.mp h_theta
     obtain rfl : a = xi * w + p * (p ^ m * c) := by linear_combination hw
     -- as `ξ = p X` and `p` is regular, `p ^ m` divides `X w`, hence `w`
     have h_Xw : (p : Amax) ^ m ∣ xiDivP * w := by
-      simpa [pow_succ', mul_assoc, dvd_add_left,
-        dvd_cancel_left_mem_nonZeroDivisors p_mem_nonZeroDivisors, -isUnit_map_iff] using h_dvd
+      simpa only [pow_succ', map_add, map_mul, ← p_mul_X, mul_assoc, map_natCast, map_pow,
+        dvd_cancel_left_mem_nonZeroDivisors p_mem_nonZeroDivisors, dvd_mul_right, dvd_add_left]
+        using h_dvd
     have hw_mem : w ∈ span {↑p, xi} ^ m :=
       ih (p_pow_dvd_of_dvd_aeval_mul monic_X w m (by rwa [aeval_X]))
     have hc_mem : p ^ m * c ∈ span {↑p, xi} ^ m := ih (by simp)
@@ -796,7 +803,8 @@ lemma BPlus.eq_zero_of_forall_pow_dvd (a : Ainf)
   have h_loc (m : ℕ) : algebraMap Amax BPlus (aeval Amax.xiDivP ((.X - C a) ^ m)) ∣ ↑c := by
     have h_dvd : algebraMap Ainf BPlus (xi - p * a) ^ m ∣ y := h_pow_dvd m
     grw [algebraMap_apply _ Amax, Dvd.intro_left _ hb] at h_dvd
-    simpa [← mul_sub, mul_pow, IsUnit.pow] using h_dvd
+    simpa only [map_pow, aeval_sub, aeval_X, aeval_C, map_sub, ← p_mul_X, map_mul, map_natCast,
+      ← mul_sub, mul_pow, isUnit_p, IsUnit.pow, IsUnit.dvd_mul_left, IsUnit.mul_left_dvd] using h_dvd
   -- the quotient lies in `A`, since `(X - a) ^ m` is monic (`Amax.p_pow_dvd_of_dvd_aeval_mul`)
   have h_int (m : ℕ) : aeval Amax.xiDivP ((.X - C a) ^ m) ∣ c := by
     -- `hw : c = (X - a) ^ m * w` in `B⁺`
