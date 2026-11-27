@@ -91,8 +91,15 @@ Symptom: `failed to synthesize … (deterministic) timeout at typeclass`. Culpri
 trace is the culprit. As a last resort, use `set_option synthInstance.maxHeartbeats 400000 in` on one declaration,
 and only if it then compiles quickly.
 
+- **Rank-zero GL equality:** If `Subsingleton.elim g 1` times out synthesizing `Subsingleton (GA E 0)`,
+  prove just the equality you need: `show g = 1 from Units.ext (Matrix.ext fun i _ => Fin.elim0 i)`.
+  The row index is empty, so no `Subsingleton` search is needed. See [#1029](https://github.com/rohanarun/riemann-hypothesis/pull/1029).
+
 ## Pattern 4 — other Lean 4.36 / elaboration changes
 
+- **`open private` cannot find a moved declaration:** Point it at the bundle that now defines the
+  declaration, and add `import all` for that bundle if a plain or `public import` leaves it hidden.
+  Keep the declaration private. See `RepOps` in [#1012](https://github.com/rohanarun/riemann-hypothesis/pull/1012).
 - **Quotient-group instances** (`(H).Normal`, `Mul (G ⧸ H)`, `CommGroup (Ideles K ⧸ …)`) fail because the nested
   search exceeds the default `maxSynthPendingDepth 1`. Fix: `set_option maxSynthPendingDepth 2 in` on the declaration.
 - **Instance diamonds on Subalgebra/IntermediateField carriers** cause `whnf` timeouts (for example `↥(ptRing …)` over `c.F`).
