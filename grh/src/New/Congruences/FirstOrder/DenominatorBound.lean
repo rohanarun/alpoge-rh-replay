@@ -1117,7 +1117,8 @@ lemma exists_linearMap_eq_smul_mem_integralForms {P : Parameters} {D : Data P} {
     h_op _ (h_base _ ⟨y, rfl⟩) (h_int y (mem_integralForms_ofIso_iff.1 hy_int)) _
       (h_base _ ⟨Z.starProjection y, rfl⟩) h_supp h_agree
   rw [mem_integralForms_ofIso_iff, hw_eq]
-  simpa [sq, mul_smul, Nat.cast_smul_eq_nsmul ℂ] using h_ell
+  change (D.chosenGroupOrder : ℂ) ^ 2 • G s (Z.starProjection y) ∈ BaseLevel.ellIntegralForms
+  rwa [sq, mul_smul, Nat.cast_smul_eq_nsmul ℂ, Nat.cast_smul_eq_nsmul ℂ]
 
 /-- Bound for denominators. Let the twist `ϑ` have ramification at most `ram` (`IsAuxTwist`), let
 `sel` be finite, and let `Z` be spanned by lift generators: forms in `Z`, of a type compatible with
