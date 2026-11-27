@@ -230,8 +230,17 @@ lemma zeroTerm_comp [WeilData E]
     (New.ratVectors E p) φ (Homeomorph.sumArrowHomeomorphProdArrow.continuous_invFun.comp
       continuous_swap) (by simp_all [φ, mem_ratVectors])
     fun b ↦ ⟨(b ∘ Sum.inr, b ∘ Sum.inl), Sum.elim_comp_inl_inr b⟩]
-  simp [φ, zeroTerm_apply, iAdelic, ratMap, comp, Matrix.mul_assoc, kAdelic, fromCols_map,
-    mulVec_add, add_right_comm, add_assoc]
+  rw [D'.zeroTerm_apply]
+  apply congrArg (quotMean (New.ratVectors E q))
+  funext b
+  rw [D.zeroTerm_apply]
+  apply congrArg (quotMean (New.ratVectors E p))
+  funext a
+  have hi : (D.comp D').iAdelic = D.iAdelic * D'.iAdelic :=
+    (ratMap_mul_ratMap V V₀ D.i D'.i).symm
+  change f ((D.comp D').iAdelic *ᵥ y + (D.comp D').kAdelic *ᵥ (a ⊕ᵥ b)) = _
+  rw [hi, comp_kAdelic, fromCols_mulVec_sumElim, ← mulVec_mulVec, ← mulVec_mulVec,
+    mulVec_add, ← add_assoc, add_right_comm]
 
 /-- If the frame k′ of a second splitting D′ of V over V₀ has no l-coordinate in D and both
 splittings read off the same V₀-coordinate, then k′ is spanned by k, with its k-coordinates in D as
@@ -274,7 +283,12 @@ lemma zeroTerm_congr [WeilData E] (D : V.Splitting V₀ p) (D' : V.Splitting V�
   ext f y
   rw [zeroTerm_apply, ← quotMean_comp (New.ratVectors E p) φ (isContPeriodic_along_k f _) h_rat
     h_surj (toLin' _).continuous_on_pi]
-  simp [φ, hiA, h_span_symm, zeroTerm_apply]
+  rw [D.zeroTerm_apply]
+  apply congrArg (quotMean (New.ratVectors E p))
+  funext b
+  change f (D'.iAdelic *ᵥ y + D'.kAdelic *ᵥ ((D'.kCoord * D.kAdelic) *ᵥ b)) =
+    f (D.iAdelic *ᵥ y + D.kAdelic *ᵥ b)
+  rw [hiA, mulVec_mulVec, h_span_symm]
 
 end Splitting
 
