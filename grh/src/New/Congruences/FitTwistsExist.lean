@@ -344,7 +344,7 @@ theorem New.Selmer.range_goodLift_le_span_hasLiftHeckePolynomial {P : Parameters
   -- the space of lifts is spanned by the lifts of good eigenforms `y` on `W_j`
   refine D.range_goodLift_le fun q y hy c hc hy_c ↦ ?_
   obtain rfl | hy_ne := eq_or_ne y 0
-  · simp
+  · exact (LinearMap.map_zero (D.singleLift ϑ j)).symm ▸ Submodule.zero_mem _
   -- the eigensystem `q` of `y` also occurs on `W_m`
   let jmax : D.LiftIndex := ⟨D.m, D.nat_le_of_hasLogBound, le_rfl⟩
   have hq : D.goodForms (D.spaceW D.m) ⊓ D.eigenPart (D.spaceW D.m) q ≠ ⊥ := fun h_bot ↦
