@@ -121,7 +121,18 @@ lemma shift_eq_smul_besselCharMatrix (h : S.Fits V l kw Y η) :
     Y.shift = toAdele (Y.genericConst : E) • besselCharMatrix (S.ratMiddle (𝔸 E)) := by
   rcases 𝔰 with ⟨_ | ϱ⟩
   · -- For `ϱ = 0` the string has one vector, and both matrices vanish.
-    simp [Grading.shift, besselCharMatrix, ← ext_iff, h.index_eq, Shape.besselIndexEquiv]
+    have h_step (a b : Fin 1) : (a : ℕ) ≠ (b : ℕ) + 1 := by omega
+    have h_shift : Y.shift = 0 := by
+      simp only [Grading.shift, Nat.mul_zero, Nat.zero_add, h_step, ite_false]
+      change
+        (gradedBlocks Y.indexEquiv Y.indexEquiv 0 (Matrix.of (0 : Fin 1 → Fin 1 → E))).map
+          toAdele = 0
+      simp only [gradedBlocks, Matrix.of_zero, Matrix.fromBlocks_zero, Matrix.submatrix_zero,
+        Pi.zero_apply, Matrix.map_zero toAdele (map_zero toAdele)]
+    rw [h_shift]
+    refine Matrix.ext fun i j ↦ ?_
+    simp only [Matrix.zero_apply, Matrix.smul_apply, besselCharMatrix, Matrix.of_apply,
+      Finset.univ_eq_empty, Finset.sum_empty, smul_zero]
   · -- Compare the entries block by block. What remains says for which positions in the string an
     -- entry is nonzero, which is linear arithmetic.
     simp [Grading.shift, besselCharMatrix, ← ext_iff, h.index_eq, Shape.besselIndexEquiv, splitGram,
