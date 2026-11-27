@@ -160,18 +160,22 @@ theorem trivialLift_mem_range_typeProjection (hp : p.IsMainPair j) :
   set Y := p.lValueData hp.hasLiftRank ϑ
   -- The label `X - 1` belongs to the trivial character of `GL₁`.
   have h_label (w : FinPlace D.E) (g : GL Unit (ResField w)) :
-      (labelChar (faithfulChar (ResField w))
-          (X - C (charName (faithfulChar (ResField w)) 1).val)).evalGL g = 1 := by
-    rw [labelChar_X_sub_C]
+      (labelChar (faithfulChar (ResField w)) (X - 1)).evalGL g = 1 := by
+    rw [← show C (charName (faithfulChar (ResField w)) 1).val = 1 by simp, labelChar_X_sub_C]
     -- On `GL₁` the rank `1` part of a function is the function itself.
     exact (ite_eq_left (by simp)).trans ((evalGL_detChar 1 g).trans (MulChar.one_apply_coe g.det))
   have h_isLabel (i : Y.descentPair.ChosenIndex) :
-      IsLabel (card Unit) (X - 1 : (ResField (Y.descentPair.chosenPlace i))[X]) :=
-    (isLiftSetting_mainPair ϑ hp).isLabel i
+      IsLabel 1 (X - 1 : (ResField (Y.descentPair.chosenPlace i))[X]) := by
+    simpa only [card_unit] using (isLiftSetting_mainPair ϑ hp).isLabel i
+  have h_coeff (i : Y.descentPair.ChosenIndex)
+      (g : GL Unit (ResField (Y.descentPair.chosenPlace i))) :
+      (labelIdem Unit (X - 1)).coeff g =
+        (Nat.card (GL Unit (ResField (Y.descentPair.chosenPlace i))) : ℂ)⁻¹ := by
+    simp [labelIdem, h_isLabel i, h_label]
   refine ⟨Y.trivialLift, ?_⟩
   -- The idempotent is the mean over the group, which fixes `Y.trivialLift`.
   change typeProjection Y.descentPair (fun _ ↦ X - 1) Y.trivialLift = Y.trivialLift
-  simp_all [asAlgebraHom_eq_sum, tupleIdem, labelIdem, Y.formAction_trivialLift,
+  simp [asAlgebraHom_eq_sum, tupleIdem, h_coeff, Y.formAction_trivialLift,
     ← Nat.cast_smul_eq_nsmul ℂ, smul_smul, prod_ne_zero_iff]
 
 end AptInstances
