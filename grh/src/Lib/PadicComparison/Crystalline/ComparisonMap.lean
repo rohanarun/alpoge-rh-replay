@@ -166,7 +166,10 @@ lemma exists_crysPeriodAlgebra {N : ℕ} {y : OC} (hy : ↑p ∣ y ^ N) :
     rw [compHom_algebraMap_eq]
     aesop
   · -- `σ` is central in `FrobGal`
-    simp [σ, compHom_algebraMap_eq, smul_smul, mul_comm]
+    intro m a
+    have h_comm : Commute m σ := (Commute.all m.1 σ.1).prod (Commute.one_right m.2)
+    simp only [compHom_algebraMap_eq, RingHom.comp_apply, MulSemiringAction.toRingHom_apply,
+      smul_algebraMap_eq_algebraMap_smul, smul_smul, h_comm.eq]
   · -- Write `y = t♯`; its image is the class of `σ [t]`, which is in `(p, ξ)` since the constant
     -- coefficient `σ t` has untilt `y ^ p ^ max N 3`, a multiple of `y ^ N`, hence of `p`.
     obtain ⟨t, rfl⟩ := untilt_surjective_of_isAbsIntegrallyClosed (p := p) y
