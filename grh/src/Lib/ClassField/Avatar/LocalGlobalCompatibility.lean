@@ -154,7 +154,18 @@ lemma New.GaloisRep.avatarCompatAt_of_isSplit {ℓ : ℕ} [ThePrime ℓ] [PadicI
         (placeOfEmb_comp_star (ιℓ.toRingHom.comp _))
     suffices h_eq : θ₁.val.2.toAdd σ = θ.val.2.toAdd σ by simp [h_eq]
     rw [hθ₁.type_eq, Function.comp_apply]
-    grind [Φ_mk_eq_or_star_eq σ]
+    rcases Φ_mk_eq_or_star_eq σ with h | h
+    · have h_place := (congrArg inducedPrime h).trans hσ
+      rw [ite_eq_left h.symm, one_mul]
+      exact (ite_eq_left h_place).trans (congrArg θ.val.2.toAdd h)
+    · have h_other : inducedPrime (Φ (.mk σ)) ≠ w := by
+        intro h_place
+        apply hw
+        exact ((congrArg star h_place).symm.trans h_conj.symm).trans
+          ((congrArg inducedPrime h).trans hσ)
+      have h_ne : σ ≠ Φ (.mk σ) := fun he ↦ h_other ((congrArg inducedPrime he).symm.trans hσ)
+      rw [ite_eq_right h_ne, neg_one_mul]
+      simp only [k, ite_eq_right h_other, neg_neg, h]
   obtain ⟨quot_fin, quot_jump, quot_poly⟩ := avatarCompatAt_of_type_eq_zero (θ / θ₁) h_zero hA
   -- The avatar of `θ` is the twist of `r = det r`, the avatar of `θ₁`, by that of `θ / θ₁`.
   have h_twist (g : Gal(Ω/E)) : ((Matrix.GeneralLinearGroup.scalar (Fin 1)).comp θ.avatar g).val =
