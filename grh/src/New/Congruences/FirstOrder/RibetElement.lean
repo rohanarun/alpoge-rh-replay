@@ -136,7 +136,8 @@ lemma ellVal_add_le_of_addVal_le {O : CoeffRing ℓ} {t' h k nTest nDetect : ℕ
   have h_val : ellVal d.val ≤ sel + loc + (t' * padicValNat ℓ (oddClassBound D) +
       t' * (O.normLength tame + 2 * nDetect * (D.halfGap * h : ℕ)) +
       (k + 1) * (D.halfGap * h : ℕ)) := by
-    grw [← normLength_addVal d, hd, ← h_sel, ← h_loc]
+    rw [← normLength_addVal d]
+    refine (normLength_mono hd).trans (.trans ?_ (add_le_add (add_le_add h_sel h_loc) le_rfl))
     simp only [map_add, two_mul, add_mul, one_mul, normLength_natCast_mul, normLength_addVal_pow,
       sum_add_distrib]
     grw [map_sum O.normLength lossχ, map_sum O.normLength odd, h_odd_val]
@@ -380,7 +381,13 @@ lemma ribet_columns {ν : ℕ} {w : K → FinPlace D.E} {τ φ : K → AbsGal D}
   -- the characters `χ e`, which `g₀` separates up to `ℓ ^ (halfGap h)`
   let χ (e : Fin V.rankDiff) : AbsGal D →* O := cyclotomicInv ℓ D.E O ^ e.val
   have h_sep (e : Fin V.rankDiff) : ∏ e' ∈ {e}ᶜ, (χ e g₀ - χ e' g₀) ∣ ℓ ^ (D.halfGap * h) := by
-    simpa [χ, cyclotomicInv] using map_dvd (algebraMap ℤ_[ℓ] O) (h_tri.prod_dvd e)
+    have hχ (i : Fin V.rankDiff) :
+        algebraMap ℤ_[ℓ] O ((cyclotomicChar Ω ℓ g₀⁻¹ ^ (i : ℕ)).val) = χ i g₀ := by
+      change _ = (cyclotomicInv ℓ D.E O ^ (i : ℕ)) g₀
+      rw [map_inv, Units.val_pow_eq_pow_val, map_pow, MonoidHom.pow_apply]
+      rfl
+    simpa only [map_prod, map_sub, map_pow, map_natCast, hχ] using
+      map_dvd (algebraMap ℤ_[ℓ] O) (h_tri.prod_dvd e)
   let ϵ' : r ⊕ Fin V.rankDiff ≃ n := (summandCoordIndexEquiv r V.rankDiff).trans ϵ
   have h_block (x : 𝓧) (g : AbsGal D) :
       u' x g = reindex ϵ' ϵ' (fromBlocks (T x g) 0 0 (diagonal fun e ↦ χ e g)) := by
