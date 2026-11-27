@@ -147,9 +147,16 @@ private lemma exists_ringHom_centrePrime_le_ker [IsAlgClosed K] (hA : IsPlaceOve
         algebraMap (ResField w) K (algebraMap (𝓞 E) (ResField w) x) := by
   have := hA.centrePrime_liesOver; let := Quotient.field w.asIdeal
   algebraize [(algebraMap (ResField w) K).comp
-    (Ideal.Quotient.lift w.asIdeal (algebraMap (𝓞 E) (ResField w)) (by simp))]
+    (Ideal.Quotient.lift w.asIdeal (algebraMap (𝓞 E) (ResField w))
+      (fun _ hx ↦ algebraMap_ResField_eq_zero.2 hx))]
+  let : Module.IsTorsionFree (𝓞 E ⧸ w.asIdeal) K :=
+    DivisionSemiring.to_moduleIsTorsionFree
+  let : Module.IsTorsionFree (𝓞 E ⧸ w.asIdeal) (𝓞 Ω ⧸ centrePrime Ω A) :=
+    DivisionSemiring.to_moduleIsTorsionFree
   let j : (𝓞 Ω ⧸ centrePrime Ω A) →ₐ[𝓞 E ⧸ w.asIdeal] K := IsAlgClosed.lift
-  exact ⟨j.toRingHom.comp (Ideal.Quotient.mk _), fun _ ht ↦ by simp [eq_zero_iff_mem.2 ht],
+  exact ⟨j.toRingHom.comp (Ideal.Quotient.mk _), fun x hx ↦ by
+    change j (Ideal.Quotient.mk _ x) = 0
+    rw [Ideal.Quotient.eq_zero_iff_mem.2 hx, map_zero],
     fun x ↦ j.commutes (Ideal.Quotient.mk w.asIdeal x)⟩
 
 /-- At level `f !` over `A` above `w` (with `IsFaithfulMulChar K T`): (a) some inertia element has
