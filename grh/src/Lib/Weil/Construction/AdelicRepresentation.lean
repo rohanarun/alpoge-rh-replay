@@ -871,14 +871,19 @@ lemma exists_isThetaFunctional_signedSpace :
   -- As |a|² has mean 1, a does not vanish identically.
   obtain ⟨y, hy⟩ : ∃ y : n → 𝔸 E, a y ≠ 0 := by
     by_contra! h_zero
-    simp_all [a]
+    change quotMean (signedSpace E s).ratVectors (fun x ↦ a x * star (a x)) = 1 at h_mean
+    simp only [h_zero, zero_mul, quotMean_const, zero_ne_one] at h_mean
   -- By `h_prod_eq`, c = P(y) / a(y) has modulus one (take x = y) and c · a(x) = P(x).
   let c : ℂ := P y / a y
   have hc_norm : c * star c = 1 := by
     rw [star_div₀, div_mul_div_comm, h_prod_eq, div_self (mul_ne_zero hy (star_ne_zero.mpr hy))]
   have hc_mul (x : n → 𝔸 E) : c * a x = P x := by
-    -- From `h_prod_eq x y` and `h_prod_eq y y`, dividing by `star (a y) ≠ 0`.
-    grind [h_prod_eq x y, h_prod_eq y y, star_ne_zero.mpr hy]
+    have h_y : c * a y = P y := div_mul_cancel₀ _ hy
+    apply mul_right_cancel₀ (star_ne_zero.mpr hy)
+    calc
+      c * a x * star (a y) = c * (P x * star (P y)) := by rw [mul_assoc, h_prod_eq]
+      _ = P x * star (a y) := by
+        rw [← h_y, star_mul', mul_left_comm c, ← mul_assoc c, hc_norm, one_mul]
   refine ⟨c • θ, ⟨fun γ hγ f ↦ by simp [h_inv γ hγ f], ?_⟩, hc_mul⟩
   -- |c · a|² = |a|², which has mean 1.
   have h_norm (x : n → 𝔸 E) : c * a x * star (c * a x) = a x * star (a x) := by
