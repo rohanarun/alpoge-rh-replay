@@ -700,8 +700,9 @@ lemma hecke_eq_frob_on_parahoricEigenspace (hA : IsPlaceOver A w)
     have blocks (i k : Fin (card n))
         (h_eq : χ (diagGL (mulSingle i u) 0 0) = χ (diagGL (mulSingle k u) 0 0)) :
         min 1 i.val = min 1 k.val := by
-      have h_iff : i ≠ 0 ↔ k ≠ 0 := by rw [← χ_slot, ← χ_slot, h_eq]
-      grind [Fin.val_ne_zero_iff]
+      have h_iff : i.val ≠ 0 ↔ k.val ≠ 0 := by
+        rw [Fin.val_ne_zero_iff, Fin.val_ne_zero_iff, ← χ_slot, ← χ_slot, h_eq]
+      omega
     obtain ⟨τ_roots, comm, θ, ⟨l, hl, lz_ne⟩, sτ_roots⟩ :
         IsParahoricCompatible ρ z ϖ (fun i ↦ χ (diagGL (mulSingle i u) 0 0)) F (x.galRep τ).val :=
       isParahoricCompatible_galRep hA hϖ hϖ_artin hs_frob hu hu_artin hτ hℓ hz z_ne _ z_type blocks
