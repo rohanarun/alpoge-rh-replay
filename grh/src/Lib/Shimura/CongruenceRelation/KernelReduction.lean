@@ -842,9 +842,13 @@ lemma exists_param_pow_card_eq_zero (hw : D.IsGoodAt (ker x.baseHom))
     let z : placeTorsion x k[ε] := ⟨L 1, by simp +contextual [hL.smul_apply]⟩
     obtain ⟨u, -, h_pow, h_zero⟩ := h_main k[ε] z (fstHom k k k)
     by_contra h_none
-    have h_card : Nat.card {s // ν s = 0} = 1 :=
-      Nat.card_eq_one_iff_exists.mpr
-        ⟨⟨0, map_zero ν⟩, by simpa [ν_eq, not_imp_not] using h_none⟩
+    have h_card : Nat.card {s // ν s = 0} = 1 := by
+      refine Nat.card_eq_one_iff_exists.mpr ⟨⟨0, map_zero ν⟩, fun s ↦ ?_⟩
+      apply Subtype.ext
+      apply Subtype.ext
+      by_contra h_ne
+      refine h_none ⟨s.1.1, s.1.2, h_ne, ?_⟩
+      simpa only [Submodule.coe_zero, map_zero] using (ν_eq s.1 0).mp s.2
     have h_fst : placeTorsionMap (fstHom k k k) z = 0 := Subtype.ext (hL.fstHom_comp 1)
     rw [h_fst, h_card, pow_one] at h_pow
     have h_L : L 1 = 0 := by
