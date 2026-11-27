@@ -478,14 +478,29 @@ lemma radius_lemma (ht_fixes : c.FixesThetaZ t)
       Subalgebra.algebraMap_def, -isUnit_map_iff] using h_dvd
   choose F hF using fun i j ↦ exists_ev_eq_frobEnd_pow ht_fixes ht_z hX hz hBZ hG_one hW_mem hW i j
   obtain ⟨V', hV'⟩ : IsUnit (1 + (X : c.S⟦X⟧) • of F) := by
-    simp [isUnit_iff_isUnit_det, det_one_add_smul X, isUnit_iff_constantCoeff, -smul_of]
-  obtain ⟨ε, hε⟩ : IsUnit (1 + X * C (p * (c.φ ^ l) r)) := by simp [isUnit_iff_constantCoeff]
+    rw [isUnit_iff_isUnit_det, isUnit_iff_constantCoeff,
+      (PowerSeries.constantCoeff (R := c.S)).map_det (1 + (X : c.S⟦X⟧) • of F),
+      RingHom.map_add, RingHom.map_one, RingHom.mapMatrix_apply,
+      Matrix.map_smul' _ _ _ (PowerSeries.constantCoeff (R := c.S)).map_mul,
+      PowerSeries.constantCoeff_X, zero_smul, add_zero, det_one]
+    exact isUnit_one
+  obtain ⟨ε, hε⟩ : IsUnit (1 + X * C (p * (c.φ ^ l) r)) := by
+    rw [isUnit_iff_constantCoeff, PowerSeries.constantCoeff.map_add, PowerSeries.constantCoeff.map_one,
+      PowerSeries.constantCoeff.map_mul, PowerSeries.constantCoeff_X, zero_mul, add_zero]
+    exact isUnit_one
   -- Apply `φ ^ l` to `hW`: `φ ^ l (z) • φ ^ l (W) = ev X • ev F` by `hX` and `hF`.
   have hBZ_frob : B.map (frobEnd ^ l) * Z.map (frobEnd ^ l) = ev.mapMatrix V' := by
-    rw [← Matrix.map_mul]
-    ext i j
-    simp [hW, hV', hX, hF, Matrix.one_apply, mul_assoc, mul_left_comm, -algebraMap_smul,
-      -RingHom.coe_pow]
+    rw [← Matrix.map_mul, hW, hV']
+    apply Matrix.ext
+    intro i j
+    change (frobEnd ^ l) ((1 + ainfToBPlus c.z • W) i j) =
+      ev ((1 + (X : c.S⟦X⟧) • of F) i j)
+    have h_one : (frobEnd ^ l) ((1 : Matrix d d BPlus) i j) =
+        ev ((1 : Matrix d d c.S⟦X⟧) i j) := by
+      by_cases hij : i = j <;> simp only [Matrix.one_apply, hij, ite_true, ite_false, map_one, map_zero]
+    rw [Matrix.add_apply, Matrix.add_apply, (frobEnd ^ l).map_add, map_add ev, h_one]
+    simp only [Matrix.smul_apply, Matrix.of_apply, smul_eq_mul,
+      (frobEnd ^ l).map_mul, map_mul ev, frobEnd_pow_ainfToBPlus_z, hX, hF, mul_assoc, mul_left_comm]
   -- Apply `φ ^ l` to `E = p + z * r`.
   have h_pa : ainfToBPlus (c.frobE l) = p * ev ε := by
     rw [frobE, eq_add_of_sub_eq' hr, RingHom.map_add, RingHom.map_mul, map_natCast (c.φ ^ l)]
