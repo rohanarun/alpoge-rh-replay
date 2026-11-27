@@ -725,9 +725,16 @@ lemma matchedPoly_constantRows (i : D.RowChoice) :
           (fun (τ : InfinitePlace D.E) (r : D.FlatIndex) (c : Fin (2 * D.m)) ↦ .X ⟨τ, r, inl c⟩)
           fun (τ : InfinitePlace D.E) (k : Fin D.reducedHalfGap) ↦
             ((D.shortRows i).map (Φ τ)).submatrix (i.rows τ k) id)) := by
-  simp [signOrder, matchedPoly, pairedDetProd, variableMinor, ← mul_assoc, paddedMinorProd,
-    prod_sigma,
-    AlgHom.map_det, Matrix.map, ← Finset.prod_mul_distrib, negIndex, constantRows, regroupEquiv]
+  -- Expand the row maps and push renaming through the polynomial products.
+  simp only [matchedPoly, variableMinor, signOrder, regroupEquiv, Equiv.symm_trans,
+    Equiv.sumCongr_symm, Equiv.refl_symm, Equiv.sumComm_symm, Equiv.coe_trans, Equiv.sumComm_apply,
+    Equiv.coe_ofBijective, Function.comp_apply, elim_inr, negIndex, Equiv.coe_refl, id_eq, card_sum,
+    card_sigma, card_fin, card_unique, pairedDetProd, Matrix.map, MvPolynomial.algebraMap_eq,
+    constantRows, Equiv.ofBijective_apply, elim_inl, Equiv.sumCongr_apply, Sum.map_map,
+    CompTriple.comp_eq, Equiv.refl_apply, prod_sum_type, transpose_apply, prod_sigma,
+    ← Finset.prod_mul_distrib, ← mul_assoc, paddedMinorProd, map_prod, map_mul, map_pow,
+    AlgHom.map_det, AlgHom.mapMatrix_apply, of_apply, MvPolynomial.rename_X, Prod.map_apply,
+    submatrix_apply, MvPolynomial.rename_rename]
   -- What is left: the exponent of the negative minor, the positive minors of `paddedMinorProd`, and
   -- the determinants on `W♭`. The last two agree entry by entry.
   congr! 4
