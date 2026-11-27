@@ -800,7 +800,7 @@ private lemma New.GaloisRep.exists_padicRep_of_cuspidal_type_at_embedding {ℓ :
   -- At an embedding inducing `w` the type of the twist is `μ`, which cancels the shift in `J`.
   simp +contextual [J, h_s₀, hμ, hv₀, AlgHeckeChar.baseChange, apply_ite, algebraMap_toAlgebra,
     Pi.single_apply]
-  lia
+  exact fun _ _ h_ne h_eq ↦ (h_ne h_eq.symm).elim
 
 /-- A weak form of a case of the theorem on Galois representations attached to cohomological
 cuspidal forms, in odd rank `a`. Let `f` be a form of weight `κ` on the definite unitary group,
