@@ -121,8 +121,12 @@ lemma testUnitLocus.nonempty_iso_away (a : T) (L : Type := Localization.Away a) 
       -- Two maps out of `L` that agree on `T` are equal.
       left_inv φ := ULift.down_injective <| CommAlgCat.hom_ext <|
         algHom_ext (.powers a) (AlgHom.ext (lift_eq (S := L) _))
-      right_inv ψ := Subtype.ext <| ULift.down_injective <| CommAlgCat.hom_ext <|
-        AlgHom.ext fun t ↦ IsLocalization.lift_eq .. }⟩
+      right_inv ψ := by
+        refine Subtype.ext <| ULift.down_injective <| CommAlgCat.hom_ext <| AlgHom.ext ?_
+        intro t
+        change (liftAlgHom a ψ.property : L →ₐ[A] c.obj) (algebraMap T L t) =
+          testSpec.asAlgHom ψ.val t
+        exact IsLocalization.Away.lift_eq (S := L) a ψ.property t }⟩
 
 /-- For e: A[X_1,…,X_d] ≅ T, the map from Spec T to (P¹)^d on tests over A sending ψ to the
 points (ψ(e X_i) : 1). -/
