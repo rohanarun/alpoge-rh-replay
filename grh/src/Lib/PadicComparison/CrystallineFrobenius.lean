@@ -585,8 +585,9 @@ private lemma map_J_tensorAction_eq_pull {p : ℕ} [ThePrime p] {R : CommRingCat
   have h_points : α ≫ Functor.whiskerRight κ Zcr = red a ha := by
     ext c : 2
     let ZV := freeAb V.toFunctor
-    refine ((ZV.map_comp ..).trans ((ZV.map_comp ..) =≫ _)).symm.trans
-      (congrArg _ (ext_apply fun y ↦ ?_))
+    change (ZV.map _ ≫ ZV.map _) ≫ ZV.map _ = ZV.map _
+    rw [← ZV.map_comp, ← ZV.map_comp]
+    refine congrArg (ZV.map) (ext_apply fun y ↦ ?_)
     -- `x ^ p ^ 0 = x`, then `h_eta`
     exact (congrArg (pdQuotientMap (τ.app c).hom) (pow_one _)).trans (h_eta c y)
   -- Twisting the coefficients by `β` is moving the period ring by `κ`: both give `1 ⊗ τ x`.
