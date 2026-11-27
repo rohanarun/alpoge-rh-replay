@@ -217,9 +217,9 @@ lemma IsWeakBaseChange.descendsAt (hs : IsWeakBaseChange (ideleChar χ) S f f')
   have h_normal : (stepKer χ).subtype.range.Normal := by
     rw [range_subtype]
     infer_instance
-  obtain ⟨Z, hZ⟩ : ∃ Z : GL n (PadicAlgCl ℓ),
-      ∀ s : stepKer χ, (r' (stepKerInclusion χ s)).val * Z = Z * r s :=
-    h_att.isTraceNondeg.exists_conj_of_trace_eq _ (AlgHom.id (PadicAlgCl ℓ) _)
+  obtain ⟨Z, hZ⟩ :=
+    h_att.isTraceNondeg.exists_conj_of_trace_eq _
+      (AlgHom.id (PadicAlgCl ℓ) (Matrix n n (PadicAlgCl ℓ)))
       (hr.isTraceNondeg.comp (stepKer χ).subtype h_normal).hasSemiprimeSpan h_trace
   -- `Z` intertwines `r ∘ res` with `r'` on the neighbourhood `res ⁻¹' stepKer χ` of `1`.
   have h_nhds : res ⁻¹' stepKer χ ∈ nhds 1 :=
@@ -491,7 +491,9 @@ lemma New.GaloisRep.sphericalCompat_of_odd {ℓ : ℕ} [ThePrime ℓ] [PadicIso 
       have hs' := hs.conj c
       have hfx : f ∈ sphericalAt (rightRegular ℂ (Gf E (Fin a)) (WeylIndex (Fin a) κ.1 → ℂ)) x :=
         levelSpace_le_sphericalAt (not_mem_S x hx) (not_mem_S (star x) (by simpa using hx))
-          (by simpa [LE.le, funext_iff] using hS)
+          (mem_levelSpace.2 fun k ↦ by
+            rw [MonoidHom.one_apply, one_smul]
+            exact funext (mem_rightStabilizer.1 (hS k.property)))
       have hℓ : ↑ℓ ∉ x.asIdeal := fun hℓ ↦ hx (mem_of_dvd _ (by simp [n]) hℓ)
       have hx_dvd : ↑(n (T + m)) ∈ x.asIdeal := n_mem (T + m) x (by omega)
       exact ⟨(h_quad (T + m)).inertiaGroup_le_ker_inf hA' hx_dvd hs',
