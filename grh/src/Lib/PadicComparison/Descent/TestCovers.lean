@@ -438,13 +438,19 @@ in `W` that is solvable in `V` is solvable in `W` (`New.Variety.Envelope.IsSolut
 lemma isCell_of_isSolutionClosed {W V : Type} [CommRing W] [CommRing V] {g : W →+* V}
     (hg : Envelope.IsSolutionClosed g) [hV : IsCell p V] :
     IsCell p W := by
-  -- `g` is injective and reflects divisibility, so most properties are read off in `V`. The `↓`
-  -- lets `TauCeti.sModEq_span_singleton_pow_iff` rewrite before `simp` unfolds the `SMOD` relation.
+  -- `g` is injective and reflects divisibility, so most properties are read off in `V`.
   have hW_domain : IsDomain W := hg.1.isDomain
   have hW_val : ValuationRing W := iff_dvd_total.mpr ⟨by simp [← hg.map_dvd_iff, dvd_total]⟩
   refine
     { haus' := by
-        simp_all [← hg.1.eq_iff, ← hg.map_dvd_iff, hV.haus, ↓ TauCeti.sModEq_span_singleton_pow_iff]
+        intro x hx
+        apply hg.1
+        rw [map_zero]
+        apply hV.haus
+        intro n
+        have hn := hx n
+        simp only [TauCeti.sModEq_span_singleton_pow_iff, sub_zero] at hn ⊢
+        simpa only [map_pow, map_natCast] using map_dvd g hn
       prec' f hf := ?_
       toIsAbsIntegrallyClosed := (hg.isTest isTest_of_preValuationRing).toIsAbsIntegrallyClosed
       p_ne_zero := by simp [← hg.1.eq_iff, hV.p_ne_zero] }
