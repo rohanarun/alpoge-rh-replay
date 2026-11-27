@@ -164,13 +164,15 @@ lemma exists_isTensorClass [HasFlatValues N] [HasFlatValues K] (ξ : H N K 2) :
         (((kerComplex p).map (restrictAlong φ)).map (abTensor.obj S)).zero).ShortExact :=
     abTensor_shortExact (G := φ ⋙ M) (G' := φ ⋙ (kerComplex p).X₁)
       (hp.map_of_exact (restrictAlong φ)) S
-  refine ⟨fun D _ φ S ↦ (h_ses_tensor φ h_exact S).extClass.comp
-      ((h_ses_tensor φ h_exact₁ S).extClass.comp
-        (.mk₀ ((abTensor.flip.map (φ.whiskerLeft u)).app S)) rfl) rfl,
-    { comm := ?_, eq_of_flat := ?_, restrict := ?_ }⟩
+  let tensorClass : TensorClassFamily N K := fun D _ φ S ↦ (h_ses_tensor φ h_exact S).extClass.comp
+    ((h_ses_tensor φ h_exact₁ S).extClass.comp
+      (.mk₀ ((abTensor.flip.map (φ.whiskerLeft u)).app S)) rfl) rfl
+  refine ⟨tensorClass, { comm := ?_, eq_of_flat := ?_, restrict := ?_ }⟩
   · intro D instD φ S S' y
-    induction y using DirectSum.induction_on with
-    | of a y =>
+    refine DFunLike.congr_fun (DirectSum.addHom_ext
+      (f := mapThenComp (abTensor.flip.obj (φ ⋙ N)) (tensorClass D φ S').toTotalH)
+      (g := (comp (tensorClass D φ S).toTotalH).comp (map (abTensor.flip.obj (φ ⋙ K)))) ?_) y
+    · intro a y
       -- y passes each extension class with the sign (-1) ^ a (`extClass_sign_comm`), and the two
       -- signs cancel; it passes the map induced by u by `naturality`.
       -- The computation is done first for arbitrary classes `e₀, e₁, v` and `e₀', e₁', v'`
@@ -197,8 +199,6 @@ lemma exists_isTensorClass [HasFlatValues N] [HasFlatValues K] (ξ : H N K 2) :
       exact h_pass (extClass_sign_comm (h_ses_tensor φ h_exact) y)
         (extClass_sign_comm (h_ses_tensor φ h_exact₁) y)
         (naturality (abTensor.flip.map (φ.whiskerLeft u)) (DirectSum.of _ a y))
-    | zero => simp only [map_zero, AddMonoidHom.zero_apply]
-    | add y y' hy hy' => simp only [map_add, AddMonoidHom.add_apply, hy, hy']
   · intro D instD φ S instS
     -- exact functors respect Yoneda products, extension classes and `mk₀`; then both sides are the
     -- same class, written with `abTensor.flip` or `abTensor`
@@ -221,7 +221,7 @@ lemma exists_isTensorClass [HasFlatValues N] [HasFlatValues K] (ξ : H N K 2) :
     exact (congrArg Ext.toTotalH h_map).symm
   · intro D instD φ S E instE ψ
     -- likewise
-    simp only [map_of, Ext.mapExactFunctor_comp, Ext.mapExactFunctor_extClass,
+    simp only [tensorClass, map_of, Ext.mapExactFunctor_comp, Ext.mapExactFunctor_extClass,
       Ext.mapExactFunctor_mk₀]
     rfl
 
@@ -462,16 +462,11 @@ lemma bijective_totalH_iff_isBijective {α : N' ⟶ c.functor ⋙ N} :
       (TotalH.comp (.homClass α)).comp
           (TotalH.mapThenComp (N := N) (restrictAlong _) (.homClass c.coeffHom)) =
         DirectSum.map (c.pull α) := by
-    ext n x : 2
-    calc
-      TotalH.comp (.homClass α)
-        (TotalH.comp (TotalH.map (restrictAlong c.functor) (.of _ n x)) (.homClass c.coeffHom))
-      _ = TotalH.comp (.homClass α)
-          (.of _ n (H.push _ c.coeffHom n (x.mapExactFunctor (restrictAlong c.functor)))) := by
-        rw [TotalH.map_of, of_comp_homClass]
-        rfl
-      _ = .of _ n (c.pull α n x) := pullbackAlong_of ..
-      _ = DirectSum.map (c.pull α) (.of _ n x) := by rw [DirectSum.map_of]
+    refine DirectSum.addHom_ext fun n x ↦ ?_
+    change pullbackAlong α
+      (TotalH.comp (TotalH.map (restrictAlong c.functor) (.of _ n x)) (.homClass c.coeffHom)) = _
+    rw [TotalH.map_of, of_comp_homClass, DirectSum.map_of]
+    exact pullbackAlong_of ..
   -- a direct sum of maps is bijective if and only if each summand is
   change Bijective ((TotalH.comp (.homClass α)).comp
     (TotalH.mapThenComp (N := N) (restrictAlong c.functor) (.homClass c.coeffHom))) ↔ _
