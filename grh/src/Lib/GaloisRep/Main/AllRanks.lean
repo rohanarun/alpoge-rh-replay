@@ -205,7 +205,13 @@ private lemma New.GaloisRep.PolyKillsAt.add {ℓ : ℕ} {E n : Type} [ThePrime �
     [EmbeddedNumberField E] [Fintype n] [DecidableEq n] {r : GalRep ℓ E n} {A : ClosurePlace}
     {s : Gal(Ω/E)} {P Q : (PadicAlgCl ℓ)[X]} (hP : PolyKillsAt r A s P) (hQ : PolyKillsAt r A s Q) :
     PolyKillsAt r A s (P + Q) := by
-  grind [PolyKillsAt, Period.IsKilledBy, eval₂_add]
+  refine ⟨fun h ↦ ?_, ?_⟩
+  · rw [map_add, hP.1 h, hQ.1 h, add_zero]
+  · intro L hs k hw
+    obtain ⟨h_crys, h_evalP⟩ := hP.2 hw
+    have h_evalQ := (hQ.2 hw).2
+    refine ⟨h_crys, ?_⟩
+    rw [eval₂_add, h_evalP, h_evalQ, add_zero]
 
 /-- If `P * a` and `P * b` kill `s` for `r` at `A`, and `a` and `b` are coprime, then `P` kills
 `s`. -/
