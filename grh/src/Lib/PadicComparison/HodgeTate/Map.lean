@@ -638,10 +638,11 @@ lemma HodgeTatePair.contractionPow_cup {a : ℕ} {M L : AbFunctor HodgeTatePair}
     rw [sum_choose_succ_nsmul fun _ _ ↦ _, contractionPow,
       ← TotalH.comp_assoc_of_sq tensorContractionCocycle_comp_wedgePairing]
     -- Expand the sum, insert the two components, and apply `ih` to both terms.
-    simp [TotalH.homClass, Ext.mk₀_add, homClass_comp, ← comp_assoc,
-      cup_comp_tensorContractionCocycle_π_true, cup_comp_tensorContractionCocycle_π_false,
-      ← cup_comp_homClass_left, contractionPow]
-    simp [comp_of, ih, smul_sum, comp_assoc]
+    simp only [TotalH.homClass, Preadditive.add_comp, Category.assoc, Ext.mk₀_add, map_add,
+      homClass_comp, ← comp_assoc, AddMonoidHom.add_apply, cup_comp_tensorContractionCocycle_π_false,
+      Int.reduceNeg, map_zsmul, AddMonoidHom.smul_apply, ← cup_comp_homClass_left,
+      cup_comp_tensorContractionCocycle_π_true, Nat.reduceSubDiff, contractionPow]
+    simp only [Int.reduceNeg, add_zero, comp_of, comp_assoc, ih, smul_sum]
     -- Compare term by term; what is left is an identity of signs.
     congr! 2 with h h_mem
     · -- terms where the contraction acts on `y`: moving it past `x` gives `(-1) ^ a`, and the
