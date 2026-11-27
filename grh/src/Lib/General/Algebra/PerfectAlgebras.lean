@@ -411,9 +411,12 @@ lemma exists_perfect_blowup_charts (hp : (p : S) = 0) [PerfectRing S p] (B : Per
   obtain ⟨B₂, E₂, lift₂, -, rel₂, root₂⟩ := exists_perfection_quotient hp _ (C g - C f * X)
   obtain ⟨B₀, E₀, -, ker₀, rel₀, root₀⟩ := exists_perfection_quotient hp _ (C f - C g * X).toLaurent
   obtain ⟨j₁, hj₁'⟩ := lift₁ (E₀.comp ⟨toLaurent, by simp⟩) rel₀
-  obtain ⟨j₂, hj₂'⟩ := lift₂ (E₀.comp ⟨.comp invert.toRingHom toLaurent, by simp⟩)
-    (show E₀ (invert (C g - C f * X).toLaurent) = 0 by
-      simp [invert_toLaurent_C_sub_C_mul_X, rel₀, -map_sub])
+  let chart₂ : B.obj[X] →ₐ[S] B₀.obj :=
+    E₀.comp ⟨.comp invert.toRingHom toLaurent, by simp⟩
+  have h_chart₂ : chart₂ (C g - C f * X) = 0 := by
+    change E₀ (invert (C g - C f * X).toLaurent) = 0
+    rw [invert_toLaurent_C_sub_C_mul_X, map_mul, map_neg, rel₀, neg_zero, zero_mul]
+  obtain ⟨j₂, hj₂'⟩ := lift₂ (d := B₀) chart₂ h_chart₂
   have hj₁ : ∀ P : B.obj[X], j₁ (E₁ P) = E₀ P.toLaurent := AlgHom.congr_fun hj₁'
   have hj₂ : ∀ P : B.obj[X], j₂ (E₂ P) = E₀ (invert P.toLaurent) := AlgHom.congr_fun hj₂'
   let i₁ : B.obj →ₐ[S] B₁.obj := E₁.comp CAlgHom
