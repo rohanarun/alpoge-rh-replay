@@ -399,8 +399,8 @@ lemma exists_isAdditive_schemeMap_comp_eq_smul (ha : a ≠ 0)
     let u : (map (sqZeroReduction k k)).obj (mk b) ⟶ specOver _ S := homMk _ hψ
     have hu : u ≫ specOver.map γ = u ≫ specOver.map (.comp (ofId ..) o) :=
       (mono_of_mono_left ι).right_cancellation _ _ <| by
-        -- `map_smul` is left out: with it `simp` moves `a` out of `pointEquiv`, off the goal.
-        simpa [← specOver.map_comp_assoc, -map_smul, hγ, ho] using h_ker_agree ι hι _ _ u
+        simpa only [assoc, hγ, ModuleObj.comp_smul, ← specOver.map_comp_assoc, ho, comp_zero,
+          map_zero, EmbeddingLike.map_eq_zero_iff] using h_ker_agree ι hι _ _ u
     have h_split (s : S) :
         ∃ d : S, γ s = preimage (specOver k[ε] S).hom ε * d + ofId _ S (o s) := by
       have h_eq : preimage (u ≫ specOver.map γ).left s =
@@ -416,7 +416,8 @@ lemma exists_isAdditive_schemeMap_comp_eq_smul (ha : a ≠ 0)
       simp [hd s, hd (d s), ← smul_def, smul_smul]
     have h_comp : z ≫ specOver.map (γ.comp γ) ≫ ι =
         z ≫ specOver.map (((ofId _ S).comp o).comp γ) ≫ ι := by rw [hγγ]
-    simpa [← specOver.map_comp_assoc, hγ, ho] using h_comp
+    simpa only [← specOver.map_comp_assoc, hγ, ModuleObj.comp_smul, ho, comp_zero, smul_zero]
+      using h_comp
   -- Hence `F` kills the kernel of the isogeny `f`, and `F = f ≫ μ`.
   obtain ⟨μ, hμ_add, hμ⟩ := exists_isAdditive_comp_eq_of_isIsogeny f F
     fun S _ _ _ _ _ y hy ↦ h_ker S y hy (h_kill y hy)
