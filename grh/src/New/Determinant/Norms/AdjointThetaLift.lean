@@ -138,7 +138,10 @@ lemma DescentPair.normalizedDescent_mul_eq_normalizedDescent_formAction (k : std
   rw [h_form, O.pairThetaKernel.swap.lift_equivariant
     (isAutomorphic_algFormCoeff Ξ.val).conj _ (1, k'.val), h_datum]
   -- The scalar `c⁻¹` from the datum matches the conjugate of `c` from the conjugated form.
-  simp [lift, ← algFormCoeff_algFormRep, h_conj, mul_assoc, mul_left_comm c⁻¹]
+  simp only [Fintype.card_pi, Nat.cast_prod, lift, MulEquiv.toMonoidHom_eq_coe, MonoidHom.coe_comp,
+    MonoidHom.coe_ofClass, MulEquiv.coe_prodComm, Function.comp_apply, Prod.swap_prod_mk, fockDatum,
+    map_smul, theta_apply, smul_eq_mul, Pi.star_apply, ← algFormCoeff_algFormRep, Complex.star_def,
+    mul_assoc, mul_left_comm c⁻¹, Pi.smul_apply, star_mul', h_conj]
 
 /-- If the parameter `l` on `W` fits the pair, the datum of the highest vector is an arrow from `W`
 to `V`: the theta lift by it takes forms of parameter `l` to forms of parameter `O.paramV`. -/
@@ -401,15 +404,13 @@ lemma DescentPair.thetaLift_eq_integral [WeilData E]
     (Subtype.ext (funext fun h ↦ ?_)))
   let ev : O.FormV →L[ℂ] ℂ := LinearMap.toContinuousLinearMap
     (LinearMap.proj h ∘ₗ ofAlgForm O.paramV 1 ∘ₗ Submodule.subtype _)
-  have h_kernel (g : G E O.signs) : ev (O.vectorKernelForm g) =
-      pairTheta O.W (stdSpace E n) O.charW O.charV
-        (O.fockDatum (highestVector O.columnCount O.paramV)) (g, h) :=
-    O.ofAlgForm_vectorKernelForm g h
-  change ofAlgForm O.paramV 1 (O.thetaLift hfit y).val h = ev _
+  have h_eval (z : O.FormV) : ev z = ofAlgForm O.paramV 1 z.val h := rfl
+  change ofAlgForm O.paramV 1 (O.thetaLift hfit y).val h = ofAlgForm O.paramV 1 _ h
   -- Evaluation of the image at `h` is continuous and linear, so it commutes with the integral.
-  rw [ofAlgForm_thetaLift, hfit.isArrow_fockDatum.coe_formLift,
+  rw [ofAlgForm_thetaLift, hfit.isArrow_fockDatum.coe_formLift, ← h_eval,
     ← ev.integral_comp_comm (O.integrable_smul_vectorKernelForm hfit y)]
-  simp only [map_smul, h_kernel, smul_eq_mul, lift, pairTheta, mul_comm (y.val _)]
+  simp only [map_smul]
+  simp only [h_eval, ofAlgForm_vectorKernelForm, smul_eq_mul, lift, pairTheta, mul_comm (y.val _)]
 
 /-! ### The block datum and the constant in the Gram form -/
 
