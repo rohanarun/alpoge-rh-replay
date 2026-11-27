@@ -230,7 +230,7 @@ theorem integral_forms_long_with_completion_cost {n : ℕ} {y : Fin n → D.targ
     exists_extend_basis_of_span_eq_top hy h_auxiliary_span
   have hz_aux (i : Fin n') : D.IsAuxiliaryForm γ (z i) := hz i
   have hz_int (i : Fin n') (ι : PrimePadicIso) (ϑ : D.MFoldTwist)
-      (hϑ : Nat.Coprime ι.prime ϑ.normQ) : γ ϑ • D.Θ ϑ (z i) ∈ integralForms ι.place :=
+      (hϑ : Nat.Coprime ι.prime ϑ.normQ) :=
     (hz_aux i).smul_lift_mem_integralForms ι ϑ hϑ
   have hz_short (i : Fin n') (σ : ℂ ≃+* ℂ) :
       D.targetLattice.normSqAt (z i) σ ≤ exp (2 * D.x₁ ^ 2 * D.b ^ 2) :=
@@ -247,10 +247,9 @@ theorem integral_forms_long_with_completion_cost {n : ℕ} {y : Fin n → D.targ
     heightLe_chainDeterminant_one_div h_small_ratios h_single_lift_heights
   -- Compare the Gram determinants for the local twists with the untwisted determinant.
   -- The product formula gives one inequality, including the cost of the completion.
-  have h_product_formula : 0 ≤ c + 2 * δ + n' * (2 * D.x₁ ^ 2 * D.b ^ 2 + D.b) +
-      D.targetDim * (D.b + D.f * D.a * D.logB ^ 4 - D.mainAmount) :=
-    TwistedLattice.covolume_add_index_nonneg (injective_lift_targetLattice 1) h_completed_indep
-      h_completed_card h_small_ratios.coprime
+  have h_product_formula :=
+    TwistedLattice.covolume_add_index_nonneg (L := D.targetLattice)
+      (injective_lift_targetLattice 1) h_completed_indep h_completed_card h_small_ratios.coprime
       (fun ι ↦ TwistedLattice.volume_ne_zero (injective_lift_targetLattice (θ ι)))
       hc hδ (γ := fun ι ↦ γ (θ ι)) (fun ι ↦ hγ_ne (θ ι))
       (fun ι i ↦ hz_int i ι (θ ι) (h_small_ratios.coprime ι))
