@@ -829,8 +829,20 @@ lemma eventually_exists_inClass_sum_dualDefect_le {V : DescentPair D.E r n}
   -- a summand embeds equivariantly in `u π`, so it belongs to the class
   have hL (v : placesDividing D.E ℓ) (i : Option (Fin t)) : InClass (F v) (C v) (U v) (L v i) := by
     refine InClass.of_jointly_injective (fun _ ↦ (hu v π).2)
-      (fun () ↦ f.symm ∘ₗ .single O (fun i ↦ L v i) i) ?_ (by simp)
-    simp [f.symm_apply_eq, funext_iff, hf, fun g ↦ Pi.apply_single fun i ↦ (L v i).ρ g]
+      (fun () ↦ f.symm ∘ₗ .single O (fun i ↦ L v i) i) ?_ ?_
+    · intro _ g x
+      apply f.injective
+      change f (f.symm (Pi.single i ((L v i).ρ g x))) =
+        f (u π g *ᵥ f.symm (Pi.single i x))
+      rw [f.apply_symm_apply]
+      funext j
+      rw [hf v j g _, f.apply_symm_apply]
+      exact (Pi.apply_single (fun j ↦ (L v j).ρ g)
+        (fun j ↦ LinearMap.map_zero ((L v j).ρ g)) i x j).symm
+    · intro x hx
+      have hx' : f.symm (Pi.single i x) = f.symm 0 :=
+        (hx ()).trans (LinearEquiv.map_zero f.symm).symm
+      simpa only [Pi.single_eq_same, Pi.zero_apply] using congrFun (f.symm.injective hx') i
   -- every jump of `u π` is a jump of some summand
   have h_jump_from (v : placesDividing D.E ℓ) (γ : O →ₐ[ℤ_[ℓ]] ℂ_[ℓ]) (a : ℤ) (ha : a ∈ U v γ) :
       ∃ i : Option (Fin t), jump (L v i).ρ γ a ≠ 0 := by
@@ -839,7 +851,9 @@ lemma eventually_exists_inClass_sum_dualDefect_le {V : DescentPair D.E r n}
     have h_jump : jump (localLattice (u π) v).ρ (coefficientEmbedding O g) a ≠ 0 :=
       ((hu v π).1 g a).trans_ne (by simpa using ha')
     exact exists_jump_of_jointly_injective (fun i ↦ (hL v i).isPotentiallyCrystalline)
-      (fun i ↦ .proj i ∘ₗ f.toLinearMap) (hf v) (by simp [← funext_iff, ← Pi.zero_def]) h_jump
+      (fun i ↦ .proj i ∘ₗ f.toLinearMap) (hf v)
+      (fun x hx ↦ f.injective ((show f x = 0 from funext hx).trans (LinearEquiv.map_zero f).symm))
+      h_jump
   have h_defect (i : Option (Fin t)) (v : placesDividing D.E ℓ) :
       O.normLength (dualDefect (InClass (F v) (C v) (U v)) (L v i).tateDual) ≤
       (localChart ℓ D.E v).toGp.range.index *
