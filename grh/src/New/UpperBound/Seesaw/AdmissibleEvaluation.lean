@@ -269,9 +269,6 @@ lemma conjTranspose_latticeLift_mulVec_stackedStringMapFin [Finite X'] :
     vecToMatrix_matrixToVec]
   simp [Matrix.mul_assoc, conjTranspose_gradeZeroRows, h_vanish]
 
-variable [Fact N.Prime]
-
-omit [Fact (Nat.Prime N)] in
 /-- Let `P` contain one place of each conjugate pair above `N` (`hP`), let `N = π π̄`
 with `π` a uniformiser at the places of `P` and a unit elsewhere (`hπ`), and let `κ` be scaling
 factors with values `1` or `δ`, trivial above `N`, with denominators bounded by the integral adele
@@ -333,7 +330,7 @@ lemma latticeLift_eq_latticeUnitary_add_isotropic (hP : IsSplitLevel P N)
     transpose_mul, transpose_transpose]
   simp [M, R, Matrix.mul_add, Matrix.mul_assoc, add_kronecker, ← mul_kronecker_mul]
 
-omit [Fintype X'] [Fact (Nat.Prime N)] in
+omit [Fintype X'] in
 /-- Let `P` contain one place of each conjugate pair above `N`, let `π` be the matching idele and
 `κ` scaling factors with values `1` or `δ`. Suppose that the point of `V'` spans the lattice of
 its grading `Y'` and that all neighbour vectors lift to the lattice of `V⁻ ⊕ V''`. Then the matrix
@@ -375,7 +372,6 @@ section
 
 omit [Fintype X']
 
-omit [Fact N.Prime] in
 /-- Let `D` be the data of two consecutive lifts between `V`, `V'`, `V''`, let the place `w` and its
 conjugate `star w` lie outside `P`, and let `j` be an index of
 `PairIndex X X'' = (X ⊕ Unit) ⊕ (X'' ⊕ Unit)`. Suppose that the entry `(l, j)` of the inclusion of
@@ -401,7 +397,6 @@ lemma evalAt_liftVector_eq_zero {j : PairIndex X X''} {w : FinPlace E} (hw_star 
     · simp only [Sum.elim_inr, Pi.mul_apply, map_mul, col_apply, ite_eq_right hb, mul_zero,
         neighbourMatrix_apply_of_notMem hw_star hw_star_star]
 
-omit [Fact N.Prime] in
 /-- Let `P` contain one place of each conjugate pair above `N` (`hP`), and let `κ` be scaling
 factors with values `1` or `δ`, trivial above `N`, with denominators bounded by the integral adele
 `β` and its conjugate (`hκ`). Write `d = selfOrConj β`, which is `β` on the first block of indices
@@ -432,7 +427,6 @@ lemma evalAt_neighbourLift_eq_zero (hP : IsSplitLevel P N) (hκ : IsScalingAtM N
     rcases i with i | i <;> rcases l with l | l <;>
       first | exact h_ne.elim h_val | simp
 
-omit [Fact N.Prime] in
 /-- Let `P` contain one place of each conjugate pair above `N` (`hP`) and let `κ` be scaling factors
 with values `1` or `δ`, trivial above `N` (`hκ`). Let `D` be double-lift data for `Y`, `Y'`, `Y''`
 whose matrix `B = D.latticeLift P π u κ` is integral (`h_int`) and whose denominators match through
@@ -450,7 +444,6 @@ lemma conjTranspose_latticeLift_mulVec_mem (hP : IsSplitLevel P N) (hκ : IsScal
 
 end
 
-omit [Fact (Nat.Prime N)] in
 /-- Let `P` contain one place of each conjugate pair above `N` (`hP`), let `N = π π̄` with
 `π` a uniformiser at the places of `P` and a unit elsewhere (`hπ`), and let `κ` be scaling factors
 with values `1` or `δ`, trivial above `N`, with denominators bounded by the integral adele `β` and
@@ -574,7 +567,7 @@ points. Here `r` consists of residues at `P`, which give the vector `neighbourTr
 `η ȳ / N` and `-ȳ / N` at the two last indices for residues `y`, `η = normNegOne`), and a class
 modulo integral points of vectors of `neighbourLattice` that vanish above `N`
 (`AwayLatticeQuotient`); the representative is the sum of that vector and a member of the class. -/
-lemma exists_zeroTermFin_splitting_vacElem_eq_sum (hP : IsSplitLevel P N)
+lemma exists_zeroTermFin_splitting_vacElem_eq_sum [Fact N.Prime] (hP : IsSplitLevel P N)
     (hπ : IsSplitSquarefree P (N : E) π) (hκ : IsScalingAtM N β δ κ) {u' : unitary (𝔸f E)}
     (hL : Y'.SpansLattice a π u') (h_lift : D.LiftsNeighbours π u κ δ) :
     ∃ c ≠ (0 : ℂ), zeroTermFin D.splitting (vacElem (V'.hom (flipSum V V''))) =
