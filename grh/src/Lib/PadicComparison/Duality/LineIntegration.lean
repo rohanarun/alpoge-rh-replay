@@ -131,6 +131,8 @@ lemma zerosEquiv_extendToZeros (x : TotalH (abCoker (ℓ • 𝟙 (g ⋙ relFree
     I.zerosEquiv Θ q (I.extendToZeros Θ q x) = pullbackAlong (I.atSectionMod q) x :=
   (I.zerosEquiv Θ q).apply_symm_apply _
 
+-- Without the seals, unification unfolds the Ext groups into the derived category and is slow.
+seal Abelian.Ext Abelian.Ext.instAddCommGroup in
 /-- Let `I` be a family of ideals on the points of a functor `X` on tests, `q` a section of `X`
 along `g`, `Θ` a theory along `g`, `φ : C' ⥤ C` a functor, `K` a theory along `φ ⋙ g`, and `b` a
 class in the total Ext group from `φ ⋙ Θ.functor` to `K.functor`. Write `R` for the map
@@ -151,20 +153,20 @@ lemma extendToZeros_naturality {C' : Type 1} [Category C'] (φ : C' ⥤ C) (K : 
   have R_pullback {N N' : AbFunctor C} (f : N ⟶ N') (y : TotalH N' Θ.functor) :
       R (pullbackAlong f y) = pullbackAlong (φ.whiskerLeft f) (R y) :=
     mapThenComp_comp map_homClass
-  have R_zerosEquiv :
-      I.zerosEquiv K q' (R (I.extendToZeros Θ q x)) =
-        R (I.zerosEquiv Θ q (I.extendToZeros Θ q x)) :=
-    (R_pullback ((sectionLift g q).whiskerLeft I.constToZeros) (I.extendToZeros Θ q x)).symm
-  have R_atSectionMod :
-      pullbackAlong (I.atSectionMod q') (R x) = R (pullbackAlong (I.atSectionMod q) x) :=
-    (R_pullback (I.atSectionMod q) x).symm
-  have h_left :
-      I.zerosEquiv K q' (R (I.extendToZeros Θ q x)) = R (pullbackAlong (I.atSectionMod q) x) :=
-    R_zerosEquiv.trans (congrArg R (I.zerosEquiv_extendToZeros Θ q x))
-  have h_right :
-      I.zerosEquiv K q' (I.extendToZeros K q' (R x)) = R (pullbackAlong (I.atSectionMod q) x) :=
-    (I.zerosEquiv_extendToZeros K q' (R x)).trans R_atSectionMod
-  exact (I.zerosEquiv K q').injective (h_left.trans h_right.symm)
+  -- (The next facts keep the types they are born with; `apply` then compares them with the goal
+  -- once. Restating them first would repeat each of the costly definitional checks.)
+  have R_zerosEquiv :=
+    R_pullback ((sectionLift g q).whiskerLeft I.constToZeros) (I.extendToZeros Θ q x)
+  have R_atSectionMod := R_pullback (I.atSectionMod q) x
+  -- `zerosEquiv K q'` of the left side is `R` of the pull-back of `x` along `q`, restricted
+  have h_left :=
+    R_zerosEquiv.symm.trans
+      ((congrArg R (I.zerosEquiv_extendToZeros Θ q x)).trans R_atSectionMod)
+  -- and so is `zerosEquiv K q'` of the right side (`(R x :)`: elaborate `R x` on its own)
+  have h_right := I.zerosEquiv_extendToZeros K q' (R x :)
+  apply (I.zerosEquiv K q').injective
+  apply h_left.trans
+  apply h_right.symm
 
 end IdealFamily
 
@@ -205,7 +207,9 @@ lemma isZariskiLocallyTop_preimage_topLocus_inf_sup
   · obtain ⟨a, ha, h_top⟩ := J.exists_notMem_eq_top hJ
     exact ⟨a, ha, fun B f hf ↦ ⟨Subtype.prop _, .inr (h_top B f hf)⟩⟩
 
-seal TorsionCoeff.mulClass in
+-- (`Abelian.Ext` and its group structure are sealed for speed: unification then compares Ext
+-- groups by their arguments instead of unfolding them into the derived category.)
+seal TorsionCoeff.mulClass Abelian.Ext Abelian.Ext.instAddCommGroup in
 /-- The one-coordinate case of `exists_move_kernel`. Let `K` be an `ℓ`-torsion coefficient along
 `g`, and let the sections `s` and `s'` of `X` agree wherever the sections `x` and `x'` of `ℙ¹` do.
 Let `h_max` say that each maximal ideal of a ring `g(c)` is the kernel of some `g(f)`. Then for
@@ -376,6 +380,8 @@ lemma map_restrictAlong_restrictAlong :
       TotalH.map (restrictAlong (ψ ⋙ φ)) x :=
   TotalH.map_map (restrictAlong φ) (restrictAlong ψ) x
 
+-- Without the seals, unification unfolds the Ext groups into the derived category and is slow.
+seal Abelian.Ext Abelian.Ext.instAddCommGroup in
 /-- Restriction to the points of `X` passes through a product of classes `M.etaAt (b j)` factor by
 factor. -/
 lemma map_foldr_etaAt {X : C ⥤ Type 1} {J : Type*}
@@ -393,7 +399,7 @@ lemma map_foldr_etaAt {X : C ⥤ Type 1} {J : Type*}
 variable (h : M.HasLineFormula) {φ} {M' : TorsionCoeff (φ ⋙ g)} (β : φ ⋙ M.functor ⟶ M'.functor)
 
 -- Keeps definitional checks from unfolding the Ext groups.
-seal CategoryTheory.Abelian.Ext in
+seal CategoryTheory.Abelian.Ext CategoryTheory.Abelian.Ext.instAddCommGroup in
 /-- Restriction along `φ` followed by the product with a class `T` from `M.functor` restricted along
 `φ` to `M'.functor` commutes with the two maps `x ↦ x · 1` and `x ↦ x · η` to the cohomology over
 the points of the line. -/
@@ -421,6 +427,8 @@ lemma lineBasis_naturality (T : TotalH ((restrictAlong φ).obj M.functor) M'.fun
 
 namespace TorsionCoeff.HasLineFormula
 
+-- Without the seals, unification unfolds the Ext groups into the derived category and is slow.
+seal Abelian.Ext Abelian.Ext.instAddCommGroup in
 /-- If the comparison `(φ, β)` has universal points along `u : Y' ⟶ φ ⋙ Y`, the projective line
 formula holds for `M` at `ℤ[Y]` (each class from ℤ[Y] over the points of ℙ¹ is a·1 + b·η for unique
 a, b from the base) if and only if it holds for `M'` at `ℤ[Y']`. -/
@@ -477,12 +485,17 @@ lemma integrate_naturality (hM' : M'.HasLineFormula) {T : AbFunctor C'}
   rw [← h_fam w]
   simp [integrate]
 
+-- Without the seals, unification unfolds the Ext groups into the derived category and is slow.
+seal Abelian.Ext Abelian.Ext.instAddCommGroup in
 /-- The integral over the line of `y · (η + ξ)`, with η here the class `M.cupClass` placed in degree
 2 (η in `M.lineBasis`), is `y`, for `y` and `ξ` pulled back from the base. -/
 lemma integrate_mul_cupClass (y : TotalH S M.functor) (ξ : TotalH M.functor M.functor) :
     h.integrate (S := S)
       (comp (TotalH.map (restrictAlong (elementsProj (projLineAlong g))) y)
-        (.of _ 2 M.cupClass +
+        -- (`by exact`: elaborates `.of` only once the type of the sum is known. Elaborated
+        -- eagerly, its type is still unknown and Lean spends ~10 s on the hint of an error
+        -- message that is then discarded.)
+        ((by exact .of _ 2 M.cupClass) +
           TotalH.map (restrictAlong (elementsProj (projLineAlong g))) ξ) :) = y := by
   -- Expand the product: `y · cupClass` is `lerayHirsch` of `y` placed at the index of `cupClass`,
   -- and the second term is restricted from the base, so it is `lerayHirsch` of a class placed at
@@ -568,6 +581,8 @@ def LineStage.consTautologicalPoint (t : LineStage A d) : LineStage A (d + 1) wh
       funext (cases f.map_val (congrFun (t.points.property
         ((elementsProj (projLineAlong t.toTestOver)).map f))))⟩
 
+-- Without the seals, unification unfolds the Ext groups into the derived category and is slow.
+seal Abelian.Ext Abelian.Ext.instAddCommGroup in
 /-- Integrating out the first parameter of r: pull back to the points of P¹, apply r with the
 tautological point as first parameter, and integrate over the line. -/
 def NaturalOp.integrate (r : NaturalOp (d + 1) N N') : NaturalOp d N N' where
@@ -608,6 +623,8 @@ finite. -/
 def IsFiniteLerayHirsch (N : AbFunctor (TestOver A)) : Prop :=
   IsLerayHirschBasis D.comparison N ∧ Finite (TotalH N (locConstAlong (𝟭 (TestOver A))))
 
+-- Without the seals, unification unfolds the Ext groups into the derived category and is slow.
+seal Abelian.Ext Abelian.Ext.instAddCommGroup in
 /-- `D.IsFiniteLerayHirsch` is a closed class (`IsClosedClass`): it holds for zero functors, and in
 a short exact sequence `0 → X₁ → X₂ → X₃ → 0` with `D.IsFiniteLerayHirsch X₁` it holds for `X₂` if
 and only if for `X₃`. -/
@@ -637,6 +654,8 @@ lemma isClosedClass_isFiniteLerayHirsch : IsClosedClass D.IsFiniteLerayHirsch :=
       exact finite_of_exact h_exact_mid
   exact h_bij_iff.and h_fin_iff
 
+-- Without the seals, unification unfolds the Ext groups into the derived category and is slow.
+seal Abelian.Ext Abelian.Ext.instAddCommGroup in
 /-- In a short exact sequence `0 → X₁ → X₂ → X₃ → 0` of functors on tests over `A`, if
 `D.IsFiniteLerayHirsch` holds for `X₂` and `X₃`, it holds for `X₁`. -/
 lemma isFiniteLerayHirsch_of_shortExact {X : ShortComplex (AbFunctor (TestOver A))}
@@ -659,6 +678,8 @@ lemma isFiniteLerayHirsch_of_shortExact {X : ShortComplex (AbFunctor (TestOver A
         (isLerayHirschBasis_iff_allBijective_truncMap.mp h_bij₃) (n + 1)
   exact ⟨isLerayHirschBasis_iff_allBijective_truncMap.mpr h_trunc₁, h_fin₁⟩
 
+-- Without the seals, unification unfolds the Ext groups into the derived category and is slow.
+seal Abelian.Ext Abelian.Ext.instAddCommGroup in
 /-- Let `α : N ⟶ N'` be a map of functors on tests over `A` such that, for every functor `g` from a
 category `C` to tests over `A` and every functor `F` on `C` with Zariski descent along `g`,
 pull-back along `α` (restricted along `g`) is a bijection of total Ext groups into `F`
@@ -680,8 +701,9 @@ lemma isFiniteLerayHirsch_iff_of_isCohomEquiv (α : N ⟶ N')
       (mapRange_bijective _ _ h_const) h_D
   exact (h_bij_iff.and h_const.finite_iff).symm
 
--- Without the seal, unification unfolds `Abelian.Ext` into the derived category and is slow.
-seal Abelian.Ext in
+-- Without the seals, unification unfolds `Abelian.Ext` and its group structure into the derived
+-- category and is slow.
+seal Abelian.Ext Abelian.Ext.instAddCommGroup in
 /-- `D.IsFiniteLerayHirsch` passes to retracts by natural operations. Let `N` have flat values,
 write `N / ℓ` for `abCoker (ℓ • 𝟙 N)`, and let `r i : N / ℓ → N'` and `ρ i : N' → N` be operations
 without parameters (`NaturalOp 0`). If `∑ i, ρ i (r i x)` is always the pull-back of `x` along
@@ -775,8 +797,9 @@ lemma isFiniteLerayHirsch_of_retract [HasFlatValues N] (r : ι → NaturalOp 0 (
 
 /-! ### Pairs in a power of the projective line -/
 
--- Without the seal, unification unfolds `Abelian.Ext` into the derived category and is slow.
-seal Abelian.Ext in
+-- Without the seals, unification unfolds `Abelian.Ext` and its group structure into the derived
+-- category and is slow.
+seal Abelian.Ext Abelian.Ext.instAddCommGroup in
 /-- `D.IsFiniteLerayHirsch` passes from `N` to `ℤ[(ℙ¹)^m]/ℤ[U]`, `U = I.topPoints`, given classes
 `β i` from it to `N`, operations `T i` with `d` parameters in `ℙ¹` from its quotient by `ℓ` to `N`,
 and `σ` sending parameters to coordinates, such that (`h_sum_eq_foldr`) for every stage `t` with
@@ -869,11 +892,13 @@ lemma isFiniteLerayHirsch_of_integrate_params (β : ι → TotalH (relFreeAb I.t
     conv_rhs => erw [← map_add, ← map_add, map_foldr_etaAt, map_pullbackAlong]
     -- The integrands agree by `h_sum_eq_foldr` over the points of the line, with the tautological
     -- point as first parameter.
-    exact congrArg _ (h_sum_eq_foldr t.consTautologicalPoint ((elementsProj _).sectionsPrecomp q')
-      _)
+    -- (`apply`: compares the statement with the goal once; `exact congrArg _ (…)` does it twice)
+    refine congrArg _ ?_
+    apply h_sum_eq_foldr t.consTautologicalPoint ((elementsProj _).sectionsPrecomp q')
 
--- Without the seal, unification unfolds `Abelian.Ext` into the derived category and is slow.
-seal Abelian.Ext in
+-- Without the seals, unification unfolds `Abelian.Ext` and its group structure into the derived
+-- category and is slow.
+seal Abelian.Ext Abelian.Ext.instAddCommGroup in
 /-- Let I be a compatible family of ideals on points of (P¹)^m, U the locus where I is the unit
 ideal, and Q = ℤ[(P¹)^m]/ℤ[U]. Let `θ i` be classes of degree `d i`, over the points of (P¹)^m, from
 N to the locally constant ℤ/ℓ-valued functions modulo those dying where I = 0 (`I.zerosCoeff`).
@@ -962,8 +987,11 @@ lemma isFiniteLerayHirsch_topPoints_of_surjective {J : Type*} {d : J → ℕ}
   have h_move :=
     hβ _ s t.theory (I.extendToZeros t.theory t.points w)
       (pullbackAlong (t.toTestOver.whiskerLeft (abCoker.π _)) w)
-      ((mapThenComp_comp map_homClass).trans
-        ((congrArg _ congr(comp $map_homClass _)).trans (h_ext t w)))
+      (by
+        -- (`apply`: compares `h_ext t w` with the goal once; as a term it is compared twice)
+        refine (mapThenComp_comp map_homClass).trans
+          ((congrArg _ congr(comp $map_homClass _)).trans ?_)
+        apply h_ext t w)
   refine (congrArg _ h_sum).trans (.trans (comp_assoc_of_eq (.symm ?_) _) h_move)
   -- The moved kernel at `(t.points, q')` is `lerayHirsch θ _ β` restricted along `t.points`, then
   -- pulled back by `I.atSection q'`.
