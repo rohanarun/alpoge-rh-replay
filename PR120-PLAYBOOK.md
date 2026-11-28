@@ -24,6 +24,8 @@ the original meaning, never to change it.
 4. Mark the PR ready. The coordinator auto-merges PRs that change only `src/**/*.lean`, touch no protected file
    and add no `sorry`/`admit`/`axiom`/`unsafe`/`implemented_by`/`native_decide`.
 
+To compare the work needed on a cold checkout, run `python3 scripts/module-build-scope.py --repo ../riemann-hypothesis MODULE [MODULE ...]` from the replay checkout with Python 3.9+ and Lean 4.36.0 installed. Use a complete proof source tree. The tool counts each target and its distinct transitive imports under `src/`, including local edits. Add `--list-importers` to find the direct importers to test after a fix. Mathlib, local cache state and individual elaboration times affect the actual build cost. Compile the selected target to check the reported error.
+
 **Hard rules:** never change a theorem statement's meaning. Never edit `Challenge.lean`, `Statements.lean`,
 `comparator.json`, `lakefile*` or `lean-toolchain`. Never rename or qualify a name on its own declaring line;
 qualify uses only. Prefer qualifying a use over adding `open`.
