@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Download every artifact named in a Lake map that is missing from a local Lake cache.
 
-Copied from scripts/rh-buildq/fetch-artifacts.py of leanprover-community/riemann-hypothesis
-(main); only the default URL differs.
+Adapted from scripts/rh-buildq/fetch-artifacts.py of leanprover-community/riemann-hypothesis.
 
 usage: fetch-artifacts.py <map.jsonl> <cache-dir> [--sha256 <file> [--verify-existing]]
                           [--base-url <url>] [--user-agent <agent>] [--report <file>]
@@ -14,14 +13,17 @@ there is always complete. Objects are content-addressed and write-once (If-None-
 --sha256 names a JSON object {"<hash16>.ltar": "<sha256>"} (e.g. from a CI module manifest):
 those downloads are verified before they are moved into the cache, and a mismatch is discarded
 and downloaded again. With --verify-existing, artifacts already in the cache are checked too
-(a symlink or mismatch is removed and downloaded again). Up to three passes; exit 1 if anything
-is still missing. curl's error lines (one per failed attempt, retries included) are grouped by
-error code and printed once per pass. --report writes the last pass's curl exit code, those
-groups and its SHA-256 failure count as JSON. scripts/ci-cache-get.py (`lake exe cache get`)
-uses this with its own --user-agent and puts the report in its final error.
+(a symlink or mismatch is removed and downloaded again). Removal and replacement share a cache
+lock, so a stale check cannot remove a concurrent restore's replacement. Up to three passes;
+exit 1 if anything is still missing. curl's error lines (one per failed attempt, retries
+included) are grouped by error code and printed once per pass. --report writes the last pass's
+curl exit code, those groups and its SHA-256 failure count as JSON. scripts/ci-cache-get.py
+(`lake exe cache get`) uses this report on failure.
 """
+import fcntl
 import hashlib, json, os, re, resource, subprocess, sys, tempfile
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 from pathlib import Path
 
 PUBLIC = "https://rh-cache.taucetiproject.org/artifacts/leanprover-community/riemann-hypothesis-grh-lean/grh/"
@@ -59,6 +61,24 @@ def option(args, name, default=None):
     return value
 
 
+def artifact_status(path, digest):
+    if path.is_symlink():
+        return "corrupt"
+    if not path.is_file():
+        return "missing"
+    try:
+        return "ok" if digest is None or sha256(path) == digest else "corrupt"
+    except FileNotFoundError:
+        return "missing"
+
+
+@contextmanager
+def cache_update_lock(cache):
+    with (cache.parent / ".fetch-artifacts.lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        yield
+
+
 def main():
     args = sys.argv[1:]
     digests = option(args, "--sha256")
@@ -82,11 +102,15 @@ def main():
         p = cache / n
         if not verify_existing:
             return p.exists()
-        if p.is_symlink() or (p.exists() and n in digests and sha256(p) != digests[n]):
-            print(f"fetch-artifacts: discarding corrupt local {n}", flush=True)
-            p.unlink()
-            return False
-        return p.is_file()
+        status = artifact_status(p, digests.get(n))
+        if status != "corrupt":
+            return status == "ok"
+        with cache_update_lock(cache):
+            status = artifact_status(p, digests.get(n))
+            if status == "corrupt":
+                print(f"fetch-artifacts: discarding corrupt local {n}", flush=True)
+                p.unlink(missing_ok=True)
+            return status == "ok"
 
     with ThreadPoolExecutor(32) as pool:
         missing = [n for n, ok in zip(names, pool.map(present, names)) if not ok]
@@ -113,14 +137,15 @@ def main():
                     p.unlink()
                     return "corrupt"
                 os.chmod(p, 0o444)
-                os.replace(p, cache / n)
+                with cache_update_lock(cache):
+                    os.replace(p, cache / n)
                 return "ok"
 
             with ThreadPoolExecutor(32) as pool:
                 results = list(pool.map(settle, missing))
         corrupt = [n for n, s in zip(missing, results) if s == "corrupt"]
-        missing = [n for n, s in zip(missing, results) if s != "ok"]
-        print(f"fetch-artifacts: pass {attempt}: downloaded {len(results) - len(missing)}/{len(results)}"
+        missing = [n for n, s in zip(missing, results) if s != "ok" and not present(n)]
+        print(f"fetch-artifacts: pass {attempt}: downloaded {results.count('ok')}/{len(results)}"
               f" (curl exit {code}; {len(corrupt)} failed SHA-256 verification)", flush=True)
         for count, line in errors[:5]:
             print(f"fetch-artifacts: {line}" + (f" (reported {count} times)" if count > 1 else ""), flush=True)
