@@ -370,7 +370,11 @@ lemma exists_finset_card_eq_natDegree (hA : ¬IsUnit A) (hB : ¬IsUnit B) (hy : 
   have h_sum : A.natDegree + B.natDegree = (Finset.univ : Finset n).card := by
     rw [← natDegree_mul hA_ne hB_ne, ← hy, charpoly_natDegree_eq_dim, Finset.card_univ]
   obtain ⟨T, -, hT⟩ := Finset.exists_subset_card_eq (Nat.le.intro h_sum)
-  exact ⟨T, by grind, by grind, hT⟩
+  have h_nonempty : T.Nonempty := Finset.card_pos.mp (hT.symm ▸ hA_pos)
+  refine ⟨T, h_nonempty.ne_empty, ?_, hT⟩
+  intro h_univ
+  have h_lt : A.natDegree < A.natDegree + B.natDegree := Nat.lt_add_of_pos_right hB_pos
+  exact h_lt.ne' (h_sum.trans (h_univ ▸ hT))
 
 end Projector
 
