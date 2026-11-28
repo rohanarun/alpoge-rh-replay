@@ -395,25 +395,25 @@ lemma lastRowDatum_conj_diagNInv (T : Matrix (n' ⊕ Unit) (n ⊕ Unit) (LocProd
     simp only [hC, diagNInv, diagN, ← map_inv, inv_inv, coe_diagGL, Pi.inv_apply,
       Units.val_inv_eq_inv_val, mul_diagonal, diagonal_mul, Sum.isLeft_inl, Units.val_one, one_mul,
       inv_one, mul_one, ↓reduceIte]
+  have h_entry (i : n' ⊕ Unit) (j : n ⊕ Unit) (w : P) :
+      C i j w = (if i.isLeft then 1 else (N : LocField w.val)) * T i j w *
+        (if j.isLeft then 1 else (N : LocField w.val)⁻¹) := by
+    simp only [hC, diagNInv, inv_inv, diagN, ← map_inv, coe_diagGL, mul_diagonal, diagonal_mul,
+      Pi.mul_apply]
+    by_cases hi : i.isLeft = true <;> by_cases hj : j.isLeft = true <;>
+      simp [hi, hj, MulEquiv.val_piUnits_symm_apply]
   have h_corner : C (.inr ()) (.inr ()) = T (.inr ()) (.inr ()) := by
     ext w : 1
-    simp only [hC, diagNInv, diagN, ← map_inv, inv_inv, coe_diagGL, Pi.inv_apply,
-      Units.val_inv_eq_inv_val, mul_diagonal, diagonal_mul, Sum.isLeft_inr, Bool.false_eq_true,
-      Pi.mul_apply, MulEquiv.val_piUnits_symm_apply, Units.val_mk0, ← div_eq_mul_inv, w.property,
-      ↓reduceIte, mul_div_cancel_left₀ _ (NeZero.out : (N : LocField w.val) ≠ 0)]
+    simp only [h_entry, Sum.isLeft_inr, Bool.false_eq_true, ↓reduceIte, ← div_eq_mul_inv,
+      mul_div_cancel_left₀ _ (NeZero.out : (N : LocField w.val) ≠ 0)]
   have h_row (j : n) (w : P) :
       v (C (.inr ()) (.inl j) w) = v (T (.inr ()) (.inl j) w) * exp (-1) := by
-    simp only [hC, diagNInv, diagN, ← map_inv, inv_inv, coe_diagGL, Pi.inv_apply,
-      Units.val_inv_eq_inv_val, mul_diagonal, diagonal_mul, Sum.isLeft_inr, Bool.false_eq_true,
-      Sum.isLeft_inl, Units.val_one, inv_one, Pi.mul_apply, MulEquiv.val_piUnits_symm_apply,
-      Units.val_mk0, Pi.one_apply, mul_one, map_mul, Λ.v_natCast, w.property, ↓reduceIte, mul_comm]
+    simp only [h_entry, Sum.isLeft_inr, Bool.false_eq_true, Sum.isLeft_inl, ↓reduceIte, mul_one,
+      map_mul, Λ.v_natCast w.val w.property, mul_comm]
   have h_col (i : n') (w : P) :
       v (C (.inl i) (.inr ()) w) ≤ 1 ↔ v (T (.inl i) (.inr ()) w) ≤ exp (-1) := by
-    simp only [hC, diagNInv, diagN, ← map_inv, inv_inv, coe_diagGL, Pi.inv_apply,
-      Units.val_inv_eq_inv_val, mul_diagonal, diagonal_mul, Sum.isLeft_inl, Units.val_one, one_mul,
-      Sum.isLeft_inr, Bool.false_eq_true, Pi.mul_apply, MulEquiv.val_piUnits_symm_apply,
-      Units.val_mk0, ← div_eq_mul_inv, map_div₀, Λ.v_natCast, w.property, ↓reduceIte, exp_pos,
-      div_le_one₀]
+    simp only [h_entry, Sum.isLeft_inl, Sum.isLeft_inr, Bool.false_eq_true, ↓reduceIte, one_mul,
+      ← div_eq_mul_inv, map_div₀, Λ.v_natCast w.val w.property, exp_pos, div_le_one₀]
   have hN : exp (-1 : ℤ) ≤ 1 := exp_le_exp.2 (by norm_num)
   simp only [lastRowDatum_apply, directDatum_apply, Sum.forall, Unique.forall_iff,
     PUnit.default_eq_unit, h_block, h_corner, h_row, h_col, exp_pos, mul_le_iff_le_one_left]
