@@ -266,8 +266,8 @@ lemma IsWeakChainDatum.gaugeLe_chain (h_weak : IsWeakChainDatum ϑ Ψ) (hQ : p.C
   have h_inv : IsJointlyInvariant (D.liftKernel ϑ) D.m Ψ.support
       (fun x ↦ Ψ x • LinearMap.id) fun x j ↦ t j (D.translateDatum x j) := fun a ha β ↦ by
     -- apply the invariance of the original data to `β` composed with the tensor of the `t j`
-    simpa +contextual [*] using
-      h_weak.isJointlyInvariant a ha (β ∘ₗ TensorChain.map (fun j ↦ t j) D.m)
+    simpa +contextual only [LinearMap.comp_apply, TensorChain.map_pure, ht, SetLike.coe_mem] using
+      h_weak.isJointlyInvariant a ha (β ∘ₗ TensorChain.map t D.m)
   exact gaugeLe_chainCombination h_inv (fun x _ ↦ by simpa using h_weak.integral x p hQ ιₚ) d
     h_raise hφ
 
