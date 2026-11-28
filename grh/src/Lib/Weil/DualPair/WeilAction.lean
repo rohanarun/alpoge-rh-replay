@@ -269,7 +269,8 @@ lemma pairWeil_of_mem_Gamma {g : G E s} {h : G E s'} (hg : g ∈ S.Γ) (hh : h �
 on the datum by `q`. -/
 lemma pairTheta_mul (f : 𝒮 (S.hom T)) (p q : G E s × G E s') :
     pairTheta S T a b f (p * q) = pairTheta S T a b (pairWeil S T a b q f) p := by
-  simp [pairTheta]
+  simp only [pairTheta, (pairWeil S T a b).map_mul p q, ContinuousLinearMap.mul_def,
+    ContinuousLinearMap.comp_apply]
 
 /-- For a CM field `E` with Weil data, pointed hermitian spaces `S` and `T` over `E`, and
 automorphic characters `a`, `b` of U(1)(𝔸), consider the theta kernel
