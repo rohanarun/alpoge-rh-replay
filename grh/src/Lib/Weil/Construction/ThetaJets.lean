@@ -113,7 +113,9 @@ lemma Space.jet_jetSeries_eq_theta (f : 𝒮 V) (P : MvPolynomial (InfinitePlace
     have h_fact : (∏ x ∈ d.support, ((d x)! : ℂ)) ≠ 0 :=
       Finset.prod_ne_zero_iff.2 fun _ _ ↦ by exact_mod_cast factorial_ne_zero _
     simp [jetSeries_apply, jet_monomial, aeval_monomial, Finsupp.prod, algebraMap_eq, smul_pow,
-      field, C_mul', prod_smul, prod_pow_eq_pow_sum, degree_apply, MvPowerSeries.coeff_apply]
+      C_mul', prod_smul, prod_pow_eq_pow_sum, degree_apply, MvPowerSeries.coeff_apply]
+    rw [mul_assoc r, ← mul_assoc (∏ x ∈ d.support, ((d x)! : ℂ)), mul_div_cancel₀ _ h_fact,
+      mul_left_comm]
   | add P Q hP hQ => simp [hP, hQ]
 
 /-- The number of boxes in the columns of height below `N`, where `κ τ h` is the number of columns
