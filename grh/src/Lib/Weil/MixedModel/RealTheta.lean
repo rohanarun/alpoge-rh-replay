@@ -162,8 +162,9 @@ lemma eq_zero_of_apply_realVec_eq_zero
     rw [← realVec_realCoord_add y, hy0, add_zero]
     exact h_vanish (realCoord y)
   -- At `V.x⁻¹ • emb a`, adding the vector of the rational `-(a i).2` removes the finite part.
-  have h_on_range (a : n → (NumberField.InfinitePlace E → ℂ) × E) : f (V.x⁻¹ • emb a) = 0 := by
-    have h_finite (i : n) : ((V.vecAtPoint (-snd ∘ a) + V.x⁻¹ • emb a) i).2 = 0 := by
+  have h_on_range (a : n → (NumberField.InfinitePlace E → ℂ) × E) :
+      f (V.x⁻¹.val *ᵥ emb a) = 0 := by
+    have h_finite (i : n) : ((V.vecAtPoint (-snd ∘ a) + V.x⁻¹.val *ᵥ emb a) i).2 = 0 := by
       change ((V.x⁻¹.val *ᵥ (toAdele ∘ (-snd ∘ a)) + V.x⁻¹.val *ᵥ emb a) i).2 = 0
       rw [← mulVec_add, mulVec, dotProduct, snd_sum]
       refine sum_eq_zero fun j _ ↦ ?_
