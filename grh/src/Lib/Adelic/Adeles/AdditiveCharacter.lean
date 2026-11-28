@@ -162,9 +162,10 @@ product of exp(−2πi ∑_w 2 Re x_w) over the infinite places and ψ_f of the 
 def stdAddChar : AddChar (𝔸 E) Circle where
   toFun x := 𝐞 (-∑ w : InfinitePlace E, 2 * (x.1 w).re) * ψf E x.2
   map_zero_eq_one' := by simp
-  map_add_eq_mul' := by
-    simp [mul_add, Finset.sum_add_distrib, map_add_eq_mul]
-    grind
+  map_add_eq_mul' x y := by
+    simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply, Complex.add_re, mul_add,
+      Finset.sum_add_distrib, neg_add_rev, map_add_eq_mul]
+    ac_rfl
 
 variable {E} {n : Type*} (w : FinPlace E) [Fintype n] [DecidableEq n] (J : Matrix n n ℂ)
 
