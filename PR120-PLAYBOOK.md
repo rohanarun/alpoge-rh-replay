@@ -122,6 +122,47 @@ and only if it then compiles quickly.
 - **"failed to read file … .olean"** on a machine with all dependencies built is not a Lean error. The kernel limit
   `vm.max_map_count` is too low; Lean needs at least `1048576` (`sudo sysctl -w vm.max_map_count=1048576`).
 
+## Found in the last layers (Nov 24–25)
+
+Found with a local full build of `Main`; PR numbers are on `rohanarun/riemann-hypothesis`. In each case the
+culprit's defining module is outside the import closure of the original module on `main`, unless stated.
+
+- **Check the original's import closure before disabling an instance.** Several late failures were regressions from
+  `attribute [-instance]` lines added to files whose original module *did* import the instance, or whose
+  dependencies are stated with it. If a `rw`/`exact` fails although pattern and goal print identically, compare them
+  with `set_option pp.explicit true`: the difference is usually one instance argument.
+- **`GlobalTheory.CompHt.fintypePsi`** (`Fintype (Psi H)` via `Fintype.ofFinite`) competes with `Subtype.fintype`.
+  Disable it only where the original never imported `Definitions/Divisors/IsHomogeneousCompIdeal` (#1303, #1370).
+  Some dependencies are still stated with it (`GlobalTheory.LieBase.pointPoly` in `IwasawaDecomposition/Bundle0589`,
+  `lieFacZ_eq` in `YReadArchB`). A file that needs both versions can bridge the two `Finset.univ`s inside the proof:
+  `Finset.prod_congr (Finset.ext fun _ => by simp only [Finset.mem_univ]) fun _ _ => ?_` (#1349, #1389, #1325).
+- **Matrix / `GL` measurable spaces.** `GroundTheory.Automorphic.GJMatrix.measurableSpace_matrix`,
+  `GlobalTheory.SplitWeil.matrixMeasurableSpace`, `Formalism.DoubleCosetMeasures.instMeasMat` and
+  `GlobalTheory.CompanionTheory.QL.instMeasGL` all put a `MeasurableSpace` on the same types. Keep the one the
+  lemmas you call were stated with (#1275, #1312, #1317, #1322, #1334, #1346).
+- **`CharZero (v.adicCompletion F)`.** Five project instances make `Algebra ℚ (v.adicCompletion ℚ)` resolve to
+  `DivisionRing.toRatAlgebra` instead of Mathlib's `instAlgebraAdicCompletion`. Disable the five in the section (#1384).
+- **Instances on abbreviations.** `GlobalTheory.DeRhamCpl.bcObj.instGrpObj` is declared on an `abbrev` for
+  `(Over.pullback _).obj _`, so it matches every such `GrpObj` goal; with `…Geo.Tor.isMonHom_inv_of_iso` it makes
+  `IsMonHom` searches time out (#1407).
+- **`decide` fails with free variables.** `Formalism.L2.SG.Pf.AllRowsWt.instNZ` builds `NeZero 2` from a local
+  `Fact (Nat.Prime 2)`, so numerals in `Fin 2` mention a hypothesis (#1398).
+- **Searches that only just time out.** `FaithfulSMul`, `Module.IsTorsionFree`, `Module.Free`, `IsNoetherian`,
+  `SFinite`/`SigmaFinite` goals can exceed 20000 heartbeats because leaked finiteness instances
+  (`GlobalTheory.TorCompact.finiteFE`, `GlobalTheory.EisBL.AETop.fdAE`,
+  `GroundTheory.Automorphic.finiteDimensional_of_isQuadraticExtension`, the `IsCNL`/`IsCO` `toIsNoetherian`
+  instances) widen the search. Supplying the instance by name is more robust than disabling a list, for example
+  `haveI : FaithfulSMul k A := (faithfulSMul_iff_algebraMap_injective k A).2 (algebraMap k A).injective` or
+  `haveI := @DivisionSemiring.to_moduleIsTorsionFree K ℂ _ _ Algebra.toModule` (#1377, #1382).
+- **A wrong overload can show up as a `maxHeartbeats` timeout**, not a type error: a root-level `private theorem`
+  from another section of the same bundle overloads the intended lemma (`cg_mul_left`, #1380). Qualify the use.
+- **`private theorem main` "has already been declared".** A public root-level `main` now lives in
+  `InertiaEigenvalues/Bundle0401`. Wrap the private one in a namespace named after the file, leaving its declaring
+  line unchanged, and qualify its uses (#1356, #1358). Put the `namespace` line before any `attribute … in` /
+  `open … in` prefix of the declaration.
+- **"too many explicit universe levels" on `Th.{u}`:** the meant structure is `UpperTheory.Gal.G3.Th`, not
+  `ReciprocityTheory.ChartRestriction.G.Geo.Tor.Th` (#1381).
+
 ## If nothing works
 
 If a section is identical to the original and still fails only because of the bundle's widened imports, the reliable
