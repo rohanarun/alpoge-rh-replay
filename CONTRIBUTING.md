@@ -6,6 +6,7 @@
 
 - **Branch:** `rohanarun/riemann-hypothesis`, branch `opt/collapse-and-consolidate-4.36` (the head of PR #120).
 - **Open failures:** [PR120-BUGS.md](PR120-BUGS.md). A 4-shard, 512-vCPU build updates it as new failures appear.
+- **Before claiming:** [check the report against your checkout and live PRs](scripts/pr120-triage.md) with the read-only triage helper.
 - Modules that fail only with `bad import` are **not** bugs. They import a broken module and will build once it's fixed. Fix the root failures in the list.
 
 ## How to take a bug

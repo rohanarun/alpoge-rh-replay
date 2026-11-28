@@ -1,0 +1,33 @@
+name: PR120 triage portability
+on:
+  pull_request:
+    paths: ['scripts/pr120-triage.py', 'tests/test_pr120_triage.py', '.github/workflows/pr120-triage.yml']
+  push:
+    branches: [main]
+    paths: ['scripts/pr120-triage.py', 'tests/test_pr120_triage.py', '.github/workflows/pr120-triage.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: '3.9'
+          - os: windows-latest
+            python: '3.12'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Test with default encoding
+        run: python -m unittest discover -s tests -p test_pr120_triage.py -v
+      - name: Test with UTF-8 mode
+        run: python -X utf8 -m unittest discover -s tests -p test_pr120_triage.py -v
