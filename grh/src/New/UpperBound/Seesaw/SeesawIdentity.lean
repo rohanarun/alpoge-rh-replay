@@ -533,7 +533,9 @@ lemma isInvariant_seesawDatum (ϑ : D.TameChar) : (seesawDatum ϑ).IsInvariant �
     exact DoubleLiftData.finEval_arrowProduct_equivariant _ _ _ rfl _ _
   · -- The last double lift is evaluated by the last pair; there both `bY` and `b` end in `1`.
     simp (disch := lia) only [doubleLiftEvalY, dite_eq_left, dite_eq_right, h_lower, h_top, hb_top]
-    exact DoubleLiftData.finEval_arrowProduct_equivariant _ _ _ (map_one _) _ _
+    exact DoubleLiftData.finEval_arrowProduct_equivariant _ (D.chainChar ϑ (2 * D.ϱ + 1))
+      (D.chainChar ϑ (2 * D.ϱ + 1 + 1)) (g := (b (2 * D.ϱ)).val)
+      (g' := (b (2 * D.ϱ + 1)).val) (k := 1) (k' := 1) (map_one _) _ _
 
 /-- Fix an archimedean point `g` of `U(Y_0)` and a linear form `t`, and let `m = 2 ϱ + 2`. There is
 a number `c₀` such that, for every tame character `ϑ` and every ramified source form `φ` on `X_0`,
