@@ -481,7 +481,16 @@ lemma integrable_prod_weightFn (hy : y ∈ S.rapidFunctions) {m : Type} [Fintype
   obtain ⟨⟨hy_cont, -⟩, -⟩ : S.IsAutomorphic y ∧ S.IsRapid y := hy
   obtain ⟨D, h_decay⟩ : ∃ D : ℝ, ∀ v : G E u, ‖(⇑w.weightFn * F) v‖ * U.height v ^ A ≤ D :=
     hF_rapid.mul w.isModerate A
-  refine .of_bound (by fun_prop) (D * |B ^ A| * |C| * ‖φ‖) (.of_forall fun (v, g) ↦ ?_)
+  have h_argument : Continuous fun p : G E u × G E s ↦ ((p.2, w.comparisonMap p.1), φ) :=
+    (continuous_snd.prodMk (w.comparisonMap.continuous.comp continuous_fst)).prodMk
+      continuous_const
+  have h_kernel : Continuous fun p : G E u × G E s ↦ K.θ (K.ω (p.2, w.comparisonMap p.1) φ) :=
+    K.θ.continuous.comp (K.continuous.comp h_argument)
+  have h_weight : Continuous fun p : G E u × G E s ↦ (⇑w.weightFn * F) p.1 :=
+    (w.weightFn.continuous.mul hF_cont).comp continuous_fst
+  refine .of_bound
+    (h_weight.mul (h_kernel.mul (hy_cont.comp continuous_snd))).aestronglyMeasurable
+    (D * |B ^ A| * |C| * ‖φ‖) (.of_forall fun (v, g) ↦ ?_)
   have hv_pos : 0 < U.height v := U.height_pos v
   have hj_pos : 0 < T.height (w.comparisonMap v) := T.height_pos _
   calc _ ≤ ‖(⇑w.weightFn * F) v‖ * ((U.height v * B) ^ A * |C| * ‖φ‖) := by
