@@ -1,8 +1,8 @@
 {
-  "source_tree": "55fe9c6cb2e5be421c5871e772b6d736ecb5d164",
+  "source_tree": "ef818ec27d317f153d00e18f168a7440ada9d28b",
   "build_roots": {},
-  "lakefile_sha256": "4c3deb95a62f6eb0a8b04d391ed843253c8a960c9279b251a8bde1c37bdb0a88",
-  "manifest_sha256": "1390a02c1729c30db51ee0b19ea7199a129ed899ac571a48956da719573590ae",
-  "toolchain": "leanprover/lean4:v4.35.0",
-  "input_fingerprint": "5b89a4c4b4a5caadaccd2929549d50a168e72e35e599710bdd3bdf3e76150b26"
+  "lakefile_sha256": "f9842aeae12b8126d9c536baca48366b5ee5c94ed490a4723ce0128fb491c88f",
+  "manifest_sha256": "2d5b9f3844a3680e8061f98ace3925b5c2c8c41c7903c1ddd3991928e1345d61",
+  "toolchain": "leanprover/lean4:v4.37.0-rc1",
+  "input_fingerprint": "265c7207fe58fcaa43d4e9a8e01b68b3f2fcd258b9ac309d32642d51b7f0e0e6"
 }
