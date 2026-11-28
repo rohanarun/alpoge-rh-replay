@@ -188,17 +188,18 @@ lemma theta_boxProd [DecidableEq n₂] {e : n₁ ⊕ n₂ ≃ n} (hs : s ∘ e =
   obtain ⟨g₁, hg₁⟩ := exists_mapsTo_ratVectors (V := signedSpace E s₁) (W := V₁)
   obtain ⟨g₂, hg₂⟩ := exists_mapsTo_ratVectors (V := signedSpace E s₂) (W := V₂)
   have h_sign : ∀ i : n₁ ⊕ n₂, s (e i) = (s₁ ⊕ᵥ s₂) i := congrFun hs
-  have h_blk : ∀ γ ∈ (signedSpace E s).ratVectors, blockEmb hs (g₁, g₂) • γ ∈ V.ratVectors := by
+  have h_blk : ∀ γ ∈ (signedSpace E s).ratVectors,
+      (blockEmb hs (g₁, g₂)).adeleMatrix *ᵥ γ ∈ V.ratVectors := by
     -- Each half of `γ` is rational for its sum of lines, so `gᵢ` moves it to a rational vector
     -- of `Vᵢ`; the point of `V` acts block by block.
     intro γ hγ
     have h_coord (i : n₁ ⊕ n₂) : ((signedSpace E s).x.val *ᵥ γ) (e i) ∈ ratAdeles E :=
       mem_ratVectors.mp ((signedSpace E s).mem_ratVectors_iff.mp hγ) (e i)
-    have h_left : g₁ • (γ ∘ e ∘ .inl) ∈ V₁.ratVectors :=
-      hg₁ _ ((signedSpace E s₁).mem_ratVectors_iff.mpr (mem_ratVectors.mpr fun i ↦ by
+    have h_left :=
+      hg₁ (γ ∘ e ∘ Sum.inl) ((signedSpace E s₁).mem_ratVectors_iff.mpr (mem_ratVectors.mpr fun i ↦ by
         simpa [signedSpace, h_sign, mulVec_diagonal] using h_coord (.inl i)))
-    have h_right : g₂ • (γ ∘ e ∘ .inr) ∈ V₂.ratVectors :=
-      hg₂ _ ((signedSpace E s₂).mem_ratVectors_iff.mpr (mem_ratVectors.mpr fun i ↦ by
+    have h_right :=
+      hg₂ (γ ∘ e ∘ Sum.inr) ((signedSpace E s₂).mem_ratVectors_iff.mpr (mem_ratVectors.mpr fun i ↦ by
         simpa [signedSpace, h_sign, mulVec_diagonal] using h_coord (.inr i)))
     have h_apply : ∀ i j, V.x.val (e i) (e j) = fromBlocks V₁.x.val 0 0 V₂.x.val i j :=
       congr_fun₂ h_blocks
@@ -218,6 +219,6 @@ lemma theta_boxProd [DecidableEq n₂] {e : n₁ ⊕ n₂ ≃ n} (hs : s ∘ e =
     simp [← e.prod_comp, h_sign]
   have h_forms : .postcomp (𝒮 V₂) V.θ ∘L V.boxProd hs = .smulRight V₁.θ V₂.θ :=
     V₁.ext_of_vacElem g₁ fun y₁ ↦ V₂.ext_of_vacElem g₂ (h_vac y₁)
-  simpa using DFunLike.congr_fun (DFunLike.congr_fun h_forms f₁) f₂
+  exact congrArg (fun T : 𝒮 V₁ →L[ℂ] (𝒮 V₂ →L[ℂ] ℂ) ↦ T f₁ f₂) h_forms
 
 end New.Space
