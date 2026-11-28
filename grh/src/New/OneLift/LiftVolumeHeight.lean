@@ -309,13 +309,10 @@ lemma exists_frame_weightRep_eq_intCast (j : D.LiftIndex)
   -- Move the integral frame of `exists_tightFrame` by the unitary map `ξ ↦ star (γ⁻¹ (star ξ))`.
   classical
   let W : Type := WeylIndex D.SecondFactorIndex (untwistedDescentPair j).colsMinus → ℂ
-  obtain ⟨η, h_frame, h_norm⟩ :
-      ∃ η : ColumnFilling (fun _ ↦ D.SecondFactorIndex) (untwistedDescentPair j).colsMinus →
-          WeylIndex D.SecondFactorIndex (untwistedDescentPair j).colsMinus → ℤ,
-        (∀ ξ : W, ∑ T, gramForm (Int.cast ∘ η T) ξ • (Int.cast ∘ η T : W) =
-          (hookNumberMinus j : ℂ) ^ 2 • ξ) ∧
-        ∀ T, weylNormSq (Int.cast ∘ η T) ≤ (hookNumberMinus j : ℝ) ^ 2 :=
-    exists_tightFrame
+  obtain ⟨η, h_frame, h_norm⟩ :=
+    exists_tightFrame (n := fun _ : D.Φ ↦ D.SecondFactorIndex)
+      (κ := (untwistedDescentPair j).colsMinus)
+  simp only [← gramForm_apply] at h_frame
   let ρ : Representation ℂ (U (stdSpace D.E D.SecondFactorIndex).J) W :=
     (stdSpace D.E D.SecondFactorIndex).weightRep (untwistedDescentPair j).colsMinus 0
   let u (δ : U (stdSpace D.E D.SecondFactorIndex).J) : W →ₗ[ℂ] W :=
@@ -339,7 +336,9 @@ lemma exists_frame_weightRep_eq_intCast (j : D.LiftIndex)
     have h_fix : σ ∘ ξ = ξ := funext fun i ↦ map_intCast σ (η T i)
     have h_value : (weylNormSq (σ ∘ u γ⁻¹ ξ) : ℂ) = weylNormSq (σ ∘ star (star ξ)) := by
       rw [coe_weylNormSq, coe_weylNormSq]
-      exact gramForm_map_weightRep (e := 0) (σ.toRingHom.comp conj) γ⁻¹ (star ξ) (star ξ)
+      have h_comp (v : W) : (σ.toRingHom.comp conj) ∘ v = σ ∘ star v := rfl
+      simpa only [h_comp, gramForm_apply, u, ρ, LinearMap.coe_mk, AddHom.coe_mk] using
+        gramForm_map_weightRep (e := 0) (σ.toRingHom.comp conj) γ⁻¹ (star ξ) (star ξ)
     rw [star_star, h_fix] at h_value
     exact (Complex.ofReal_injective h_value).le.trans (h_norm T)
 
