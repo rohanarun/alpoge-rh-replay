@@ -227,13 +227,22 @@ lemma _root_.New.weilMultiplier_fromBlocks
     have h_block : ((g.fst w : GL n ℂ) : Matrix n n ℂ).submatrix e e =
         fromBlocks ((g₁.fst w : GL n₁ ℂ) : Matrix n₁ n₁ ℂ) 0 0
           ((g₂.fst w : GL n₂ ℂ) : Matrix n₂ n₂ ℂ) := by
-      simp_all [← ext_iff, Prod.ext_iff, funext_iff]
+      refine Matrix.ext fun i j ↦ ?_
+      have h := congrArg (fun M : Matrix (n₁ ⊕ n₂) (n₁ ⊕ n₂) (𝔸 E) ↦ (M i j).1 w) h_blocks
+      rcases i with i | i <;> rcases j with j | j <;> simpa [submatrix_apply] using h
     simp_all [realMultiplier, ← principalMinor_submatrix e, principalMinor_fromBlocks, funext_iff]
   -- The finite factors: the finite part of `g` is block diagonal after relabelling by `e.symm`.
   have h_fin_block : ((g.snd : GL n (𝔸f E)) : Matrix n n (𝔸f E)) =
       (fromBlocks ((g₁.snd : GL n₁ (𝔸f E)) : Matrix n₁ n₁ (𝔸f E)) 0 0
         ((g₂.snd : GL n₂ (𝔸f E)) : Matrix n₂ n₂ (𝔸f E))).submatrix e.symm e.symm := by
-    simp_all [← ext_iff, Prod.ext_iff, reindex_equiv e]
+    refine Matrix.ext fun i j ↦ ?_
+    have h := congrArg (fun M : Matrix (n₁ ⊕ n₂) (n₁ ⊕ n₂) (𝔸 E) ↦
+      (M (e.symm i) (e.symm j)).2) h_blocks
+    simp only [submatrix_apply, Equiv.apply_symm_apply, G.adeleMatrix_snd] at h
+    rw [submatrix_apply]
+    generalize e.symm i = i' at h ⊢
+    generalize e.symm j = j' at h ⊢
+    cases i' <;> cases j' <;> simpa using h
   have h_fin : finMultiplier g.snd = finMultiplier g₁.snd * finMultiplier g₂.snd :=
     glMultiplier_fromBlocks _ _ e.symm h_fin_block
   rw [weilMultiplier, weilMultiplier, weilMultiplier, h_fin]
