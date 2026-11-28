@@ -296,12 +296,13 @@ lemma exists_mapsTo_lattice_hasDegreeGe_sub_smul_stringMap [Finite X] [Finite X'
   · rw [mem_lattice, ← mulVec_mulVec, ← mulVec_mulVec, mulVec_mulVec, Units.inv_mul, one_mulVec]
     exact IsIntMatrix.mulVec (fun p q ↦ hl (p, q)) hy
   · have h_entry : (α : (𝔸f E)ˣ)⁻¹.val * sh p q = star b⁻¹.val * W p q := by
-      have h_lt : Y'.gradeOf p < Y.gradeOf q := by lia
+      have h_lt : Y'.gradeOf p < Y.gradeOf q := by simpa only [add_zero] using h_deg
       simpa [mulVec_diagonal, mapDegree, h_lt, matrixToVec, sub_eq_zero] using congrFun h_neg (p, q)
-    calc (W - (star b / α).val • sh) p q
-      _ = W p q - (star b).val * ((α : (𝔸f E)ˣ)⁻¹.val * sh p q) := by
-        simp [div_eq_mul_inv, mul_assoc]
-      _ = 0 := by simp [h_entry, ← mul_assoc, ← star_mul]
+    have h_cancel : (star b).val * star b⁻¹.val = 1 := by
+      change (star b).val * (star b⁻¹).val = 1
+      rw [← Units.val_mul, ← star_mul', mul_inv_cancel, star_one, Units.val_one]
+    rw [Matrix.sub_apply, Matrix.smul_apply, smul_eq_mul, div_eq_mul_inv, Units.val_mul,
+      mul_assoc, h_entry, ← mul_assoc, h_cancel, one_mul, sub_self]
 
 omit [Fintype X] in
 /-- The gradings `Y`, `Y'` split the bases of the Hermitian spaces `V`, `V'` (of signs `ε`, `ε'` at
