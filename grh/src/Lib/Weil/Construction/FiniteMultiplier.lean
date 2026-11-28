@@ -958,7 +958,9 @@ lemma finMultiplier_eq_of_supportedOn {S : Set (FinPlace E)} (hS : Set.IsConjDis
     by_cases hw : star w ∈ S <;> simp [h_a, hw, Units.ext_iff, evalAt_star_GL (star_star _),
       g.atPlace_star (star_star w), -star_inv, -coe_units_inv]
   have h_supp (w : FinPlace E) : (star a⁻¹).map (evalAt w) = 1 ∨ a.map (evalAt w) = 1 := by
-    grind
+    by_cases hw : w ∈ S
+    · exact Or.inl ((h_star w).trans (ite_eq_right (h_disj w hw)))
+    · exact Or.inr ((h_a w).trans (ite_eq_right hw))
   have h_eq : g.val = star a⁻¹ * a := by
     refine GL_ext_evalAt fun w ↦ ?_
     change g.atPlace w = (star a⁻¹ * a).map (evalAt w)
