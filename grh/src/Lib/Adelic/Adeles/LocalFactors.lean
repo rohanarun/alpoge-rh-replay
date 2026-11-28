@@ -88,11 +88,20 @@ lemma under_span_singleton_of_v_eq {I : Ideal (𝓞 E)} (hI : I ≠ ⊥) {t : Ô
   -- An integer lies in `t Ô` iff it lies in `w ^ multiplicity w I` for all `w`, that is, in `I`.
   refine .trans (ext fun c ↦ ?_) (iInf_maxPowDividing_eq hI)
   calc c ∈ (span {t}).under (𝓞 E)
+    _ ↔ ∃ y ∈ Ô E, (c : 𝔸f E) = t.val * y := by
+      rw [mem_under, mem_span_singleton, dvd_def]
+      constructor
+      · rintro ⟨y, hy⟩
+        exact ⟨y.val, y.property, congrArg Subtype.val hy⟩
+      · rintro ⟨y, hy, h⟩
+        exact ⟨⟨y, hy⟩, Subtype.ext h⟩
     _ ↔ ∀ w : HeightOneSpectrum (𝓞 E), w.intValuation c ≤ .exp (-multiplicity w.asIdeal I) := by
-      simp [ht, Subtype.ext_iff, exists_eq_mul_iff_v_le, valuation_of_algebraMap,
-        mem_span_singleton, dvd_def]
+      rw [exists_eq_mul_iff_v_le (E := E)]
+      exact forall_congr' fun w ↦ by
+        change v (algebraMap E (LocField w) c) ≤ v (t.val w) ↔ _
+        rw [v_algebraMap_eq_intValuation, ht w]
     _ ↔ c ∈ ⨅ w : HeightOneSpectrum (𝓞 E), w.maxPowDividing I := by
-      simp [hI, maxPowDividing_eq_pow_multiplicity, ← intValuation_le_pow_iff_mem]
+      simp only [mem_iInf, maxPowDividing_eq_pow_multiplicity hI, ← intValuation_le_pow_iff_mem]
 
 /-- Let `Ô` be the ring of integral finite adeles and `y` a finite adele. If the ideal `I` of `𝓞 E`
 generates the principal ideal `t Ô` of `Ô`, then `I y ⊆ Ô` if and only if `t y ∈ Ô`. -/
