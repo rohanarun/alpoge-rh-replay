@@ -224,16 +224,35 @@ lemma injective_arrowTensor :
   obtain ⟨z, hz_ne, hz⟩ := theta_arrowProduct V V' V''
   refine tensor_eq_zero_of_separating
     (f := fun x ↦ ((V.hom V').θ ∘L (V.hom V').ϱ x).toLinearMap.domRestrict (V.hom V').finitePart)
-    (fun h ↦ Subtype.ext ((V.hom V').data_ext fun x ↦ by simpa [theta_rho] using h x)) t
+    (fun h ↦ Subtype.ext ((V.hom V').data_ext fun x ↦ by
+      simpa only [ContinuousLinearMap.toLinearMap_comp, domRestrict_apply, coe_comp,
+        Function.comp_apply, ContinuousLinearMap.coe_coe, theta_rho, ZeroMemClass.coe_zero,
+        Space.zero_apply] using h x)) t
     fun x ↦ ?_
   -- Write the point `x` as the flip of a point `y`.
   obtain ⟨y, rfl⟩ := (flipCoords star_normNegOne_mul_self rfl (t := ε) (s := ε')).φ.surjective x
   ext x'
-  replace ht : arrowTensor t ((y ⊕ᵥ x') ∘ Equiv.sumProdDistrib ι ι'' ι') = 0 := by simp [ht]
+  let point := (y ⊕ᵥ x') ∘ Equiv.sumProdDistrib ι ι'' ι'
+  let flippedPoint := (flipCoords star_normNegOne_mul_self rfl (t := ε) (s := ε')).φ y
+  have h_product (f : 𝒮 (V.hom V')) (f' : 𝒮 (V'.hom V'')) :
+      (V'.hom (flipSum V V'')).θ ((V'.hom (flipSum V V'')).ϱ point (arrowProduct f f')) =
+        z * (f flippedPoint * f' x') := by
+    have h_translate :
+        (V'.hom (flipSum V V'')).ϱ point (arrowProduct f f') =
+          arrowProduct ((V.hom V').ϱ flippedPoint f) ((V'.hom V'').ϱ x' f') := by
+      simp only [point, flippedPoint, arrowProduct, ContinuousLinearMap.comp_apply,
+        CoordChange.map_rho, boxProd_rho, Equiv.prodCongr_refl_refl, Equiv.trans_refl, Equiv.symm_symm]
+    rw [h_translate, hz, theta_rho, theta_rho]
+  replace ht : arrowTensor t point = 0 := by simp only [ht, Space.zero_apply]
   obtain ⟨S, rfl⟩ := t.exists_finset
   rw [← theta_rho] at ht ⊢
-  simp_all [Function.comp_def, ← Finset.mul_sum, arrowProduct, arrowTensor, rho_boxProd,
-    ← CoordChange.map_rho]
+  simp only [arrowTensor, coe_comp, Function.comp_apply, map_sum, map_tmul, subtype_apply,
+    lift.tmul, ContinuousLinearMap.toLinearMap₁₂_apply_apply_apply, h_product, ← Finset.mul_sum] at ht
+  have h_zero := (mul_eq_zero.mp ht).resolve_left hz_ne
+  simpa only [map_sum, map_tmul, lift.tmul, lsmul_apply, coe_comp, Function.comp_apply,
+    ContinuousLinearMap.toLinearMap_comp, domRestrict_apply, ContinuousLinearMap.coe_coe,
+    theta_rho, AddSubmonoidClass.coe_finsetSum, SetLike.val_smul, map_smul, smul_eq_mul,
+    ZeroMemClass.coe_zero, Space.zero_apply] using h_zero
 
 lemma leftInverse_arrowTensor : arrowTensor.leftInverse (arrowTensor t) = t :=
   leftInverse_apply_of_inj (LinearMap.ker_eq_bot.mpr injective_arrowTensor) t
