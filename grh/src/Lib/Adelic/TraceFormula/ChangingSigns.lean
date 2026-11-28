@@ -402,6 +402,7 @@ lemma exists_hasSignType_mul_iff (η : Z → InfinitePlace E → n → ℤˣ)
   -- hence `(q, y, μ) ↦ (U • q, y, μ)` is equivariant and passes to the orbits
   let σ : Perm (MarkedTriple K Z) := prodCongrLeft fun (y, μ) ↦ toPerm (V μ y)
   have h_equiv (z : GL n E) : ∀ p : MarkedTriple K Z, σ (z • p) = z • σ p := fun (q, y, μ) ↦ by
+    let : MulAction (GL n (𝔸f E)) (GL n (𝔸f E) ⧸ K) := MulAction.quotient _ K
     change (V μ (z * y * z⁻¹) • toFinGL z • q, z * y * z⁻¹, μ) =
       (toFinGL z • V μ y • q, z * y * z⁻¹, μ)
     rw [← mul_smul, ← mul_smul, (h_conj z y μ).eq]
