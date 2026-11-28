@@ -487,8 +487,9 @@ lemma exists_spanning_matrix (hU : c.IsPeriodMatrix U h v) :
   obtain ⟨u, hu, hup⟩ : ∃ u ∈ c.bicommutant, u * p = 1 := c.exists_bicommutant_mul_p_eq_one
   let g : (d → Ainf) →ₗ[Ainf] d → BPlus := c.E.val ^ h • (Algebra.linearMap Ainf BPlus).compLeft d
   let P : Submodule c.S (d → Ainf) :=
-    (mulVecBilin ℕ _ U ∘ₗ c.bicommutant.val.toLinearMap.compLeft d).range.comap
-      (g.restrictScalars _)
+    (mulVecBilin ℕ c.S U ∘ₗ c.bicommutant.toSubmodule.subtype.compLeft d).range.comap
+      (g.restrictScalars c.S)
+  let : SMul c.S P := (Submodule.module P).toSMul
   -- each member `j` of `P` has a solution `y j` over `S_B` of `U (y j) = E ^ h j`
   have h_sol : ∀ j : P, ∃ y : d → c.bicommutant, U *ᵥ Subtype.val ∘ y = g j := P.coe_mem
   choose y hy using h_sol
@@ -531,12 +532,11 @@ lemma exists_spanning_matrix (hU : c.IsPeriodMatrix U h v) :
   refine ⟨(of fun j ↦ (q j).val)ᵀ, (of fun j i ↦ (y (q j) i).val)ᵀ, hZ_mem,
     ext_col fun j ↦ hy (q j), fun x y₀ hy₀ hx ↦ ?_⟩
   -- the basis `b = q ∘ e` spans `P`, so the columns `q` do
-  have h_span_b : ⟨x, fun i : d ↦ ⟨y₀ i, hy₀ i⟩, hx⟩ ∈ Submodule.span c.S (Set.range (q ∘ e)) := by
-    simp [hq]
-  have h_span : ⟨x, fun i : d ↦ ⟨y₀ i, hy₀ i⟩, hx⟩ ∈ Submodule.span c.S (Set.range q) :=
+  let xP : P := ⟨x, fun i : d ↦ ⟨y₀ i, hy₀ i⟩, hx⟩
+  have h_span_b : xP ∈ Submodule.span c.S (Set.range (q ∘ e)) := by simp [hq]
+  have h_span : xP ∈ Submodule.span c.S (Set.range q) :=
     Submodule.span_mono (Set.range_comp_subset_range e q) h_span_b
-  obtain ⟨s, hs⟩ : ∃ s : d → c.S, ∑ i : d, s i • q i = ⟨x, fun i : d ↦ ⟨y₀ i, hy₀ i⟩, hx⟩ :=
-  (Submodule.mem_span_range_iff_exists_fun _).mp h_span
+  obtain ⟨s, hs⟩ := (Submodule.mem_span_range_iff_exists_fun _).mp h_span
   have h_vals : ∑ i : d, s i • ((q i : P) : d → Ainf) = x := by
     simpa using congrArg Subtype.val hs
   refine ⟨s, funext fun k ↦ ?_⟩
