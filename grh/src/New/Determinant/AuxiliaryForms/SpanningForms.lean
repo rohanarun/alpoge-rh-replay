@@ -231,7 +231,7 @@ lemma exists_norm_mul_lastPathPairing_le_one : ∃ N ≠ (0 : ℕ),
       _ ≤ _ := by
           grw [hL_le]
           rw [sum_const, card_univ, nsmul_eq_mul]
-          exact D.le_of_hasLogBound
+          exact D.le_of_hasLogBound (by scale_grind D)
   refine ⟨∏ τ, N τ, by simp [N, NeZero.ne, prod_eq_zero_iff], h_log,
     fun {ϑ p _ _} hp g v' v hv' hv ↦ ?_⟩
   let f (τ : D.Φ) : 𝔸f D.E →+* ℂ_[p] := adeleExtension (weightEmbedding ιₚ τ)
@@ -293,7 +293,7 @@ lemma exists_mul_lastPathPeriod_mem_embValRing : ∃ N ≠ (0 : ℕ),
     calc _ = log M + (D.m * log d + D.m * log d) := by simp [log_mul, hM_ne, hd_ne]
       _ ≤ _ := by
         grw [hM_le, h_log_d]
-        exact D.le_of_hasLogBound
+        exact D.le_of_hasLogBound (by scale_grind D)
   refine ⟨M * (d ^ D.m * d ^ D.m), by simp [hM_ne, hd_ne], le_exp_of_log_le h_log,
     fun {ϑ n Ψ y p _ _} hΨ hy hp h_int ↦ ?_⟩
   -- After `j` lifts, `d ^ j • v` has gauge at most `1`.
@@ -365,7 +365,7 @@ lemma sqrt_weylNormSq_lastPathKernel_le (σ : ℂ ≃+* ℂ) (S : EdgeTuple (1 :
   -- 'le_of_hasLogBound' uses these two bounds for the ranks as local instances.
   have := D.hasLogUpper_of_le (card_lastPathIndex_le z hj)
   have := D.hasLogUpper_of_le (card_lastPathIndex_le z hj.le)
-  simpa using D.le_of_hasLogBound
+  simpa using D.le_of_hasLogBound (by scale_grind D)
 
 /-- Conjugates of `Ξ = lastPathPeriod Ψ y` for the trivial twist. Let `Ψ` be a path datum on the
 last path and `y` a pair of forms fixed by the levels at the outer ends of the two halves, whose
@@ -443,7 +443,7 @@ lemma norm_lastPathPeriod_le {Ψ : EdgeTuple (1 : D.MFoldTwist) → ℂ}
       simp only [C, vectorCountBound, edgeMatrixCountBound, card_residueRing_twistModulus,
         prod_q_chosenPlace, h_normQ, mul_one, Nat.cast_pow, log_pow, Nat.cast_mul,
         Nat.cast_ofNat]
-      exact D.le_of_hasLogBound
+      exact D.le_of_hasLogBound (by scale_grind D)
     have hG : G ^ (D.m + (D.m + 1) + D.m + D.m) =
         exp ((D.m + (D.m + 1) + D.m + D.m : ℕ) * (D.x ^ 99 * D.b ^ 2)) :=
       (exp_natCast_mul _ _).symm
@@ -454,7 +454,7 @@ lemma norm_lastPathPeriod_le {Ψ : EdgeTuple (1 : D.MFoldTwist) → ℂ}
           rw [hG]; gcongr
       _ = exp (D.x ^ 199 * D.b ^ 2 +
             (D.m + (D.m + 1) + D.m + D.m : ℕ) * (D.x ^ 99 * D.b ^ 2)) := (exp_add _ _).symm
-      _ ≤ exp (D.x ^ 200 * D.b ^ 2) := exp_le_exp.2 D.le_of_hasLogBound
+      _ ≤ exp (D.x ^ 200 * D.b ^ 2) := exp_le_exp.2 <| D.le_of_hasLogBound (by scale_grind D)
   obtain ⟨a, ha, ha_sum⟩ := Set.mem_nsmul_iff_sum.1 h_sum
   calc _ = ‖∑ i, σ (a i)‖ := by rw [← ha_sum, map_sum]
     _ ≤ n * R :=

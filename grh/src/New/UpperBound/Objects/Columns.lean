@@ -710,7 +710,15 @@ lemma exists_sum_columnsY_le_and_pow_le_exp :
     · exact Nat.mul_le_mul_right _ (by grind [Nat.card_Ico])
   · refine Real.le_exp_of_log_le ?_
     push_cast [sum_const, card_univ, smul_eq_mul, Real.log_pow]
-    exact D.le_of_hasLogBound
+    -- `scale_arith` splits every `max` and times out, and the kernel cannot check `grind` with the
+    -- large numerals of `scale_inequalities'`: derive bounds with small numerals for `grind`.
+    exact D.le_of_hasLogBound (by
+      obtain ⟨⟨h64, -, -, -⟩, hc, hL, hX, hX₁, -⟩ := New.Data.scale_inequalities' D
+      have hcL : P.constantBound ≤ Real.log D.logB := by linarith
+      have hXB : D.logX ≤ D.logB := by linarith
+      clear hc hX hX₁
+      simp only [Bool.false_eq_true, ↓reduceIte, Nat.cast_ofNat]
+      grind)
 
 /-- There is an integer matrix `br` from the Weyl module on `X_m` to that on `Y_m` that is a
 branching map (`IsBranchingMap`). It is equivariant for the block matrices `diag (g, z)` up to the

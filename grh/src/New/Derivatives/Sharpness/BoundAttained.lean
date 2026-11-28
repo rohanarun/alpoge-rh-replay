@@ -367,7 +367,7 @@ lemma norm_map_mul_intVacuum_le {P : Parameters} (D : Data P) {l : D.Φ → ℕ}
   have h_exponent : 12 * D.f * Real.log D.M + 2 * D.f * D.lossFactorCount * Real.log lossBase +
       12 * (P.constantBound * D.q₁ ^ 2) ≤ D.f * D.m / D.k * D.b := by
     rw [h_lossBase, lossFactorCount]
-    exact D.le_of_hasLogBound
+    exact D.le_of_hasLogBound (by scale_grind D)
   grw [map_mul, norm_mul, map_natCast, Complex.norm_natCast, h_int, h_vac, ← exp_add, h_exponent]
 
 -- Keeps definitional checks from unfolding the finite sums.

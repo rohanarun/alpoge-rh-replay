@@ -130,7 +130,7 @@ lemma log_classNumber_le : log (NumberField.classNumber D.E) ≤ D.x ^ 30 := by
   -- The last step compares sizes: `f ≤ x¹²` and `log rd_E ≤ 12 log x`.
   calc _ ≤ log ((2 ^ (2 * D.f) * (D.rootDisc ^ D.f) ^ 2) ^ (2 * D.f + 1)) :=
         log_le_log (mod_cast NumberField.classNumber_pos D.E) h_bound
-    _ ≤ D.x ^ 30 := D.le_of_hasLogBound
+    _ ≤ D.x ^ 30 := D.le_of_hasLogBound (by scale_grind D)
 
 /-! ### Weights
 

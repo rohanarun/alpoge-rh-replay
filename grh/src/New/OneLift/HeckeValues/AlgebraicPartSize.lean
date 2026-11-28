@@ -154,7 +154,7 @@ lemma New.Data.CriticalPair.norm_map_integralAlgebraicPart_le {P : Parameters} {
     grw [φ.norm_map_inner_le φ, h_normSq, h_normSq, mul_self_sqrt (by positivity)]
   -- Every term of the logarithm is small against `x ^ 34`.
   have h_log : log (exp (D.x ^ 33) * (exp (D.x ^ 30) * (exp (D.x ^ 30) * C) ^ 2)) ≤ D.x ^ 34 := by
-    simpa [C, hp, log_mul, NeZero.ne] using D.le_of_hasLogBound
+    simpa [C, hp, log_mul, NeZero.ne] using D.le_of_hasLogBound (by scale_grind D)
   calc ‖σ (integralAlgebraicPart hp.2 .one)‖
       = D.chosenGroupOrder * p.denomBound ^ 2 * ‖σ (inner ℂ φ φ)‖ := by
         simp [integralAlgebraicPart, toAutChar_one_and_toTwist_one_and_Q_one, φ]

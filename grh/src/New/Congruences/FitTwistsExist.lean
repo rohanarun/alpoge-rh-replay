@@ -146,7 +146,7 @@ lemma New.Selmer.sum_localDefectBound_mul_log_le {P : Parameters} (D : Data P) (
       ((D.natB + 30 * D.halfGap ^ 3) ^ (60 * D.halfGap ^ 3)) ^ D.halfGap ^ 3 : ℕ) ≤
         exp 180 * D.b * D.logB := by
     push_cast
-    exact D.le_of_hasLogBound
+    exact D.le_of_hasLogBound (by scale_grind D)
   calc ∑ l ∈ T, (localDefectBound D l : ℝ) * log l = 4 * D.f * ∑ l ∈ T,
          (defectBound D l : ℝ) * log l := by
         simp [localDefectBound, mul_sum, mul_assoc]

@@ -397,7 +397,8 @@ instance hasLogBound_deltaE (v : D.Φ) (u : Bool) :
   -- Instance search bounds the product `exp (log A) * towerDeg s * √d` factor by factor. The
   -- sum of the exponents is compared with `10 log x` and `12 log x` by `h_log` and
   -- `D.scale_inequalities`.
-  exact .of_lower_of_upper (by cases u <;> grind [D.scale_inequalities])
+  obtain ⟨h_log_ge, h_log_le⟩ := abs_le.mp h_log
+  exact .of_lower_of_upper (by cases u <;> scale_arith D)
 
 /-- The root discriminant `rd_E = D.rootDisc` of the field `E = D.E` lies in `[x ^ 10, x ^ 12]`. -/
 lemma rootDisc_mem_Icc : D.rootDisc ∈ Set.Icc (D.x ^ 10) (D.x ^ 12) := by

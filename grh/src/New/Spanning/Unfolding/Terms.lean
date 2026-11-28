@@ -459,7 +459,12 @@ lemma pow_le_tailScale {e : ℕ} (he : e ≤ 10 ^ 5 * 𝔰.n ^ 9 * numInfPlaces 
     have hk : 1000 * (2 * 𝔰.ϱ + 2) ^ 9 ≤ 𝔰.k := S.pow_le_k
     rify at he hk
     grw [he, ← hk]
-    grind
+    -- `(2 ϱ + 2) ^ 9 = 2 ^ 9 (ϱ + 1) ^ 9`, and `10 ^ 5 ≤ 1000 * 2 ^ 9 / 4`
+    have h_pos : (0 : ℝ) ≤ (𝔰.ϱ + 1) ^ 9 * numInfPlaces E := by positivity
+    have h_eq : (1000 : ℝ) * (2 * 𝔰.ϱ + 2) ^ 9 * numInfPlaces E / 4 =
+        128000 * ((𝔰.ϱ + 1) ^ 9 * numInfPlaces E) := by ring
+    rw [h_eq]
+    linarith
   simpa [tailScale] using rpow_le_rpow_of_exponent_le S.one_le_b h_exponent
 
 /-- The fourth power of `tailScale` `τ = b ^ (k f / 4)` is `b ^ (k f)`, where `k = 𝔰.k` and

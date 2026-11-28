@@ -271,7 +271,7 @@ all places, in the columns of height below the rank `n_{j+1} = D.n (j + 1)`. The
 lemma one_add_logb_boxes_le (hj : j < D.m) :
     1 + logb p (max (boxes D.columnCount (D.n (j + 1))) 1 : ℕ) ≤ D.logB ^ 2 := by
   have h_low (σ : D.Φ) : (D.lowBoxes j σ : ℝ) ≤ D.M :=
-    (lowBoxes_le hj σ).trans D.le_of_hasLogBound
+    (lowBoxes_le hj σ).trans (D.le_of_hasLogBound (by scale_grind D))
   have h_boxes : ((max (boxes D.columnCount (D.n (j + 1))) 1 : ℕ) : ℝ) ≤ D.f * D.a + D.f * D.M +
     1 := by
     grw [max_le_add_of_nonneg (Nat.zero_le _) zero_le_one, cast_add_one,
@@ -283,7 +283,7 @@ lemma one_add_logb_boxes_le (hj : j < D.m) :
     linarith only [Real.log_two_gt_d9]
   calc _ ≤ 1 + Real.log (D.f * D.a + D.f * D.M + 1) / (1 / 2) := by
         grw [logb, ← h_log, h_boxes]
-    _ ≤ D.logB ^ 2 := D.le_of_hasLogBound
+    _ ≤ D.logB ^ 2 := D.le_of_hasLogBound (by scale_grind D)
 
 /-- Let `j < m`, let the prime `p` be below the cut-off `x₁` and non-split in `K = ℚ(√-d)`, let
 `e ∈ positivePartnerExponents P.d p`, let `S` be a set of infinite places of `E`, and let

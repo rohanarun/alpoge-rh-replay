@@ -201,7 +201,9 @@ lemma norm_map_eval_le_of_isHomogeneous {ι : Type*} {Q : MvPolynomial ι ℂ} {
   -- Scale `z` by `u = σ⁻¹ (t⁻¹)`: this divides `σ z` by `t` and `σ (Q z)` by `t ^ d`.
   let u : ℂ := σ.symm (t : ℂ)⁻¹
   have h_eval : Q.eval (fun i ↦ u * z i) = u ^ d * Q.eval z := by
-    simpa only [Pi.smul_def, smul_eq_mul] using hQ.eval_smul u z
+    have h_comp : (eval z).comp C = RingHom.id ℂ := RingHom.ext fun _ ↦ eval_C _
+    simpa [aeval_bind₁, aeval_eq_eval, -coe_aeval_eq_eval, h_comp] using
+      congrArg (aeval z) (isHomogeneous_iff_aeval_smul_X.1 hQ u (by simp [u, ht.ne']))
   have h_scaled : ‖σ (Q.eval fun i ↦ u * z i)‖ ≤ B :=
     hB _ fun i ↦ by simpa [u, abs_of_pos ht, inv_mul_le_iff₀ ht] using hz i
   rw [h_eval] at h_scaled
@@ -273,7 +275,15 @@ lemma M_pow_mul_card_mul_exp_le {P : Parameters} {D : Data P} {d : ℕ} {𝔪 : 
     simp only [k, e, card_prod]
     norm_cast
     grw [le_abs_self P.constantBound, hd, hL, hN]
-    exact D.le_of_hasLogBound
+    refine D.le_of_hasLogBound (h_exp := ?_)
+    -- `scale_arith D` splits the `max`es into too many cases; distribute them instead
+    obtain ⟨⟨_, _, _, _⟩, _, _, _, _, _⟩ := New.Data.scale_inequalities' D
+    simp only [Bool.false_eq_true, ↓reduceIte, Nat.cast_ofNat, ← max_add_add_right,
+      ← max_add_add_left, ← max_sub_sub_right, max_lt_iff]
+    constructorm* _ ∧ _
+    all_goals try simp only [max_def]
+    all_goals try split_ifs
+    all_goals linarith
   grw [h_card, h_pow, ← exp_add, ← exp_add, h_log]
 
 /-- Let `L`, `N` have at most `D.gap = 2 * D.r ^ 8` elements and let `d ≤ D.M`. Let the automorphic

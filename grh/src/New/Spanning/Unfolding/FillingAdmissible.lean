@@ -138,7 +138,7 @@ lemma card_besselSystem_le_add_pow (v : D.Φ) :
     v).exists_conj_rep_eq_schur
   have h_degree : D.columnCount v 1 ≤ D.a := by by_cases hv : v ∈ D.aPlaces <;>
                                                   simp [columnCount, hv]
-  have one_lt_k : 1 < D.k := D.nat_le_of_hasLogBound
+  have one_lt_k : 1 < D.k := (D.nat_le_of_hasLogBound : 2 ≤ D.k)
   have h_row (i : ℕ) (_ : 0 < i) (hi_lt : i < Fintype.card (D.X 0)) :
       D.columnCount v i = if i = 1 then D.columnCount v 1 else 0 := by
     rw [D.card_X₀] at hi_lt
@@ -612,7 +612,18 @@ lemma abs_log_mainSecondMoment_div_identitySecondMoment_sub_le :
       |D.f * (D.m - 1) * (D.ϱ * log (D.M * D.rootDisc / 2 / π) + log (√D.rootDisc / 2 / π)) -
       D.m * ∑ v : D.Φ, log (D.weight v)| ≤ D.f * D.k * D.logB / 4 - (log (1 + D.b⁻¹ ^ 9) +
         D.m * (D.m * ∑ v : D.Φ, log (D.weight v) + D.f * D.r * D.x⁻¹) + D.f * D.k * √D.logB) :=
-    le_sub_iff_add_le.mpr D.le_of_hasLogBound
+    -- The default `h_exp` tactic (`scale_arith`) splits all the `max` cases and times out here.
+    le_sub_iff_add_le.mpr (D.le_of_hasLogBound (h_exp := by
+      clear_aux_decl
+      clear * - D
+      obtain ⟨⟨_, _, _, _⟩, _, _, _, _, _⟩ := New.Data.scale_inequalities' D
+      simp only [Bool.false_eq_true, ↓reduceIte, ← max_add_add_right, ← max_add_add_left,
+        ← max_sub_sub_right, Nat.cast_ofNat, max_lt_iff]
+      and_intros
+      all_goals
+        try simp only [max_def]
+        try split_ifs
+      all_goals linarith))
   rw [mainSecondMoment_div_identitySecondMoment_eq, h_order]
   simp only [eq_tsub_of_add_eq D.r_add_one] at *
   -- Expand the logarithms and the sums: `sum_range_sub` telescopes the mass terms, and

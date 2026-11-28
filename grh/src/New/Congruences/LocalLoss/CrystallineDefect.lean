@@ -510,7 +510,7 @@ lemma New.Selmer.normLength_dualDefect_le_defectBound_of_isTameType {P : Paramet
   have h_large : farWindowStart D i σ + 6 * (4 * D.t + (D.halfGap ^ 2 + 1)) +
       D.r ^ 2 * ((D.r + D.t) * D.r + 1) ^ 2 + 2 < D.levelPrime n := by
     grw [farWindowStart, sub_le, hi]
-    split_ifs <;> exact D.nat_lt_of_hasLogBound
+    split_ifs <;> exact D.nat_lt_of_hasLogBound (by scale_grind D)
   exact normLength_dualDefect_le_of_hasCupExponent hL.isPotentiallyCrystalline
     (by grw [show 8 * (D.halfGap ^ 2 + 1) + 2 * (4 * D.t) ≤
         150 * (D.halfGap ^ 2 + 1 + 4 * D.t + 1) by omega,

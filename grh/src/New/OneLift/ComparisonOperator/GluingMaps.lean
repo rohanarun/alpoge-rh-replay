@@ -715,7 +715,8 @@ lemma M_pow_denominatorExponent_sq_mul_le_exp :
       card D.Φ * (D.halfGap * ((2 * D.m : ℕ) * (card D.FlatIndex : ℝ)))) + D.b +
       (D.b + log D.chosenGroupOrder))) ≤ D.f * D.m * D.b * D.logB ^ 2 := by
     simpa [ha, he, hL, D.t_eq_five_mul_r, card_firstFactorIndex j, add_assoc] using
-      D.le_of_hasLogBound
+      D.le_of_hasLogBound (by scale_grind D)
+  have h_flat_pos : 0 < card D.FlatIndex := Fintype.card_pos
   grw [h_exponent, h_card, h_ring]
   refine le_exp_of_log_le ?_
   grw [← h_size, ← h_rows]
