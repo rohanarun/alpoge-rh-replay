@@ -312,13 +312,17 @@ private lemma frobE_pow_smul_apply_comb (F : Frame L) (μ : L.Functional) (m : �
     dotProduct_mulVec] at h_cmp
   apply (((isUnit_smul_of_dvd_mu 1 ⟨_, F.isPeriodMatrixOf.E_mul_tau_mul.symm⟩).pow a).map
     (frobPowToBdR m)).mul_left_cancel
-  -- The normalisation unfolds the maps and the coordinates; `ring_nf` then closes the goal.
+  -- Expand the frame coordinates and cancel the matching sums.
   linear_combination (norm := (
-    simp [latticeVec, frobPowToBdR, smul_def', ↓map_apply, val_frobE, phi_pow_smul, mul_sum,
-      ↓RingHom.mapMatrix_apply, FrobGal.smul_def, sum_mul, mul_comm (μ _),
-      ← IsScalarTower.algebraMap_apply, Fintype.linearCombination_apply, mulVec, dotProduct,
-      basisValues, vecMul, sub_eq_zero]
-    ring_nf)) h_cmp
+    simp only [frobPowToBdR, Subalgebra.algebraMap_apply, smul_mul', one_smul, map_mul,
+      RingHom.coe_comp, Function.comp_apply, toRingHom_apply, smul_pow',
+      smul_algebraMap_eq_algebraMap_smul, FrobGal.smul_def, map_pow,
+      ← IsScalarTower.algebraMap_apply, val_frobE, phi_pow_smul, smul_def', latticeVec,
+      Fintype.linearCombination_apply, mulVec, dotProduct, ↓map_apply, map_sum, map_smul,
+      sum_mul, mul_sum, basisValues, pi_apply, applyₗ'_apply_apply, ↓RingHom.mapMatrix_apply,
+      Matrix.smul_apply, Pi.smul_apply', Pi.one_apply, mul_one, mul_comm (μ _), vecMul, sub_eq_zero]
+    simp only [@mul_assoc BdR _]
+    ring1)) h_cmp
 
 /-- The case `t = Pi.single i 1` of `frobE_pow_smul_apply_comb`: the value of a form on
 `φ ^ m • F.n i`. -/
