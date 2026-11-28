@@ -203,12 +203,18 @@ lemma map_schrodingerOp_eq_zero_of_invariant {P : Set (FinPlace E)} (hP : Set.Is
   refine map_eq_zero_of_support_not_orthogonal hP (LinearMap.range (shiftMatrix s X Y).mulVecLin)
     (Set.forall_mem_range.2 hℓ) (fun y hy ↦ ?_) f
   let K (i : p) (j : q) (x : n' × n) : 𝔸f E := (X x.1 i * star (Y x.2 j)).2
-  obtain ⟨i, j, h_ne⟩ : ∃ (i : p) (j : q), star (K i j) ⬝ᵥ y ≠ 0 := by
-    simpa [← ext_iff, K, dotProduct, Fintype.sum_prod_type, Matrix.mul_apply, vecToMatrix,
-      Finset.mul_sum, mul_assoc, mul_comm, mul_left_comm] using h_supp y hy
+  obtain ⟨i, j, h_ne⟩ : ∃ (i : p) (j : q), ((X.map snd)ᴴ * (vecToMatrix y * Y.map snd)) i j ≠ 0 := by
+    by_contra! h
+    exact h_supp y hy (Matrix.ext fun i j ↦ by simpa only [Matrix.zero_apply] using h i j)
+  have h_dot : star (K i j) ⬝ᵥ y = ((X.map snd)ᴴ * (vecToMatrix y * Y.map snd)) i j := by
+    simp only [K, dotProduct, Fintype.sum_prod_type, Matrix.mul_apply, conjTranspose_apply,
+      Matrix.map_apply, vecToMatrix, of_apply, Pi.star_apply, Prod.snd_mul, Prod.snd_star,
+      star_mul', star_star, Finset.mul_sum]
+    refine Finset.sum_congr rfl fun i' _ ↦ Finset.sum_congr rfl fun j' _ ↦ ?_
+    ac_rfl
   have h_col : (fun x : n' × n ↦ ((shiftMatrix s X Y *ᵥ Pi.single (i, j) 1) x).2) = K i j :=
     funext fun x ↦ by simp [K, shiftMatrix, stdForm]
-  exact ⟨shiftMatrix s X Y *ᵥ Pi.single (i, j) 1, ⟨Pi.single (i, j) 1, rfl⟩, by rwa [h_col]⟩
+  exact ⟨shiftMatrix s X Y *ᵥ Pi.single (i, j) 1, ⟨Pi.single (i, j) 1, rfl⟩, by rwa [h_col, h_dot]⟩
 
 end Supports
 
