@@ -250,12 +250,16 @@ lemma exists_zeroTerm_omega_eq_smul :
   conv at hc =>
     intro x
     rw [← div_mul_cancel₀ c hc'_ne, mul_assoc]
+  have h_vac (x : p → 𝔸 E) :
+      (L ∘L V.ϱ (D.lAdelic *ᵥ x)) (V.ω k V.vacElem) =
+        (c / c') • D.slice x (V.ω k V.vacElem) := by
+    rw [hc x, hc' x, smul_smul]
   refine ⟨c / c', fun f ↦ ?_⟩
   have hL : L = (c / c') • D.zeroTerm := V.ext_of_vacElem k fun y ↦ by
     trans (L ∘L V.ϱ (D.lAdelic *ᵥ 0)) (V.ϱ (k.adeleMatrix *ᵥ y) (V.ω k V.vacElem))
     · simp [omega_rho]
-    · rw [h_law]
-      simp [↓hc, hc', smul_smul, ← slice_zero, omega_rho, mul_left_comm]
+    · rw [h_law, _root_.smul_apply, ← slice_zero, omega_rho, isMixedLaw_slice, h_vac,
+        map_smul, smul_smul, smul_smul, mul_comm (c / c')]
   simpa [L, rep_apply_apply] using congrArg (V₀.ω g₀) (DFunLike.congr_fun hL f)
 
 omit [WeilData E] in
