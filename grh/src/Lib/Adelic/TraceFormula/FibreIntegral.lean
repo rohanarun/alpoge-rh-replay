@@ -53,9 +53,11 @@ lemma TestFunction.conjugate_apply (j : Γ →ₜ* G) (g : Γ) (f : TestFunction
 function is fixed by the elements of a neighbourhood of `1`. -/
 instance TestFunction.isSmoothRep_conjugate (j : Γ →ₜ* G) :
     IsSmoothRep (conjugate j) where
-  eventually_fixed f :=
-    ((j.continuous.prodMk j.continuous).tendsto' 1 1 (Prod.ext (map_one j) (map_one j))).eventually
-      (IsSmoothRep.eventually_fixed (ρ := TestFunction.translate) f)
+  eventually_fixed f := by
+    have h_tendsto : Tendsto (fun g : Γ ↦ (j g, j g)) (𝓝 1) (𝓝 (1 : G × G)) :=
+      (j.continuous.prodMk j.continuous).tendsto' 1 1 (Prod.ext (map_one j) (map_one j))
+    exact h_tendsto.eventually
+      (IsSmoothRep.eventually_fixed (ρ := TestFunction.translate (G := G)) f)
 
 /-! ### Test functions on products and on closed subsets -/
 
