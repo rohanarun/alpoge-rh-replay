@@ -295,9 +295,8 @@ lemma Comparison.IsBijective.of_mod {q' : moduleCoeff Φ' ⟶ G'} {γ : φ ⋙ G
         coeffMap β ≫ End.asHom (act a) := by
     ext
     apply_rules [up_inj.mpr, LinearMap.map_smul]
-  have ladder : (LongExactSeq.covariant h_short N).Hom (LongExactSeq.covariant h_short' N')
-      ((ofModuleHom φ β).pull α) ((ofModuleHom φ β).pull α) ((of φ γ).pull α) :=
-    pull_hom_covariant h_short h_short' ⟨coeffMap β, coeffMap β, γ, h_linear.symm, h_comm⟩ α
+  have ladder := pull_hom_covariant (N := N) (N' := N') (φ := φ) h_short h_short'
+    ⟨coeffMap β, coeffMap β, γ, h_linear.symm, h_comm⟩ α
   -- The kernel is `a`-divisible, as the comparison mod `a` is injective in degree `n` and
   -- surjective in degree `n - 1`.
   have ker_div (n : ℕ) : IsSMulDivisible (pullₗ β α n).ker a := by
