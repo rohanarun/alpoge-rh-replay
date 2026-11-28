@@ -12,9 +12,10 @@ public import Lib.Analytic.PolyaVinogradov
 # A prime `d` in a class whose quadratic twists have no zero in a box
 
 Fix a class modulo `N` whose primes are `≡ 7` modulo `8` and prime to `N`, and a box
-`re s ≥ β = 1/2 + 9 δ`, `|im s| ≤ H`. A prime `d` of the class is bad (`IsBadPrime`) if some
+`re s ≥ β` with `1/2 < β < 1`, `|im s| ≤ H`. A prime `d` of the class is bad (`IsBadPrime`) if some
 `L(s, ξ (·/d))`, with `ξ` modulo `N`, has a zero in the box. The main estimate is the count
-`zero_density_quadTwist`: there are `O(X ^ (1 - δ / 2))` bad primes up to `X`. Such a count also
+`zero_density_quadTwist`: for every positive `γ < (β - 1/2) / (4 (2 - β))` there are
+`O(X ^ (1 - γ))` bad primes up to `X`. Such a count also
 follows from the large sieve inequality for real characters; the proof here needs only the
 Pólya–Vinogradov inequality, because theta series keep all sums short.
 
@@ -23,14 +24,14 @@ Pólya–Vinogradov inequality, because theta series keep all sums short.
    `j`, the Mellin transform of `θ_χ` at `s - 1/2` is `Γ_j L`, and by the functional equation the
    integral of `|θ_χ(u)| du / u` over `u < q ^ (-1/2)` equals that over `u > q ^ (-1/2)`. The
    truncated transform `𝓜` of `θ_{μχ}` (`mollifier`) approximates `Γ_j / L` on `re s = 2`.
-2. For large `T` a zero in the box forces `J(χ, T) > T ^ (2 δ)`
-   (`eventually_rpow_lt_thetaTailIntegral`). Otherwise `Γ_j L 𝓜 - Γ_j²` is `≪ T ^ (4 δ)` on
+2. For large `T` a zero in the box forces `J(χ, T) > T ^ α` when `2 α (2 - β) < β - 1/2`
+   (`eventually_rpow_lt_thetaTailIntegral`). Otherwise `Γ_j L 𝓜 - Γ_j²` is `≪ T ^ (2 α)` on
    `re s = 1/2` and `≪ 1 / T` on `re s = 2`, so it is small at the zero by the three-lines theorem,
    while it equals `-Γ_j²` there.
 3. In the mean over `v ≤ T²` the theta series with coefficients `αₙ (-v/n°)`, where `n°` is the odd
    part of `n`, are small (`sum_sq_thetaSeries_jacobiSym_le`): expand the square, bound the pairs
    with `(n n')°` a square trivially and the others by Pólya–Vinogradov. So the sum of the `J` is
-   `≪ T ^ (2 + δ)`.
+   `≪ T ^ (2 + ε)` for every `ε > 0`.
 4. By reciprocity `(n/d) = (-d/n°)`, so 2 and 3 give the count, with `T² = N X`, after passing from
    `ξ` to the primitive character that induces it.
 5. If all primes of an invertible class were bad, the sum of `log p / p` over the class would
@@ -205,40 +206,36 @@ lemma norm_gaussianMellin_mul_LFunction_le (hχ : χ.IsPrimitive) (hχ_ne : χ �
         ← le_add_of_nonneg_right (integral_norm_thetaSeries_div_nonneg (inv_pos.2 hT).le)]
 
 variable (j) in
-/-- For each parity `j` there is a constant `C` with the following property. Let `δ, T > 0`, and let
-`χ ≠ 1` be a primitive character of conductor `q ≤ T²` with `χ(-1) = (-1)^j` and
-`J(χ, T) ≤ T ^ (2 δ)`, where `J(χ, T) = ∫_{1/T}^∞ (|θ_χ(u)| + |θ_{μχ}(u)|) du / u`
-(`thetaTailIntegral`) and `θ_c` is the parity-`j` theta series of `c`. Then every zero `s` of
-`L(s, χ)` with `1/2 + 9 δ ≤ re s ≤ 1` satisfies `|Γ_j(s)|² ≤ C T ^ (-2 δ)`, where
-`Γ_j(s) = ∫_0^∞ w(z) z ^ s dz / z` (`gaussianMellin`) is the Mellin transform of the parity-`j`
-weight `w`. -/
+/-- A theta tail at most `T ^ α` gives exponents `2 α` and `-1` on the lines
+`re s = 1/2` and `re s = 2`. At a zero with `β ≤ re s ≤ 1`, interpolation bounds
+the square of the Gaussian Mellin transform with the exponent at `β`. -/
 theorem three_lines_bound_of_LFunction_eq_zero :
-    ∃ C : ℝ, ∀ {δ T : ℝ} {q : ℕ} [NeZero q] {χ : DirichletCharacter ℂ q} {s : ℂ}, 0 < δ →
-      χ.IsPrimitive → χ ≠ 1 → χ (-1) = (-1) ^ j.val → 0 < T → q ≤ T ^ 2 →
-      thetaTailIntegral j (χ ·) T ≤ T ^ (2 * δ) →
-      χ.LFunction s = 0 → 1 / 2 + 9 * δ ≤ s.re → s.re ≤ 1 →
-      ‖gaussianMellin j s‖ ^ 2 ≤ C * T ^ (-(2 * δ)) := by
+    ∃ C : ℝ, ∀ {α β T : ℝ} {q : ℕ} [NeZero q] {χ : DirichletCharacter ℂ q} {s : ℂ},
+      0 < α → 1 / 2 < β → χ.IsPrimitive → χ ≠ 1 → χ (-1) = (-1) ^ j.val → 0 < T → q ≤ T ^ 2 →
+      thetaTailIntegral j (χ ·) T ≤ T ^ α →
+      χ.LFunction s = 0 → β ≤ s.re → s.re ≤ 1 →
+      ‖gaussianMellin j s‖ ^ 2 ≤ C * T ^ (-((β - 1 / 2 - 2 * α * (2 - β)) / (3 / 2))) := by
   -- Apply the three-lines theorem on `1/2 ≤ re z ≤ 2` to `Ψ = Γ_j L 𝓜 - Γ_j²`, which is `-Γ_j²`
-  -- at the zero, `≪ T ^ (4 δ)` on the left line and `≪ 1 / T` on the right line.
+  -- at the zero, `≪ T ^ (2 α)` on the left line and `≪ 1 / T` on the right line.
   obtain ⟨hΓ_diff, G, hG⟩ : DifferentiableOn ℂ (gaussianMellin j) {z : ℂ | 0 < z.re} ∧
       ∃ G : ℝ, ∀ z : ℂ, z.re ∈ Set.Icc 2⁻¹ 2 → ‖gaussianMellin j z‖ ≤ G :=
     gaussianMellin_differentiableOn_and_bdd
   set C : ℝ := 9 + G ^ 2
-  refine ⟨C, fun {δ T q} _ {χ s} hδ hχ hχ_ne h_parity hT hq hJ h_zero h_re h_re_le ↦ ?_⟩
+  refine ⟨C, fun {α β T q} _ {χ s} hα hβ hχ hχ_ne h_parity hT hq hJ h_zero h_re h_re_le ↦ ?_⟩
   have hT_one : 1 ≤ T := (one_le_sq_iff₀ hT.le).1 (hq.trans' (Nat.one_le_cast.2 NeZero.one_le))
   have hχ_le (n : ℕ) : ‖χ n‖ ≤ 1 := χ.norm_le_one n
   let Ψ (z : ℂ) : ℂ :=
     gaussianMellin j z * χ.LFunction z * mollifier j (χ ·) T z - gaussianMellin j z ^ 2
-  have h_left (z : ℂ) (hz : z.re = 2⁻¹) : ‖Ψ z‖ ≤ C * T ^ (4 * δ) := by
-    have h_sq : T ^ (2 * δ) * T ^ (2 * δ) = T ^ (4 * δ) := by rw [← rpow_add hT]; ring_nf
-    have h_prod : ‖gaussianMellin j z * χ.LFunction z‖ ≤ 2 * T ^ (2 * δ) := by
+  have h_left (z : ℂ) (hz : z.re = 2⁻¹) : ‖Ψ z‖ ≤ C * T ^ (2 * α) := by
+    have h_sq : T ^ α * T ^ α = T ^ (2 * α) := by rw [← rpow_add hT]; ring_nf
+    have h_prod : ‖gaussianMellin j z * χ.LFunction z‖ ≤ 2 * T ^ α := by
       grw [norm_gaussianMellin_mul_LFunction_le hχ hχ_ne h_parity hT hq hz, hJ]
-    have h𝓜 : ‖mollifier j (χ ·) T z‖ ≤ T ^ (2 * δ) := (norm_mollifier_le hχ_le hT hz).trans hJ
+    have h𝓜 : ‖mollifier j (χ ·) T z‖ ≤ T ^ α := (norm_mollifier_le hχ_le hT hz).trans hJ
     calc ‖Ψ z‖
-      _ ≤ 2 * T ^ (2 * δ) * T ^ (2 * δ) + G ^ 2 := by
+      _ ≤ 2 * T ^ α * T ^ α + G ^ 2 := by
         grw [norm_sub_le, norm_mul, norm_pow, hG z (by norm_num [hz]), h_prod, h𝓜]
-      _ ≤ C * T ^ (4 * δ) := by
-        nlinarith [sq_nonneg G, one_le_rpow hT_one (by positivity : 0 ≤ 4 * δ)]
+      _ ≤ C * T ^ (2 * α) := by
+        nlinarith [sq_nonneg G, one_le_rpow hT_one (by positivity : 0 ≤ 2 * α)]
   have h_right (z : ℂ) (hz : z.re = 2) : ‖Ψ z‖ ≤ C * T ^ (-1 : ℝ) := by
     grw [norm_mul_mollifier_sub_le hT hz, rpow_neg_one, div_eq_mul_inv,
       show 9 ≤ C from le_add_of_nonneg_right (sq_nonneg G)]
@@ -259,40 +256,42 @@ theorem three_lines_bound_of_LFunction_eq_zero :
     have hG₁_nonneg : 0 ≤ G₁ := (norm_nonneg _).trans (hG₁ z hz)
     grw [norm_sub_le, norm_mul, norm_pow, ← mellin_gaussianTheta_char hχ_ne h_parity (h_pos hz),
       hG z hz, hG₁ z hz, hG₂ z hz]
-  -- The line `re z = 2` has the weight `(re s - 1/2) / (3/2) ≥ 6 δ`.
+  -- The exponent decreases as the weight of the right boundary increases.
   let weight : ℝ := (s.re - 2⁻¹) / (2 - 2⁻¹)
-  have h_weight : 6 * δ ≤ weight := (le_div_iff₀ (by norm_num)).2 (by linarith)
   calc ‖gaussianMellin j s‖ ^ 2 = ‖Ψ s‖ := by simp [Ψ, h_zero]
-    _ ≤ (C * T ^ (4 * δ)) ^ (1 - weight) * (C * T ^ (-1 : ℝ)) ^ weight :=
+    _ ≤ (C * T ^ (2 * α)) ^ (1 - weight) * (C * T ^ (-1 : ℝ)) ^ weight :=
       norm_le_interp_of_mem_verticalClosedStrip' (by norm_num) ⟨by linarith, by linarith⟩
         h_diff.diffContOnCl h_bdd h_left h_right
-    _ = C ^ (1 - weight + weight) * T ^ (4 * δ * (1 - weight) + -1 * weight) := by
+    _ = C ^ (1 - weight + weight) * T ^ (2 * α * (1 - weight) + -1 * weight) := by
       simp (disch := positivity) only [mul_rpow, rpow_add, rpow_mul]
       ring
-    _ ≤ C * T ^ (-(2 * δ)) := by
-      -- The exponent is `4 δ - weight (1 + 4 δ) ≤ 4 δ - 6 δ`.
-      have h_exponent : 4 * δ * (1 - weight) + -1 * weight ≤ -(2 * δ) := by nlinarith [h_weight, hδ]
+    _ ≤ C * T ^ (-((β - 1 / 2 - 2 * α * (2 - β)) / (3 / 2))) := by
+      have h_exponent : 2 * α * (1 - weight) + -1 * weight ≤
+          -((β - 1 / 2 - 2 * α * (2 - β)) / (3 / 2)) := by
+        norm_num [weight]
+        linarith only [mul_nonneg (sub_nonneg.mpr h_re) (by positivity : 0 ≤ 2 * α + 1)]
       rw [sub_add_cancel, rpow_one]
       gcongr
 
 variable (j) in
-/-- **Three lines.** Let `δ > 0`, let `T` be large in terms of `δ` and the height `H`, and let
-`χ ≠ 1` be primitive of conductor `q ≤ T²`, with `χ(-1) = (-1) ^ j`. If `L(s, χ)` has a zero in the
-box `re s ≥ 1/2 + 9 δ`, `|im s| ≤ H`, then the integral `J(χ, T)` of `(|θ_χ(u)| + |θ_{μχ}(u)|) / u`
-over `u > 1 / T` (`thetaTailIntegral`) exceeds `T ^ (2 δ)`. -/
-theorem eventually_rpow_lt_thetaTailIntegral (hδ : 0 < δ) (H : ℝ) :
+/-- A zero in the fixed box forces the theta tail to exceed `T ^ α` for large `T`
+whenever the interpolated exponent at `β` is negative. -/
+theorem eventually_rpow_lt_thetaTailIntegral {α β : ℝ} (hα : 0 < α) (hβ : 1 / 2 < β)
+    (h_decay : 2 * α * (2 - β) < β - 1 / 2) (H : ℝ) :
     ∀ᶠ T : ℝ in atTop, ∀ {q : ℕ} [NeZero q] {χ : DirichletCharacter ℂ q} {s : ℂ},
       χ.IsPrimitive → χ ≠ 1 → χ (-1) = (-1) ^ j.val → q ≤ T ^ 2 →
-      1 / 2 + 9 * δ ≤ s.re → |s.im| ≤ H → χ.LFunction s = 0 →
-      T ^ (2 * δ) < thetaTailIntegral j (χ ·) T := by
-  obtain ⟨C, hC⟩ := three_lines_bound_of_LFunction_eq_zero j -- `|Γ_j(s)|² ≤ C T ^ (-2 δ)`
+      β ≤ s.re → |s.im| ≤ H → χ.LFunction s = 0 →
+      T ^ α < thetaTailIntegral j (χ ·) T := by
+  obtain ⟨C, hC⟩ := three_lines_bound_of_LFunction_eq_zero j
   -- `|Γ_j|` has a positive lower bound on the rectangle `1/2 ≤ re s ≤ 1`, `|im s| ≤ H`.
   obtain ⟨c, hc_pos, hc⟩ :
       ∃ c > 0, ∀ s ∈ Set.Icc 2⁻¹ 1 ×ℂ Set.Icc (-H) H, c ≤ ‖gaussianMellin j s‖ :=
     exists_pos_le_norm_gaussianMellin (isCompact_Icc.reProdIm isCompact_Icc)
       fun s hs ↦ lt_of_lt_of_le (by norm_num) (mem_reProdIm.1 hs).1.1
-  have h_lim : Tendsto (fun T : ℝ ↦ C * T ^ (-(2 * δ))) atTop (nhds 0) := by
-    simpa using (tendsto_rpow_neg_atTop (by positivity : 0 < 2 * δ)).const_mul C
+  let η := (β - 1 / 2 - 2 * α * (2 - β)) / (3 / 2)
+  have hη : 0 < η := div_pos (sub_pos.mpr h_decay) (by norm_num)
+  have h_lim : Tendsto (fun T : ℝ ↦ C * T ^ (-η)) atTop (nhds 0) := by
+    simpa using (tendsto_rpow_neg_atTop hη).const_mul C
   filter_upwards [h_lim.eventually_lt_const (pow_pos hc_pos 2), eventually_gt_atTop 0]
     with T h_small hT q _ χ s hχ hχ_ne h_parity hq h_re h_im h_zero
   have h_re_le : s.re ≤ 1 :=
@@ -301,7 +300,7 @@ theorem eventually_rpow_lt_thetaTailIntegral (hδ : 0 < δ) (H : ℝ) :
   refine h_small.not_ge ?_
   calc c ^ 2
     _ ≤ ‖gaussianMellin j s‖ ^ 2 := by grw [hc s ⟨⟨by linarith, h_re_le⟩, abs_le.1 h_im⟩]
-    _ ≤ C * T ^ (-(2 * δ)) := hC hδ hχ hχ_ne h_parity hT hq hJ h_zero h_re h_re_le
+    _ ≤ C * T ^ (-η) := hC hα hβ hχ hχ_ne h_parity hT hq hJ h_zero h_re h_re_le
 
 end ThreeLines
 
@@ -671,25 +670,24 @@ structure IsPrimeWithTwistZero (ψ : DirichletCharacter ℂ N) (β H : ℝ) (d :
   exists_zero : ∃ s : ℂ, β ≤ s.re ∧ |s.im| ≤ H ∧ (quadTwist ψ d).LFunction s = 0
 
 open scoped Classical in
-/-- Let `ψ` be primitive modulo `M`, `δ > 0` and `H` real. Then only `O(T ^ (2 - δ))` primes
-`d ≡ 7 mod 8` with `M d ≤ T²` and prime to `M` have a twist `ψ (·/d)` whose `L`-function has a zero
-in the box `re s ≥ 1/2 + 9 δ`, `|im s| ≤ H` (`IsPrimeWithTwistZero`): each has
-`thetaTailIntegral > T ^ (2 δ)`, and the sum of these integrals is `≪ T ^ (2 + δ)`. -/
-lemma exists_card_zero_quadTwist_le {δ : ℝ} (hδ : 0 < δ) (H : ℝ) {M : ℕ} [NeZero M]
+/-- Count prime twists of a fixed primitive character. Each zero costs at least `T ^ α`
+in a sum of theta tails bounded by `C T ^ (2 + ε)`. -/
+lemma exists_card_zero_quadTwist_le {α β ε : ℝ} (hα : 0 < α) (hβ : 1 / 2 < β)
+    (h_decay : 2 * α * (2 - β) < β - 1 / 2) (hε : 0 < ε) (H : ℝ) {M : ℕ} [NeZero M]
     {ψ : DirichletCharacter ℂ M} (hψ : ψ.IsPrimitive) :
     ∃ C : ℝ, ∀ᶠ T : ℝ in atTop,
       #{d ∈ Ioc 0 ⌊T ^ 2⌋₊ | d % 8 = 7 ∧ M.Coprime d ∧ M * d ≤ T ^ 2 ∧
-        IsPrimeWithTwistZero ψ (1 / 2 + 9 * δ) H d} ≤ C * T ^ (2 - δ) := by
+        IsPrimeWithTwistZero ψ β H d} ≤ C * T ^ (2 + ε - α) := by
   -- The parity `j` of the twists does not depend on `d`: it is opposite to that of `ψ`.
   obtain ⟨j, hj⟩ : ∃ j : Fin 2, ψ (-1) = -(-1) ^ j.val := ψ.even_or_odd.elim
     (fun h ↦ ⟨1, h.trans (by norm_num)⟩) fun h ↦ ⟨0, h.trans (by norm_num)⟩
-  obtain ⟨C, hC⟩ := sum_thetaTailIntegral_le j hδ
+  obtain ⟨C, hC⟩ := sum_thetaTailIntegral_le j hε
   refine ⟨C, ?_⟩
-  filter_upwards [eventually_rpow_lt_thetaTailIntegral j hδ H, eventually_gt_atTop 0]
+  filter_upwards [eventually_rpow_lt_thetaTailIntegral j hα hβ h_decay H, eventually_gt_atTop 0]
     with T h_lines hT
   let F (v : ℕ) : ℝ := thetaTailIntegral j (fun n : ℕ ↦ ψ n * J(-v | ordCompl[2] n)) T
   have h_large (d : ℕ) (h8 : d % 8 = 7) (hM : M.Coprime d) (hd : M * d ≤ T ^ 2)
-      (h_twist : IsPrimeWithTwistZero ψ (1 / 2 + 9 * δ) H d) : T ^ (2 * δ) < F d := by
+      (h_twist : IsPrimeWithTwistZero ψ β H d) : T ^ α < F d := by
     have : Fact d.Prime := h_twist.prime
     obtain ⟨s, h_re, h_im, h_zero⟩ := h_twist.exists_zero
     have h_par : quadTwist ψ d (-1) = (-1) ^ j.val := by
@@ -702,19 +700,19 @@ lemma exists_card_zero_quadTwist_le {δ : ℝ} (hδ : 0 < δ) (H : ℝ) {M : ℕ
         h_par (mod_cast hd) h_re h_im h_zero
   have hF (v : ℕ) : 0 ≤ F v := setIntegral_nonneg measurableSet_Ioi fun u hu ↦
     div_nonneg (by positivity) ((inv_pos.2 hT).trans hu).le
-  -- The number of these primes times `T ^ (2 δ)` is at most `∑ F v`.
-  refine le_of_mul_le_mul_right ?_ (rpow_pos_of_pos hT (2 * δ))
+  -- The number of these primes times `T ^ α` is at most `∑ F v`.
+  refine le_of_mul_le_mul_right ?_ (rpow_pos_of_pos hT α)
   let S : Finset ℕ := {d ∈ Ioc 0 ⌊T ^ 2⌋₊ | d % 8 = 7 ∧ M.Coprime d ∧ M * d ≤ T ^ 2 ∧
-    IsPrimeWithTwistZero ψ (1 / 2 + 9 * δ) H d}
-  calc #S * T ^ (2 * δ)
+    IsPrimeWithTwistZero ψ β H d}
+  calc #S * T ^ α
     _ ≤ ∑ d ∈ S, F d := by
       simpa using card_nsmul_le_sum S F _ fun d hd_mem ↦
         have ⟨_, h8, hM, hd, h_twist⟩ := mem_filter.1 hd_mem
         (h_large d h8 hM hd h_twist).le
     _ ≤ ∑ v ∈ Ioc 0 ⌊T ^ 2⌋₊, F v :=
       sum_le_sum_of_subset_of_nonneg (filter_subset _ _) fun v _ _ ↦ hF v
-    _ ≤ C * T ^ (2 + δ) := hC T hT _ fun n ↦ ψ.norm_le_one n
-    _ = C * T ^ (2 - δ) * T ^ (2 * δ) := by
+    _ ≤ C * T ^ (2 + ε) := hC T hT _ fun n ↦ ψ.norm_le_one n
+    _ = C * T ^ (2 + ε - α) * T ^ α := by
       rw [mul_assoc, ← rpow_add hT]
       ring_nf
 
@@ -724,37 +722,50 @@ def IsBadPrime (a : ZMod N) (β H : ℝ) (d : ℕ) : Prop :=
   (d : ZMod N) = a ∧ ∃ ξ : DirichletCharacter ℂ N, IsPrimeWithTwistZero ξ β H d
 
 open scoped Classical in
-/-- **Bad primes are rare.** Let `β = 1/2 + 9 δ` with `δ > 0`, and let `a` be a class modulo `N` all
-of whose primes are `≡ 7 mod 8` and prime to `N` (this holds if `8 ∣ N` and `a ≡ 7 mod 8` is prime
-to `N`). The number of primes `d ≤ X` of the class that are bad (`IsBadPrime`: some `L(s, ξ (·/d))`
-with `ξ` modulo `N` has a zero with `re s ≥ β`, `|im s| ≤ H`) is `O(X ^ (1 - δ / 2))`. -/
-lemma zero_density_quadTwist {N : ℕ} [NeZero N] {δ : ℝ} (hδ : 0 < δ) (H : ℝ) {a : ZMod N}
+/-- **Bad primes are rare.** For `1/2 < β < 1`, the number of primes in an admissible class
+up to `X` for which some Dirichlet twist has a zero with `β ≤ re s`, `|im s| ≤ H` is
+`O(X ^ (1 - γ))` for every `0 < γ < (β - 1/2) / (4 (2 - β))`. In particular `β = 3/4`
+permits every `γ < 1/20` in this range, including `γ = 1/30`. -/
+lemma zero_density_quadTwist {N : ℕ} [NeZero N] {β γ : ℝ} (hβ : 1 / 2 < β) (hβ_lt : β < 1)
+    (hγ : 0 < γ) (hγ_lt : γ < (β - 1 / 2) / (4 * (2 - β))) (H : ℝ) {a : ZMod N}
     (h_class : ∀ d : ℕ, d.Prime → (d : ZMod N) = a → d % 8 = 7 ∧ N.Coprime d) :
-    (fun X : ℕ ↦ (#{d ∈ Ioc 0 X | IsBadPrime a (1 / 2 + 9 * δ) H d} : ℝ)) =O[atTop]
-      fun X : ℕ ↦ (X : ℝ) ^ (1 - δ / 2) := by
+    (fun X : ℕ ↦ (#{d ∈ Ioc 0 X | IsBadPrime a β H d} : ℝ)) =O[atTop]
+      fun X : ℕ ↦ (X : ℝ) ^ (1 - γ) := by
   -- Take `T² = N X`, pass from each `ξ` to the primitive character that induces it, and sum.
   have hN : (0 : ℝ) < N := Nat.cast_pos.2 (NeZero.pos N)
   choose M hMN ψ hM hψ h_induced using
     fun ξ : DirichletCharacter ℂ N ↦ exists_isPrimitive_changeLevel_eq ξ
   let S (ξ : DirichletCharacter ℂ N) (T : ℝ) : Finset ℕ :=
     {d ∈ Ioc 0 ⌊T ^ 2⌋₊ | d % 8 = 7 ∧ (M ξ).Coprime d ∧ M ξ * d ≤ T ^ 2 ∧
-      IsPrimeWithTwistZero (ψ ξ) (1 / 2 + 9 * δ) H d}
-  choose C hC using fun ξ ↦ exists_card_zero_quadTwist_le hδ H (hψ ξ)
+      IsPrimeWithTwistZero (ψ ξ) β H d}
+  -- Choose a tail threshold that allows both decay on the strip and a positive moment loss.
+  have h_width : 0 < 2 - β := by linarith
+  have h_room : 2 * γ < (β - 1 / 2) / (2 * (2 - β)) := by
+    apply (lt_div_iff₀ (by positivity)).2
+    linarith only [(lt_div_iff₀ (by positivity)).1 hγ_lt]
+  obtain ⟨α, h_low, h_high⟩ := exists_between h_room
+  have h_decay : 2 * α * (2 - β) < β - 1 / 2 := by
+    linarith only [(lt_div_iff₀ (by positivity)).1 h_high]
+  have h_count (ξ : DirichletCharacter ℂ N) :
+      ∃ C : ℝ, ∀ᶠ T : ℝ in atTop, (#(S ξ T) : ℝ) ≤ C * T ^ (2 - 2 * γ) := by
+    simpa only [S, show 2 + (α - 2 * γ) - α = 2 - 2 * γ by ring] using
+      exists_card_zero_quadTwist_le (by linarith : 0 < α) hβ h_decay (sub_pos.mpr h_low) H (hψ ξ)
+  choose C hC using h_count
   have h_tendsto : Tendsto (fun X : ℕ ↦ √(N * X)) atTop atTop :=
     tendsto_sqrt_atTop.comp (tendsto_natCast_atTop_atTop.const_mul_atTop hN)
-  refine .of_bound ((∑ ξ, C ξ) * N ^ (1 - δ / 2)) ?_
+  refine .of_bound ((∑ ξ, C ξ) * N ^ (1 - γ)) ?_
   -- The bounds for all `ξ` hold at `T = √(N X)` once `X` is large.
   filter_upwards [h_tendsto.eventually (eventually_all.2 hC)] with X hX
   set T : ℝ := √(N * X)
   have hT : T ^ 2 = N * X := sq_sqrt (by positivity)
-  have h_pow : T ^ (2 - δ) = N ^ (1 - δ / 2) * X ^ (1 - δ / 2) := by
+  have h_pow : T ^ (2 - 2 * γ) = N ^ (1 - γ) * X ^ (1 - γ) := by
     rw [← mul_rpow hN.le X.cast_nonneg, ← hT, ← rpow_natCast_mul (sqrt_nonneg _), Nat.cast_ofNat,
-      mul_one_sub, mul_div_cancel₀ δ two_ne_zero]
-  suffices h_subset : {d ∈ Ioc 0 X | IsBadPrime a (1 / 2 + 9 * δ) H d} ⊆ univ.biUnion (S · T) by
+      mul_one_sub]
+  suffices h_subset : {d ∈ Ioc 0 X | IsBadPrime a β H d} ⊆ univ.biUnion (S · T) by
     rw [Real.norm_natCast, norm_of_nonneg (by positivity), mul_assoc, ← h_pow, sum_mul]
-    calc (#{d ∈ Ioc 0 X | IsBadPrime a (1 / 2 + 9 * δ) H d} : ℝ)
+    calc (#{d ∈ Ioc 0 X | IsBadPrime a β H d} : ℝ)
       _ ≤ ∑ ξ, (#(S ξ T) : ℝ) := mod_cast (card_le_card h_subset).trans card_biUnion_le
-      _ ≤ ∑ ξ, C ξ * T ^ (2 - δ) := sum_le_sum fun ξ _ ↦ hX ξ
+      _ ≤ ∑ ξ, C ξ * T ^ (2 - 2 * γ) := sum_le_sum fun ξ _ ↦ hX ξ
   intro d hd
   obtain ⟨hd_mem, hd_class, ξ, h_twist⟩ := mem_filter.1 hd
   have hd_prime : Fact d.Prime := h_twist.prime
@@ -796,29 +807,32 @@ lemma exists_entireL_quadTwist_ne_zero {N : ℕ} [NeZero N] {β : ℝ} (H : ℝ)
   wlog hβ_lt : β < 1 generalizing β with h_lt_one
   · obtain ⟨d, hd, h_ne⟩ := h_lt_one (β := 3 / 4) (by norm_num) (by norm_num)
     exact ⟨d, hd, fun ξ s h_re ↦ h_ne ξ s (by linarith)⟩
-  obtain ⟨δ, rfl⟩ : ∃ δ, β = 1 / 2 + 9 * δ := ⟨(β - 1 / 2) / 9, by ring⟩
-  have hδ : 0 < δ := by linarith
-  -- If every prime of the class were bad, only `O(X ^ (1 - δ / 2))` of them would be at most `X`,
-  -- so `∑ log d / d` over the class would converge.
+  let γ := (β - 1 / 2) / (8 * (2 - β))
+  have h_width : 0 < 2 - β := by linarith
+  have hγ : 0 < γ := div_pos (sub_pos.mpr hβ) (by positivity)
+  have hγ_le : γ ≤ 1 := (div_le_one (by positivity)).2 (by linarith)
+  have hγ_lt : γ < (β - 1 / 2) / (4 * (2 - β)) :=
+    div_lt_div_of_pos_left (sub_pos.mpr hβ) (by positivity) (by linarith)
+  -- A positive power saving makes the bad primes' total logarithmic weight converge.
   by_contra! h_all
   have h_bad (d : Primes) (hd_class : ((d : ℕ) : ZMod N) = a) :
-      IsBadPrime a (1 / 2 + 9 * δ) H d := by
+      IsBadPrime a β H d := by
     obtain ⟨ξ, s, h_re, h_im, h_zero⟩ := h_all d hd_class
     obtain ⟨h8, h_coprime⟩ := h_class d hd_class
     rw [entireL, ite_eq_right (quadTwist_ne_one ξ _ (by omega) h_coprime)] at h_zero
     exact ⟨hd_class, ξ, ⟨s, h_re, h_im, h_zero⟩⟩
   let f (n : ℕ) : ℂ := if n.Prime ∧ n = a then 1 else 0
-  have h_count : (fun X ↦ ∑ n ∈ Icc 1 X, ‖f n‖) =O[atTop] fun X : ℕ ↦ (X : ℝ) ^ (1 - δ / 2) := by
+  have h_count : (fun X ↦ ∑ n ∈ Icc 1 X, ‖f n‖) =O[atTop] fun X : ℕ ↦ (X : ℝ) ^ (1 - γ) := by
     refine .trans (.of_norm_le fun X ↦ ?_)
-      (zero_density_quadTwist hδ H fun d hd ↦ h_class ⟨d, hd⟩)
+      (zero_density_quadTwist hβ hβ_lt hγ hγ_lt H fun d hd ↦ h_class ⟨d, hd⟩)
     simp only [f, apply_ite norm, norm_one, norm_zero, sum_boole, Real.norm_natCast, Nat.cast_le]
     -- Every prime of the class is bad, so it is counted by `zero_density_quadTwist`.
     refine card_le_card fun d hd ↦ ?_
     obtain ⟨hd_mem, hd_prime, hd_class⟩ := mem_filter.1 hd
     exact mem_filter.2 ⟨by simpa [Nat.one_le_iff_ne_zero, Nat.pos_iff_ne_zero] using hd_mem,
       h_bad ⟨d, hd_prime⟩ hd_class⟩
-  have h_conv : LSeriesSummable f (1 - δ / 2 / 2) :=
-    LSeriesSummable_of_sum_norm_bigO h_count (by linarith) (by simpa)
+  have h_conv : LSeriesSummable f (1 - γ / 2) :=
+    LSeriesSummable_of_sum_norm_bigO h_count (sub_nonneg.mpr hγ_le) (by simp; linarith)
   have h_log : LSeriesSummable (logMul f) 1 := LSeriesSummable_logMul_of_lt_re
     (h_conv.abscissaOfAbsConv_le.trans_lt (mod_cast by simpa))
   -- The terms `Λ(p) / p` of the divergent series are those of this one, as `Λ(p) = log p`.
