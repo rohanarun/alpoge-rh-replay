@@ -94,12 +94,29 @@ def flipCoords : CoordChange E (.id ℂ) (homSigns t s) (homSigns s t') where
     simp [adelicSum, val_scaleIdele_fst, val_scaleIdele_snd, ← mul_assoc,
       starCoordEquiv, val_flipIdele, _root_.funext_iff, Prod.ext_iff]
     grind [star_mul', star_one, α.mul_inv]
-  beta_realEquiv := by
-    -- Conjugation exchanges the two sums in the exponent, and `t' = -t` changes their signs.
-    simp [ht, realHeisenberg, signMatrix, dotProduct, Finset.sum_comm (γ := a), ← mul_assoc,
-      ← cast_mul,
-      mul_comm, pairSign, mulVec_diagonal, sum_prod_type, starCoordEquiv]
-    grind
+  beta_realEquiv x y := by
+    let e : (InfinitePlace E × (n × a)) ≃ (InfinitePlace E × (a × n)) :=
+      .prodCongr 1 (.prodComm ..)
+    let u (i : InfinitePlace E × (n × a)) : ℂˣ :=
+      .map (castRingHom ℂ) (homSigns t s i.2)
+    let A := starCoordEquiv e u
+    -- Conjugation swaps the two vectors, and the opposite sign changes the pairing's sign.
+    have h_pair (x y : InfinitePlace E × (a × n) → ℂ) :
+        star (A y) ⬝ᵥ signMatrix (realSigns E (homSigns t s)) *ᵥ A x =
+          -(star x ⬝ᵥ signMatrix (realSigns E (homSigns s t')) *ᵥ y) := by
+      simp only [dotProduct, signMatrix, mulVec_diagonal, Pi.star_apply]
+      rw [← Finset.sum_neg_distrib, ← e.sum_comp]
+      refine Finset.sum_congr rfl fun i _ ↦ ?_
+      have h_sign : homSigns s t' (e i).2 = -homSigns t s i.2 := by
+        simp [e, ht, pairSign, mul_comm]
+      change star ((u i : ℂ) * star (y (e i))) * ((homSigns t s i.2 : ℂ) *
+        ((u i : ℂ) * star (x (e i)))) =
+        -(star (x (e i)) * ((homSigns s t' (e i).2 : ℂ) * y (e i)))
+      rw [h_sign]
+      rcases Int.units_eq_one_or (homSigns t s i.2) with h | h <;>
+        simp [u, h, mul_comm]
+    change (RingHom.id ℂ) ((realHeisenberg (realSigns E (homSigns t s))).β (A x) (A y)) = _
+    simp only [RingHom.id_apply, realHeisenberg, h_pair, neg_sub_neg]
   vac_realEquiv := by
     simp [dotProduct, Finset.sum_comm (γ := a), ← mul_assoc, ← cast_mul, mul_comm, realVac,
       starCoordEquiv, sum_prod_type]
