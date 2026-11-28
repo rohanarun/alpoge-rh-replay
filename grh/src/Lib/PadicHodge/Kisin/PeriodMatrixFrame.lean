@@ -230,19 +230,25 @@ lemma not_dvd_det_of_frobenius {Q ρ : Matrix d d Ainf} {B : Matrix d d c.S}
   have hNCs (k : d) : ψ (((N * C) *ᵥ s) k) = 0 := by
     have hdvd : thetaPhiInv (M + n) (p : c.S).val ∣
         thetaPhiInv (M + n) ((Q *ᵥ fun i : d ↦ (C *ᵥ s) i) (τ k)) := by
-      simpa [OFlat, ← eq_zero_iff_dvd, mk_thetaPhiInv_eq_coeff, mulVec_eq_sum, hs,
-        ← iterate_frobenius, hR_apply] using congrArg (coeff (M + n)) (congrFun hCa (τ k))
+      simpa only [SubringClass.coe_natCast, map_natCast, mulVec, dotProduct,
+        AddSubmonoidClass.coe_finsetSum, MulMemClass.coe_mul, map_sum, map_mul, ← eq_zero_iff_dvd,
+        mk_thetaPhiInv_eq_coeff, OFlat, WittVector.constantCoeff_apply, map_apply, hR_apply,
+        Pi.pow_apply, ← iterate_frobenius, coeff_iterate_frobenius, hs, Pi.zero_apply, map_zero]
+        using congrArg (coeff (M + n)) (congrFun hCa (τ k))
     obtain ⟨x, y, hx⟩ :
         ∃ x : c.S,
           c.frobE (M + n) ∣ c.adicBasis.coord (σ k) ((Q *ᵥ fun i : d ↦ (C *ᵥ s) i) (τ k)) - p * x :=
       c.exists_frobE_dvd_sub_of_dvd _ (c.adicBasis.coord (σ k)) p _ hdvd
     have hψ_apply (x : c.S) : ψ x = coeff (M + n) (π x.val) := rfl
     rw [hψ_apply, ← mulVec_mulVec, hNQ, ← mk_thetaPhiInv_eq_coeff, eq_add_of_sub_eq hx]
-    simp [CharP.cast_eq_zero, frobE_dvd_iff.mp dvd_rfl]
+    simp only [AddMemClass.coe_add, MulMemClass.coe_mul, SubringClass.coe_natCast, map_add,
+      map_mul, frobE_dvd_iff.mp dvd_rfl, zero_mul, map_natCast, zero_add, CharP.cast_eq_zero]
   -- As `ψ (s ν) = 1`, it kills `det (N C)`, hence `K ^ p ^ n`, whose image is component `M` of `K`.
   have hψ_s : ψ (s ν) = 1 := by simpa [ψ, hR_apply, haν] using (hs ν).symm
   have hdet : ψ (N * C).det = 0 := ψ.map_det_eq_zero_of_map_mulVec_eq_zero hNCs hψ_s
-  have h_NC : coeff (M + n) (R N.det) * coeff (M + n) (R C.det) = 0 := by simpa [ψ] using hdet
+  have h_NC : coeff (M + n) (R N.det) * coeff (M + n) (R C.det) = 0 := by
+    rw [← (coeff (M + n) : OFlat →+* ModP OC p).map_mul, ← R.map_mul, ← det_mul]
+    exact hdet
   have h_zero : coeff (M + n) (K * R C.det) = 0 := by simp [K, mul_assoc, h_NC]
   have h_pow : coeff (M + n) (K ^ p ^ n) = coeff M K := by simp [OFlat, ← iterate_frobenius]
   have h_map : coeff (M + n) (K * R C.det) ∣ coeff (M + n) (K ^ p ^ n) := map_dvd _ hCK
