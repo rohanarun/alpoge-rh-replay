@@ -251,7 +251,9 @@ lemma formRep_lowerChainUpTo_eq_lowerChainUpTo_smul (ϑ : D.TameChar) {j : ℕ} 
       subst hk
       exact funext fun x ↦ Units.ext (h_first x)
     rw [Finset.prod_eq_one fun x _ ↦ prod_univ_zero _, one_smul]
-    exact (apply_liftResidue_eq (W := D.FormY 0) y k h_red).symm
+    exact (apply_liftResidue_eq
+      (π := (D.spaceY 0).formRep (typeKernel D.paramW (D.signsY 0)))
+      (w := D.chosenPlace) (H := ⊥) (χ := 1) y k h_red).symm
   | succ j ih =>
     -- The upper left block `A x` of `g x` has the same diagonal blocks as `g x`, except the last.
     let ι : Type := (D.levelPlaces ϑ).ChosenIndex ⊕ (D.levelPlaces ϑ).TwistIndex
