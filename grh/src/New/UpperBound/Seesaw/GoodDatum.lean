@@ -93,7 +93,11 @@ lemma flipScale_mul_divStar_ideleA :
   -- The factors `α` and `ᾱ` cancel.
   have h_units : star WeilData.α * WeilData.α⁻¹ * (D.ideleA * star D.ideleA⁻¹) =
       star D.chosenIdele⁻¹ * D.chosenIdele := by
-    simp [ideleA, div_eq_mul_inv, star_mul', mul_comm, mul_left_comm]
+    simp only [ideleA, div_eq_mul_inv, _root_.mul_inv_rev, inv_inv, star_mul', star_star, star_inv]
+    calc
+      _ = (star WeilData.α * (star WeilData.α)⁻¹) * (WeilData.α⁻¹ * WeilData.α) *
+          ((star D.chosenIdele)⁻¹ * D.chosenIdele) := by ac_rfl
+      _ = _ := by simp
   have h_adeles : (↑(star WeilData.α * WeilData.α⁻¹ : (𝔸f D.E)ˣ) : 𝔸f D.E) * divStar D.ideleA =
       D.chosenRatio := by
     rw [coe_divStar, ← Units.coe_star, ← Units.val_mul, ← Units.val_mul, h_units, Units.val_mul,
