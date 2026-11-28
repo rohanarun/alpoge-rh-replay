@@ -288,6 +288,8 @@ lemma exists_finite_groupRing_quotient [IsTopologicalGroup G] [Finite κ] {τ : 
   -- extension of `ℚ_[p]`. So the image lies in the product of the finite modules
   -- `P s * M(O s) * (P s)⁻¹`.
   choose O ν P hP using fun s ↦ (eventually_exists_isLatticeIn (hτ s)).exists
+  let : Algebra ℤ_[p] Φ.range := Φ.range.algebra
+  let : Module ℤ_[p] Φ.range := Φ.range.algebra.toModule
   have h_finite : Module.Finite ℤ_[p] Φ.range := by
     let L (s : κ) : Matrix (τ s).Index (τ s).Index (O s) →ₗ[ℤ_[p]]
         Matrix (τ s).Index (τ s).Index (PadicAlgCl p) :=
@@ -295,13 +297,14 @@ lemma exists_finite_groupRing_quotient [IsTopologicalGroup G] [Finite κ] {τ : 
     refine Finite.of_fg ((fg_pi fun s ↦ fg_range (L s)).of_le (S := Φ.range.toSubmodule) ?_)
     rintro _ ⟨y, rfl⟩ s -
     refine ⟨y.lift _ _ _ (ν s), ?_⟩
-    have h_conj (g : G) :
-        (ν s g).map Subtype.val = (P s).val⁻¹ * (τ s).rep g * (P s).val := by
-      simpa using (hP s g).symm
-    simp [L, Φ, lift_apply, Finsupp.sum, h_conj, mul_assoc]
+    have hL (g : G) : L s (ν s g) = ((τ s).rep g).val := by
+      change (P s).val * (ν s g).map (O s).val.val * (P s).inv = _
+      rw [← hP s g]
+      change ((P s) * ((P s)⁻¹ * (τ s).rep g * (P s)) * (P s)⁻¹).val = _
+      exact congrArg (fun U : GL (τ s).Index (PadicAlgCl p) ↦ U.val) (by group)
+    simp only [lift_apply, Finsupp.sum, map_sum, map_smul, hL, AlgHom.toRingHom_eq_coe,
+      RingHom.coe_coe, AlgHom.pi_apply, MonoidHom.coe_comp, Function.comp_apply, Units.coeHom_apply, Φ]
   -- It is torsion free, being inside matrices over `Q̄_p`, hence free.
-  let : Algebra ℤ_[p] Φ.range := Φ.range.algebra
-  let : Module ℤ_[p] Φ.range := Φ.range.algebra.toModule
   have h_comm : SMulCommClass Φ.range ℤ_[p] Φ.range := ⟨fun x r y ↦ mul_smul_comm r x y⟩
   have h_tf : IsTorsionFree ℤ_[p] Φ.range :=
     have : IsTorsionFree ℤ_[p] (∀ s, Matrix (τ s).Index (τ s).Index (PadicAlgCl p)) :=
