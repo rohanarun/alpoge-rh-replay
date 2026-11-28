@@ -149,13 +149,17 @@ lemma exists_unitary_mul_unit {b : 𝔸f E} {R : Set (FinPlace E)} (hR : R.IsCon
     sub_mem (add_mem hy h_part) (mul_mem (star_mem_Ô h_part) hy)
   have h_norm (y : 𝔸f E) : cut y * star (cut y) = y * star y := by
     simp only [cut, star_sub, star_add, star_mul', star_star, star_one]
-    grind -- uses that `e` and `star e` are orthogonal idempotents
+    linear_combination -((1 - y) ^ 2 * star y) * h_idem
+      - ((1 - star y) ^ 2 * y) * h_idem_star
+      + ((1 - y) * (1 - star y) * (1 + y * star y)) * h_disj
   have h_mul (y z : 𝔸f E) : cut y * cut z = cut (y * z) := by
     simp only [cut, star_sub, star_mul', star_one]
-    grind
+    linear_combination ((1 - y) * (1 - z)) * h_idem
+      + ((1 - star y) * (1 - star z) * y * z) * h_idem_star
+      - ((1 - y) * (1 - star z) * z + (1 - star y) * y * (1 - z)) * h_disj
   have h_cut_on (y : 𝔸f E) : e * cut y = e := by
-    simp only [cut, star_mul']
-    grind
+    simp only [cut, star_mul', star_sub, star_one]
+    linear_combination (1 - y) * h_idem - ((1 - star y) * y) * h_disj
   have h_inv : cut x.val * cut x⁻¹.val = 1 := by
     simp only [h_mul, ← Subring.coe_mul, x.mul_inv, Subring.coe_one]
     simp [cut]
