@@ -154,18 +154,21 @@ lemma smul_latticeMinus_le_of_map_latticePlus {Y : Grading V N X s} {Y' : Gradin
     (h_shift_le : (star q / a).val •
       (Y.latticePlus x).map ((Y.stringMapFin Y').restrictScalars (Ô E)) ≤ Y'.latticeMinus x') :
     star q.val ^ (k + 1) • Y'.latticeMinus 1 ≤ Y'.latticeMinus x' := by
-  refine smul_le_iff_forall.2 fun y hy ↦ ?_
+  refine (smul_le_iff_forall (c := star q.val ^ (k + 1))
+    (A := Y'.latticeMinus 1) (B := Y'.latticeMinus x')).2 fun y hy ↦ ?_
   obtain ⟨z, hz, hzy⟩ : ∃ z ∈ Y.latticePlus 1, Y.stringMapFin Y' z = a.val • y :=
     h_shift_one_eq.ge (Submodule.smul_mem_pointwise_smul y a.val _ hy)
   -- The dual `q̄ ^ k Λ⁺ ⊆ Λ'⁺` of the upper bound puts `q̄ ^ k z` into `Λ'⁺`.
   have h_mem : star (q.val ^ k) • z ∈ Y.latticePlus x :=
-    smul_le_iff_forall.1 (star_smul_latticePlus_le h_upper) z hz
+    (smul_le_iff_forall (c := star (q.val ^ k))).1
+      (star_smul_latticePlus_le (Y := Y) (x := x) (x' := 1) (c := q.val ^ k) h_upper) z hz
   have h_eq : star q.val ^ (k + 1) • y =
       (star q / a).val • Y.stringMapFin Y' (star (q.val ^ k) • z) := by
     rw [map_smul, hzy, smul_smul, smul_smul, mul_right_comm, ← Units.val_mul, div_mul_cancel,
       Units.coe_star, star_pow, pow_succ']
   rw [h_eq]
-  exact smul_le_iff_forall.1 h_shift_le _ (Submodule.mem_map_of_mem h_mem)
+  exact (smul_le_iff_forall (c := (star q / a).val)).1 h_shift_le _
+    (Submodule.mem_map_of_mem (f := (Y.stringMapFin Y').restrictScalars (Ô E)) h_mem)
 
 omit [Fintype X] in
 /-- Write `Λ±` and `Λ'±` for the projection to `X^⊥` (`+`) and the intersection with it (`-`) of the
