@@ -434,24 +434,28 @@ maximal ideal `c.maxIdeal = (p, z)` of S, with an index `i` whose coordinate for
 `d.coord i : A_inf → S` is the identity on S. -/
 lemma exists_adicBasis_coord_eq_self :
     ∃ d : AdicBasis c.maxIdeal Ainf, ∃ i : d.Index, ∀ s : c.S, d.coord i s = s := by
-  -- `1` is independent modulo `maxIdeal`, since `z` is not a unit. By `exists_adicBasis` such a
-  -- family extends to a topological basis once `p, z` is a regular sequence on `Ainf`.
-  have indep : LinearIndepOn (c.S ⧸ c.maxIdeal) (c.maxIdeal • ⊤ : Submodule c.S Ainf).mkQ {1} := by
-    let field_quot : Field (c.S ⧸ c.maxIdeal) := Quotient.field c.maxIdeal
-    -- For the one vector `1` this says that `1 ∉ (p, z) Ainf`; otherwise `z` would be a unit.
-    have h_one : (1 : Ainf) ∉ (c.maxIdeal • ⊤ : Submodule c.S Ainf) := by
-      simpa [mem_span_pair_iff, ← isUnit_iff_dvd_one, map_span, image_pair,
-        isUnit_iff_isUnit_constantCoeff, z] using c.not_isUnit_z
-    rw [linearIndepOn_iff_notMem_span]
-    intro i hi
-    simpa [mem_singleton_iff.mp hi, Submodule.Quotient.mk_eq_zero] using h_one
   -- `z` is regular modulo `p`, because `p` is prime and does not divide `z`.
   have z_reg (a b : Ainf) (h_eq : c.z • a = (p : c.S) • b) : ∃ a' : Ainf, a = (p : c.S) • a' :=
     (prime_p.dvd_or_dvd ⟨b, h_eq⟩).resolve_left c.not_p_dvd_z
   -- `p` is not a zero divisor on `Ainf`.
   have hp_smul : ∀ a : Ainf, (p : c.S) • a = 0 → (p : c.S) = 0 ∨ a = 0 := by simp
-  obtain ⟨d, hd⟩ : ∃ d : AdicBasis c.maxIdeal Ainf, {(1 : Ainf)} ⊆ Set.range d.b :=
-    exists_adicBasis rfl z_reg {1} indep hp_smul
+  obtain ⟨d, hd⟩ : ∃ d : AdicBasis c.maxIdeal Ainf, {(1 : Ainf)} ⊆ Set.range d.b := by
+    refine exists_adicBasis (I := c.maxIdeal) rfl z_reg {1} ?_ hp_smul
+    let field_quot : Field (c.S ⧸ c.maxIdeal) := Quotient.field c.maxIdeal
+    rw [linearIndepOn_iff_notMem_span]
+    intro i hi
+    obtain rfl := mem_singleton_iff.mp hi
+    -- The image of `1` lies outside the span of the empty family.
+    rw [sdiff_self, image_empty, Submodule.span_empty, Submodule.mem_bot,
+      Submodule.mkQ_apply, Submodule.Quotient.mk_eq_zero]
+    have h_extended := c.maxIdeal_pow_smul_top_eq_restrictScalars 1
+    simp only [pow_one] at h_extended
+    rw [h_extended]
+    change (1 : Ainf) ∉ (span {(p : Ainf), c.seriesMap X} : Ideal Ainf)
+    intro h
+    have h_dvd : constantCoeff (c.seriesMap X) ∣ 1 := by
+      simpa only [constantCoeff_apply, one_coeff_zero] using mem_span_pair_iff.mp h
+    exact c.not_isUnit_z (isUnit_iff_isUnit_constantCoeff.mpr (isUnit_iff_dvd_one.mpr h_dvd))
   obtain ⟨i, hi⟩ : ∃ i : d.Index, d.b i = 1 := hd (mem_singleton 1)
   refine ⟨d, i, fun s ↦ ?_⟩
   -- `s` is the finite combination with the single coefficient `s` at `i`.
