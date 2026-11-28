@@ -95,7 +95,11 @@ def regular(path, maximum):
         info = os.fstat(handle.fileno())
         if not stat.S_ISREG(info.st_mode) or info.st_size > maximum:
             raise ValueError(f"expected a bounded regular file: {path}")
-        return handle.read(maximum + 1)
+        # BufferedReader allocates for the requested size, even for a much smaller file.
+        data = handle.read(info.st_size + 1)
+        if len(data) != info.st_size:
+            raise ValueError(f"size changed while reading: {path}")
+        return data
 
 
 def git(root, *args):
