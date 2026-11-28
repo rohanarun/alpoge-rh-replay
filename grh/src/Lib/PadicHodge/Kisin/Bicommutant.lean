@@ -330,10 +330,7 @@ lemma eventually_approx_sum_extendedCoord (y : BPlus) (m : ℕ) :
       (p : BPlus) ^ k * y = ainfToBPlus a + (p : BPlus) ^ (k + m) * ainfToBPlus mu ^ 0 * w :=
     y.exists_Ainf_approx m 0
   -- The remainder lies in `(p, z) ^ N ⊆ (p, ξ) ^ (k + m)`, so `p ^ (k + m)` divides it in `Amax`.
-  obtain ⟨N, hN⟩ : ∃ N : ℕ,
-      c.maxIdeal ^ N • (⊤ : Submodule c.S Ainf) ≤
-        (span {(p : Ainf), xi} ^ (k + m)).restrictScalars c.S :=
-    c.exists_maxIdeal_pow_le (k + m)
+  obtain ⟨N, hN⟩ := c.exists_maxIdeal_pow_le (k + m)
   filter_upwards [c.adicBasis.eventually_sub_sum_mem a N] with F hF
   obtain ⟨b, hb⟩ : (p : Amax) ^ (k + m) ∣
       algebraMap Ainf Amax (a - ∑ i ∈ F, c.adicBasis.coord i a • c.adicBasis.b i) :=
@@ -346,15 +343,22 @@ lemma eventually_approx_sum_extendedCoord (y : BPlus) (m : ℕ) :
   -- Apply `T = 1 - ∑ b i • extendedCoord i` to `hy`, insert `hb` for the part of `a`, cancel
   -- `p ^ k`.
   let T : BPlus →ₗ[c.S] BPlus := 1 - ∑ i ∈ F, c.adicBasis.b i • c.extendedCoord i
-  have h_applied : T ((p : BPlus) ^ k * y) - algebraMap Amax BPlus ((p : Amax) ^ (k + m) * b) =
-      T (ainfToBPlus a + (p : BPlus) ^ (k + m) * ainfToBPlus mu ^ 0 * w) -
-        algebraMap Amax BPlus
-          (algebraMap Ainf Amax (a - ∑ i ∈ F, c.adicBasis.coord i a • c.adicBasis.b i)) := by
-    rw [hy, hb]
-  -- `↓commutes`: without it the products `b i * coord i a` are left in two orders.
-  simpa [T, ← mul_add, map_add, ← algebraMap_apply, ↓commutes (R := c.S), sub_eq_iff_eq_add,
-    smul_def, map_p_pow_mul, pow_add, mul_assoc, extendToBPlus_ainfToBPlus, IsUnit.ne_zero] using
-    h_applied
+  have h_T (z : BPlus) : T z = z - ∑ i ∈ F, c.adicBasis.b i • c.extendedCoord i z := by
+    simp only [T, LinearMap.sub_apply, one_apply_eq_self, LinearMap.coe_sum, Finset.sum_apply,
+      LinearMap.smul_apply]
+  have h_T_ainf : T (ainfToBPlus a) =
+      algebraMap Amax BPlus
+        (algebraMap Ainf Amax (a - ∑ i ∈ F, c.adicBasis.coord i a • c.adicBasis.b i)) := by
+    change T (ainfToBPlus a) = ainfToBPlus (a - ∑ i ∈ F, c.adicBasis.coord i a • c.adicBasis.b i)
+    simp only [h_T, map_sub, map_sum, extendToBPlus_ainfToBPlus, LinearMap.coe_comp,
+      Function.comp_apply, linearMap_apply, smul_def, Subalgebra.algebraMap_apply, map_mul,
+      ↓commutes (R := c.S)]
+  have h_T_w : T w = w - ∑ i ∈ F, ainfToBPlus (c.adicBasis.b i) * c.extendedCoord i w := by
+    simpa only [smul_def] using h_T w
+  rw [← h_T y, ← h_T_w]
+  apply mul_left_cancel₀ (isUnit_p.pow k).ne_zero
+  rw [← map_p_pow_mul T k y, hy, pow_zero, mul_one, map_add, map_p_pow_mul, h_T_ainf, hb,
+    map_mul, map_pow, map_natCast, ← mul_assoc, ← pow_add, mul_add, add_comm]
 
 /-- The Frobenius of B^+ maps S_B = `c.bicommutant` into itself. -/
 lemma frobEnd_mem_bicommutant {y : BPlus} (hy : y ∈ c.bicommutant) :
