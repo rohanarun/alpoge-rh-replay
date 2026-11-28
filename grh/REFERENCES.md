@@ -2,9 +2,9 @@
 
 Only some of the citations were compared with their sources. The table lists the 228 citations that were part of the comparison. A place is a theorem, section or page number; places that were looked for and could not be confirmed were dropped. At second hand means from a table of contents, a catalogue or a citation in another work.
 
-- compared, place confirmed: 66
+- compared, place confirmed: 67
 - not compared, no place given: 8
-- place confirmed at second hand: 35
+- place confirmed at second hand: 34
 - work found, no place given: 119
 
 The citations of 122 other files were not part of this check, nor were further citations in the files below that stand outside the checked paragraphs; 68 of these files give places. They are listed at the end.
@@ -61,7 +61,7 @@ The citations of 122 other files were not part of this check, nor were further c
 | D. Cox, Primes of the form x²+ny² (1989) | place confirmed at second hand | `Lib/CM/ChowlaSelberg` |
 | D. R. Heath-Brown, A mean value estimate for real character sums, Acta Arith. 72 (1995) | work found, no place given | `Lib/Analytic/QuadraticTwist` |
 | DLMF, Chapter 20 | place confirmed at second hand | `Lib/CM/Integrality/Doubling` |
-| DLMF, Chapter 23 | place confirmed at second hand | `Lib/CM/Integrality/Doubling` |
+| DLMF, [23.10.7](https://dlmf.nist.gov/23.10.E7) and [23.10.10](https://dlmf.nist.gov/23.10.E10) | compared, place confirmed | `Lib/CM/Integrality/Doubling` ([normalization and quartics](notes/sigma-duplication.md)) |
 | Davenport, Multiplicative Number Theory | compared, place confirmed | `Lib/Analytic/DirichletTheta`, `Lib/Analytic/PolyaVinogradov` |
 | Davenport, Multiplicative Number Theory | work found, no place given | `New/Reduction/Zeros/PrimeError` |
 | Davidson 1987 | work found, no place given | `Lib/Weil/DualPair/HolomorphicData` |
