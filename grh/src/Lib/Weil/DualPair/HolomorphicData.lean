@@ -148,8 +148,11 @@ lemma prod_mem_holomorphicData (ho : IsPosFirstOrder s o)
     -- As positive indices come first, `s a = 1` and `s b = -1`; then `E a b` is a sum of second
     -- derivatives, which vanish by `IsTermwiseHarmonic`.
     obtain ⟨ha, hb⟩ : s a = 1 ∧ s b = -1 := by
-      have h_first : s b = 1 → s a = -1 → o b < o a := ho.2 b a
-      grind [units_eq_one_or (s a), units_eq_one_or (s b)]
+      rcases units_eq_one_or (s a) with ha | ha
+      · exact ⟨ha, (units_eq_one_or (s b)).resolve_left fun hb ↦ hs (ha.trans hb.symm)⟩
+      · rcases units_eq_one_or (s b) with hb | hb
+        · exact (not_lt_of_ge hab.le (ho.2 b a hb ha)).elim
+        · exact (hs (ha.trans hb.symm)).elim
     have h_second (c : n') : MvPolynomial.pderiv (c, a) (MvPolynomial.pderiv (c, b) (P w)) = 0 :=
       (hP w).isTermwiseHarmonic_swap a b c hs
     simp [pair, swap_oscRows_E, pairSign, raiseOp, lowerOp, ne_of_apply_ne s hs, ha, hb, h_second]
