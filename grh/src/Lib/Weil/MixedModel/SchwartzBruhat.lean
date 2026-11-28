@@ -165,7 +165,16 @@ omit [Fintype n] [DecidableEq n] in
 /-- A vector integral off `S` and integral on `S` is integral everywhere. -/
 lemma integralBox_compl_inter :
     SetLike.coe (integralBox n Sᶜ) ∩ integralBox n S = stdLattice E n := by
-  grind [mem_integralBox, mem_stdLattice, mem_Ô, SetLike.mem_coe, idem_mul_mem_Ô]
+  ext x
+  simp only [Set.mem_inter_iff, SetLike.mem_coe, mem_integralBox, mem_stdLattice, idem_mul_mem_Ô]
+  simp only [mem_Ô]
+  constructor
+  · rintro ⟨h_off, h_on⟩ i w
+    by_cases hw : w ∈ S
+    · exact h_on i w hw
+    · exact h_off i w hw
+  · intro h
+    exact ⟨fun i w _ ↦ h i w, fun i w _ ↦ h i w⟩
 
 lemma isLocallyConstant_selfDualAddChar [WeilData E] : IsLocallyConstant (selfDualAddChar E) := by
   -- `selfDualAddChar E` is invariant under translation by the elements of `Ô E`, a neighbourhood of
