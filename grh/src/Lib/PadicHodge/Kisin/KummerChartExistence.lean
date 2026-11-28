@@ -237,9 +237,22 @@ lemma exists_smul_teichmuller_eq (C : Subgroup (Gp p)) [hC : IsClosed (C : Set (
   have hX_anti (n : ℕ) : X (n + 1) ⊆ X n := by
     refine Set.inter_subset_inter_right _ fun g h_next ↦ ?_
     have h_eq : ((g • b u (n + 1) : PadicAlgCl p) : ℂ_[p]) = (v.untiltRoot (n + 1)).val := h_next
-    -- `↓`: with the plain lemma simp unfolds one Frobenius too many on each side
-    simpa [← UniformSpace.Completion.algEquiv_smul_coe, hb, untiltRoot, ↓Function.iterate_succ',
-      ← untilt_iterate_frobeniusEquiv_symm_pow (_^[n] _) 1] using congrArg (· ^ p) h_eq
+    have h_step (w : OFlat) : (untiltRoot (n + 1) w).val ^ p = (untiltRoot n w).val := by
+      have h_pow := untilt_iterate_frobeniusEquiv_symm_pow
+        ((frobeniusEquiv (PreTilt OC p) p).symm^[n] w) 1
+      simpa only [untiltRoot, Function.iterate_succ', Function.comp_apply,
+        Function.iterate_zero_apply, pow_one, SubmonoidClass.coe_pow] using
+        congrArg (fun x : OC ↦ (x : ℂ_[p])) h_pow
+    have h_u_step : (b u (n + 1) : ℂ_[p]) ^ p = (b u n : ℂ_[p]) := by
+      rw [hb u rfl (n + 1), hb u rfl n, h_step]
+    calc
+      ((g • b u n : PadicAlgCl p) : ℂ_[p]) = g • (b u n : ℂ_[p]) :=
+        (UniformSpace.Completion.algEquiv_smul_coe g (b u n)).symm
+      _ = (g • (b u (n + 1) : ℂ_[p])) ^ p := by rw [← h_u_step, smul_pow']
+      _ = (untiltRoot n v).val :=
+        (congrArg (fun x : ℂ_[p] ↦ x ^ p)
+          ((UniformSpace.Completion.algEquiv_smul_coe g (b u (n + 1))).trans h_eq)).trans
+          (h_step v)
   have hX_ne (n : ℕ) : (X n).Nonempty := by
     have h_pow_eq : b v n ^ (p ^ n * e) = b u n ^ (p ^ n * e) := by simp [hb_pow, hv]
     obtain ⟨g, hg_C, hg_smul⟩ : ∃ g ∈ C, g • b u n = b v n :=
@@ -259,8 +272,11 @@ lemma exists_smul_teichmuller_eq (C : Subgroup (Gp p)) [hC : IsClosed (C : Set (
   refine (congrArg (Perfection.coeff (ModP OC p) p n) h_tilt).trans ?_
   refine (coeff_tiltMap _ (u.mk_untiltRoot n)).symm.trans ?_
   have hg_n : ((g • b u n : PadicAlgCl p) : ℂ_[p]) = (v.untiltRoot n).val := (hg n).right
-  have h_root_eq : g • untiltRoot n u = untiltRoot n v :=
-    Subtype.ext (by simpa [← hb] using hg_n)
+  have h_root_eq : g • untiltRoot n u = untiltRoot n v := by
+    apply Subtype.ext
+    change g • (untiltRoot n u).val = (untiltRoot n v).val
+    rw [← hb u rfl n, UniformSpace.Completion.algEquiv_smul_coe]
+    exact hg_n
   exact (congrArg (Ideal.Quotient.mk (span {(p : OC)})) h_root_eq).trans (v.mk_untiltRoot n)
 
 /-- A Kummer chart for j : Γ → G_p with open image: a chart S = Λ⟦z⟧ ⊂ A_inf, Λ = W(𝔽_{p^f}), and a
