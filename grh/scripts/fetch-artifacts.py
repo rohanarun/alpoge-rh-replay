@@ -7,7 +7,7 @@ usage: fetch-artifacts.py <map.jsonl> <cache-dir> [--sha256 <file> [--verify-exi
                           [--base-url <url>] [--user-agent <agent>] [--report <file>]
 Stock Lake 4.37 does not download artifacts lazily during `lake build`: a mapped module whose
 artifact is absent locally is simply compiled. So restores must prefetch. One curl process
-downloads up to 500 files at a time (fd soft limit raised to match) and retries transport
+downloads up to 500 files at a time, within the process's file limit, and retries transport
 errors and CDN 5xx. Files land in <cache-dir>/artifacts/<hash16>.ltar atomically, so a file
 there is always complete. Objects are content-addressed and write-once (If-None-Match) in R2.
 --sha256 names a JSON object {"<hash16>.ltar": "<sha256>"} (e.g. from a CI module manifest):
@@ -52,6 +52,22 @@ def sha256(path):
         return hashlib.file_digest(f, "sha256").hexdigest()
 
 
+def transfer_limit():
+    soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    want = 65536 if hard == resource.RLIM_INFINITY else min(hard, 65536)
+    if soft != resource.RLIM_INFINITY and soft < want:
+        try:
+            resource.setrlimit(resource.RLIMIT_NOFILE, (want, hard))
+            soft = want
+        except (OSError, ValueError):
+            pass  # Keep the usable soft limit if the host refuses the increase.
+    if soft == resource.RLIM_INFINITY:
+        return PARALLEL
+    # Each active transfer can hold a socket and an output file. Leave descriptors
+    # for curl's resolver, the event loop, standard streams and other open files.
+    return max(1, min(PARALLEL, (soft - 16) // 2))
+
+
 def option(args, name, default=None):
     if name not in args:
         return default
@@ -91,10 +107,8 @@ def main():
         args.remove("--verify-existing")
     mapping, cache = Path(args[0]), Path(args[1]) / "artifacts"
     cache.mkdir(parents=True, exist_ok=True)
-    soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
-    want = 65536 if hard == resource.RLIM_INFINITY else min(hard, 65536)
-    if soft != resource.RLIM_INFINITY and soft < want:
-        resource.setrlimit(resource.RLIMIT_NOFILE, (want, hard))
+    parallel = transfer_limit()
+    hash_workers = min(32, parallel)
     lines = mapping.read_text().splitlines()[1:]
     names = sorted({json.loads(l)[1] for l in lines if l})
 
@@ -112,7 +126,7 @@ def main():
                 p.unlink(missing_ok=True)
             return status == "ok"
 
-    with ThreadPoolExecutor(32) as pool:
+    with ThreadPoolExecutor(hash_workers) as pool:
         missing = [n for n, ok in zip(names, pool.map(present, names)) if not ok]
     print(f"fetch-artifacts: {len(names)} mapped, {len(missing)} missing locally", flush=True)
     code, errors, corrupt = 0, [], []
@@ -125,7 +139,7 @@ def main():
             r = subprocess.run(["curl", "--disable", "--fail", "--silent", "--show-error", "--location",
                                 "--user-agent", agent, "--retry", "5", "--retry-all-errors",
                                 "--connect-timeout", "30", "--max-time", "600",
-                                "--parallel", "--parallel-max", str(PARALLEL), "--config", str(conf)],
+                                "--parallel", "--parallel-max", str(parallel), "--config", str(conf)],
                                stderr=subprocess.PIPE, text=True, errors="replace")
             code, errors = r.returncode, curl_errors(r.stderr)
 
@@ -141,7 +155,7 @@ def main():
                     os.replace(p, cache / n)
                 return "ok"
 
-            with ThreadPoolExecutor(32) as pool:
+            with ThreadPoolExecutor(hash_workers) as pool:
                 results = list(pool.map(settle, missing))
         corrupt = [n for n, s in zip(missing, results) if s == "corrupt"]
         missing = [n for n, s in zip(missing, results) if s != "ok" and not present(n)]
