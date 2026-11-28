@@ -55,9 +55,10 @@ lemma exists_conj_pow_mem_stdLevel {j : ℕ} {x : Gf D.E (D.Y j)}
   refine ⟨n, fun u hu ↦ mem_stdLevel_iff.2 fun w ↦ ?_⟩
   have hu_int := mem_stdLevel_iff.1 (levelOf_le_stdLevel hu)
   have h_onQ {w} (hw : w ∈ ϑ.Q) : ((x * u * x⁻¹) ^ ϑ.normQ ^ n).atPlace w ∈ localIntGL _ w := by
-    have := pow_pow_mem_localCongruence (D.normQ_mem_and_notMem_of_mem_Q ϑ (.inl hw)).1
-      (mem_localCongruence_zero.2 ⟨hu_int w, congrFun (mem_levelOf.1 hu).2 (.inr ⟨w, hw⟩)⟩) n
-    simpa using hn w hw (by simpa using this)
+    have h_level : u.atPlace w ∈ localCongruence (D.Y j) w 0 :=
+      mem_localCongruence_zero.2 ⟨hu_int w, congrFun (mem_levelOf.1 hu).2 (.inr ⟨w, hw⟩)⟩
+    simpa only [conj_pow, map_mul, map_pow, map_inv, Set.mem_preimage, SetLike.mem_coe] using hn w hw
+      (pow_pow_mem_localCongruence (D.normQ_mem_and_notMem_of_mem_Q ϑ (.inl hw)).1 h_level n)
   by_cases hw : w ∈ ϑ.Q ∨ star w ∈ ϑ.Q
   · exact hw.elim h_onQ fun hw ↦ atPlace_star_mem_iff.1 (h_onQ hw)
   · simp [hx w hw, mul_mem, pow_mem (hu_int w)]
