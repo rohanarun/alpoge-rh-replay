@@ -392,10 +392,13 @@ lemma sum_phiInvToBdR_map_mul_mem_of_mem_valueField (f : Ainf →ₗ[k.S] k.S) {
   -- The conjugate `f' = φ^{-a} ∘ f ∘ φ^a` is again `S`-linear.
   let f' : Ainf →ₗ[k.S] Ainf :=
     { toFun x := (φ ^ a)⁻¹ • f (φ ^ a • x)
-      map_add' := by simp
+      map_add' x y := by rw [smul_add, f.map_add, AddMemClass.coe_add, smul_add]
       map_smul' s x := by
-        simpa [smul_def', inv_smul_eq_iff, Subtype.ext_iff] using
-          f.map_smul ⟨φ ^ a • s, by simp [phi_pow_smul, ← k.coe_phi_pow]⟩ (φ ^ a • x) }
+        simpa only [smul_def', Subalgebra.algebraMap_apply, smul_mul', Algebra.algebraMap_self,
+          RingHom.id_apply, inv_smul_eq_iff, smul_inv_smul, smul_eq_mul, Subtype.ext_iff,
+          MulMemClass.coe_mul] using
+          f.map_smul ⟨φ ^ a • s, by
+            simp only [phi_pow_smul, ← k.coe_phi_pow, RingHom.coe_pow, SetLike.coe_mem]⟩ (φ ^ a • x) }
   -- Applying the extension of `f'` to `BPlus` multiplies the weighted sum by some `u : BdRPlus`.
   let term (i : Σ l, q l) : BPlus :=
     i.2.1.1 * Chart.ainfToBPlus ((φ ^ a)⁻¹ • i.2.1.2 • r i.1)
