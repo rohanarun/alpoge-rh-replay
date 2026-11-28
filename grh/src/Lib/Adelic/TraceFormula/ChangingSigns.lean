@@ -290,10 +290,10 @@ lemma exists_coprime_sign_dvd_norm_sub {ν₀ : ℚ} {β : Matrix n n E}
   · -- only `(w, i)` lies over the place of `φ w i`
     have hs_eq : s (.mk (φ w i)) = η w i :=
       prod_eq_single_of_mem (w, i) (by simp) fun p hp hp_ne ↦ absurd
-        (eq_of_mk_lift_numberedRoots_eq h_root_eval w p.1 i p.2 (by simpa [φ] using hp)) hp_ne
-    simpa [← hδ, φ, eval_map, hs_eq] using h_pos (φ w i)
+        (eq_of_mk_lift_numberedRoots_eq h_root_eval w p.1 i p.2 (Finset.mem_filter.1 hp).2) hp_ne
+    simpa only [← hδ, φ, AdjoinRoot.lift_mk, hs_eq, eval_map] using h_pos (φ w i)
   · rw [← mk_eq_mk, map_mul, hc]
-    simpa using adjoinRoot_root_mul_star h_circle
+    simpa only [AdjoinRoot.mk_X, AdjoinRoot.mk_C, map_ratCast] using adjoinRoot_root_mul_star h_circle
   · -- in the adeles of `L` the difference is `ū⁻¹ u⁻¹ - x = 0`
     have h_idele : star (u⁻¹) * u⁻¹ = principalIdele x := by
       rw [star_inv, ← mul_inv, mul_comm, inv_eq_of_mul_eq_one_left h_norm]
