@@ -631,22 +631,36 @@ invertible matrix. -/
   -- By `map_eq_zero_of_map_integrated_eq_zero` it is enough to take
   -- `f = integrated P (finHeisenbergOp y vacElem)` with `y` zero above `S.conjClosure`; `g` fixes
   -- such `y`.
-  refine sub_eq_zero.mp
-    (V.map_eq_zero_of_map_integrated_eq_zero (L := V.projOn S * V.ω g - (finMultiplier g⁻¹)⁻¹ • 1)
-      hf_fix fun P y hy ↦ ?_)
-  rw [_root_.sub_apply, mul_apply_eq_comp, _root_.smul_apply,
+  let L : 𝒮 V →L[ℂ] 𝒮 V := (V.projOn S ∘L V.ω g) - (finMultiplier g⁻¹)⁻¹ • 1
+  suffices hL : L f = 0 by
+    simpa only [L, _root_.sub_apply, ContinuousLinearMap.comp_apply, _root_.smul_apply,
+      one_apply_eq_self, sub_eq_zero] using hL
+  refine V.map_eq_zero_of_map_integrated_eq_zero (L := L) hf_fix fun P y hy ↦ ?_
+  dsimp only [L]
+  rw [_root_.sub_apply, ContinuousLinearMap.comp_apply, _root_.smul_apply,
     one_apply_eq_self, sub_eq_zero]
   -- `g` is `1` off `S.conjClosure` and `y` is `0` above it.
   have hgy_eq : g *ᵥ y = y := by
-    ext i w
-    by_cases hw : w ∈ S.conjClosure <;>
-      simp_all [Gf.atPlace, mulVec_eq_sum, ← evalAt_apply, GeneralLinearGroup.ext_iff,
-        Matrix.one_apply]
+    funext i
+    ext1 w
+    change evalAt w (((g : GL n (𝔸f E)).val *ᵥ y) i) = evalAt w (y i)
+    rw [(evalAt w).map_mulVec]
+    change ((g.atPlace w).val *ᵥ (evalAt w ∘ y)) i = evalAt w (y i)
+    by_cases hw : w ∈ S.conjClosure
+    · have hyw : evalAt w ∘ y = 0 := funext fun j ↦ hy j w hw
+      rw [hyw, mulVec_zero]
+      exact (congrFun hyw i).symm
+    · have hgw := Gf.mem_supportedOn.mp hg w (fun h ↦ hw (Or.inl h)) (fun h ↦ hw (Or.inr h))
+      rw [hgw, Units.val_one, one_mulVec, Function.comp_apply]
   -- Split the projection on `vacElem` into the real part, the part above `S.conjClosure` and the
   -- rest.
   have h_proj : V.dataInner V.vacElem (V.ω g V.vacElem) • V.vacElem =
       V.projReal (V.projOn S (V.projOn S.conjClosureᶜ (V.ω g V.vacElem))) := by
-    have h_univ : conjClosure univ = conjClosure (S ∪ S.conjClosureᶜ) := by grind
+    have h_univ : conjClosure univ = conjClosure (S ∪ S.conjClosureᶜ) := by
+      ext w
+      simp only [Set.conjClosure, Set.mem_union, Set.mem_univ, Set.mem_preimage,
+        Set.mem_compl_iff, true_or, true_iff]
+      tauto
     rw [dataInner_vacElem_smul_vacElem, ← projOn_union, projOn, projOn, h_univ]
   -- `ω g vacElem` is already a vacuum at the real places and off `S.conjClosure`, so `projOn S`
   -- alone sends it to this multiple of `vacElem`. Apply `integrated P ∘ finHeisenbergOp y`, which
