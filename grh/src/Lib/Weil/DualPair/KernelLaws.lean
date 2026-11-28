@@ -92,10 +92,14 @@ function Ψ modulo 𝔪 and the polynomial P. -/
 def modKernelBilin (g : G E s) (h : G E s') :
     (Matrix n' n 𝔪.ResidueRing → ℂ) →ₗ[ℂ] MvPolynomial (InfinitePlace E × n' × n) ℂ →ₗ[ℂ] ℂ :=
   LinearMap.mk₂ ℂ (fun Ψ P ↦ modKernel S T a b 𝔪 Ψ P g h)
-    (fun Ψ Ψ' P ↦ by simp [modKernel, pairTheta, modDatum, Pi.add_comp])
-    (fun c Ψ P ↦ by simp [modKernel, pairTheta, modDatum, Pi.smul_comp])
-    (fun Ψ P P' ↦ by simp [modKernel, pairTheta, modDatum])
-    (fun c Ψ P ↦ by simp [modKernel, pairTheta, modDatum])
+    (fun Ψ Ψ' P ↦ by
+      simp only [modKernel, pairTheta, modDatum, Pi.add_comp, map_add, _root_.add_apply])
+    (fun c Ψ P ↦ by
+      simp only [modKernel, pairTheta, modDatum, Pi.smul_comp, map_smul, _root_.smul_apply])
+    (fun Ψ P P' ↦ by
+      simp only [modKernel, pairTheta, modDatum, map_add, _root_.add_apply])
+    (fun c Ψ P ↦ by
+      simp only [modKernel, pairTheta, modDatum, map_smul, _root_.smul_apply])
 
 @[simp]
 lemma modKernelBilin_apply (g : G E s) (h : G E s') (Ψ : Matrix n' n 𝔪.ResidueRing → ℂ)
