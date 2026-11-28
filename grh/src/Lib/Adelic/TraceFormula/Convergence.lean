@@ -340,7 +340,14 @@ theorem exists_tsum_enorm_kernelTerm_le_of_notMem {B : ℕ} {k : GInf E s → �
   calc ∑' γ : U V.J, ‖V.kernelTerm k φ (Z.indicator 1) x γ x‖ₑ
       ≤ ENNReal.ofReal (C * ((c * δ) ^ f) ^ (4 * card n ^ 3) * V.height x ^ d) :=
         h_bound Z x x ((c * δ) ^ f) (by positivity) h_norm
-    _ = ENNReal.ofReal (C * (c ^ card n) ^ d * (δ ^ card n * V.height x) ^ d) := by ring_nf!
+    _ = ENNReal.ofReal (C * (c ^ card n) ^ d * (δ ^ card n * V.height x) ^ d) := by
+      have h_exp : f * (4 * card n ^ 3) = card n * d := by
+        change f * (4 * card n ^ 3) = card n * (4 * f * card n ^ 2)
+        rw [show card n ^ 3 = card n ^ 2 * card n from pow_succ _ 2]
+        ac_rfl
+      rw [← pow_mul (c * δ) f (4 * card n ^ 3), h_exp, pow_mul (c * δ) (card n) d,
+        mul_pow c δ, mul_pow (c ^ card n) (δ ^ card n), mul_pow (δ ^ card n) (V.height x)]
+      simp only [mul_assoc]
 
 /-- If `k` has decay of order at least `13 (card n)³`, then the sum of the moduli of the values of
 `k ⊗ φ` at `x⁻¹ γ x`, over the rational points `γ` with irreducible characteristic polynomial, is
