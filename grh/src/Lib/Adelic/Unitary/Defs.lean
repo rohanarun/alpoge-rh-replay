@@ -315,9 +315,19 @@ lemma singleGL_mul_star_singleGL_inv_mem_U {w : FinPlace E} (hw : w.IsSplit)
 component g at w, the inverse conjugate transpose of g at w̄, and 1 at all other places. -/
 def ofSplitPlace : GL n (LocField w) →* Gf E n :=
   MonoidHom.mk' (fun g ↦ ⟨singleGL w g * star (singleGL w g⁻¹),
-    singleGL_mul_star_singleGL_inv_mem_U hw g⟩) fun _ _ ↦
-    Subtype.ext <| GL_ext_evalAt fun u ↦ by
-      by_cases hu : u = w <;> aesop
+    singleGL_mul_star_singleGL_inv_mem_U hw g⟩) fun g k ↦
+    Subtype.ext <| by
+      have h_comm : Commute (singleGL w k) (star (singleGL w g⁻¹)) := by
+        apply GL_ext_evalAt
+        intro u
+        rcases eq_or_ne u w with rfl | hu
+        · simp only [map_mul, evalAt_star_singleGL hw, mul_one, one_mul]
+        · simp only [map_mul, evalAt_singleGL_of_ne hu, mul_one, one_mul]
+      change singleGL w (g * k) * star (singleGL w (g * k)⁻¹) =
+        (singleGL w g * star (singleGL w g⁻¹)) * (singleGL w k * star (singleGL w k⁻¹))
+      rw [(singleGL w).map_mul, _root_.mul_inv_rev, (singleGL w).map_mul, star_mul]
+      simpa only [mul_assoc] using
+        h_comm.mul_mul_mul_comm (singleGL w g) (star (singleGL w k⁻¹))
 
 /-- For a finite place `w` of `E` that is split over the maximal real subfield and for `g` in
 `GL_n(E_w)`, the component at `w` of the element `ofSplitPlace hw g` of `G_f` is `g`. -/
