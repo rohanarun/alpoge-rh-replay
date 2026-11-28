@@ -355,14 +355,19 @@ lemma exists_norm_pairWeil_schrodingerOp_mul_pow_le {S : Space E n s} {T : Space
         one_le_pow₀ (one_le_mul_of_one_le_of_one_le hρ ((one_le_div hH).2 hH_small))
       calc ‖L (J v)‖
         _ ≤ ‖J‖ * ‖L‖ * 1 * ‖v‖ := by
-          grw [L.le_opNorm, J.le_opNorm, mul_one, mul_comm ‖J‖ ‖L‖, mul_assoc]
+          simpa only [mul_one, mul_assoc, mul_left_comm ‖L‖ ‖J‖] using
+            (L.le_opNorm (J v)).trans
+              (mul_le_mul_of_nonneg_left (J.le_opNorm v) (norm_nonneg L))
         _ ≤ _ := by
-          gcongr
-          exact le_add_of_nonneg_left (by positivity)
+          have hJ : ‖J‖ ≤ C' :=
+            le_add_of_nonneg_left (mul_nonneg hC (pow_nonneg (abs_nonneg Z) _))
+          gcongr ?_ * ‖L‖ * ?_ * ?_
   calc ‖L (J v)‖ * H ^ N
     _ ≤ C' * (|Y| * (ρ * H) ^ A) * (ρ * (2 / H)) ^ (N + A) * m * H ^ N := by grw [h_gain, hL]
     _ = C' * |Y| * 2 ^ (N + A) * m * ρ ^ (N + 2 * A) := by
-      simp [mul_pow, div_pow, pow_add, two_mul, field]
+      rw [show N + 2 * A = N + A + A by omega, pow_add ρ (N + A) A]
+      simp only [mul_pow, div_pow, pow_add H]
+      field_simp
 
 /-- The adelic coordinate matrix of a rational basis at `g`, as an invertible matrix. -/
 private noncomputable def basisCoordMatrix (S : Space E n s) (g : G E s) (c : GL n E) :
