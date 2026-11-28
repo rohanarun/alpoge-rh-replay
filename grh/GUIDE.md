@@ -80,7 +80,7 @@ The parameters are a multiple q₀ of 18480 and a prime d ≡ q₀/2 − 1 mod q
 | carrier | `Rows.carrierForm` | one theta lift of the constant function 1, the same for all twists |
 | tie | `Selmer.tieRelations` | linear relation between the values of a cocycle at a tame generator and at a Frobenius element of an auxiliary place |
 | even class, odd class | `Selmer.evenClasses`, `Selmer.shaOdd` | cocycle modulo ℓ^ν in a Tate twist, with local conditions above ℓ, unramified off ℓ (even classes: and off the added places), even or odd under complex conjugation; for the twist 0 odd classes have no parity condition |
-| most Frobenii | `mostFrobenii` | filter on Frobenius data; a property that holds for most of them holds on a dense set |
+| most Frobenii | `mostFrobenii` | Every nonempty Galois open set contains a nonempty open part on which the property holds for all Frobenius data outside finitely many places. The exceptional places may depend on the open part. See the [rank-one example](notes/frobenius-filter.md). |
 
 Letters used in comments, and their names in Lean:
 
