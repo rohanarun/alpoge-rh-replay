@@ -586,6 +586,9 @@ lemma DoubleLiftData.exists_integral_constTermAtStringMap_mul_eq
     integrable_of_isCocompact
       (isCocompact_prod Y'.isCocompact_ratBessel (stdSpace E X).isCocompact_Gamma)
       (by fun_prop) (by simp +contextual [h_fix_levi, h_fix_right, -map_mul, mem_prod])
+  have : SFinite Y'.besselMeasure :=
+    @instSFiniteOfSigmaFinite _ _ Y'.besselMeasure
+      (@IsFiniteMeasure.toSigmaFinite _ _ Y'.besselMeasure Y'.isFiniteMeasure_besselMeasure)
   rw [funext h_inner, integral_const_mul, integral_integral_swap h_int]
   -- pull the constants `κ`, `κ'` and `z⁻¹` to where they arise
   simp_rw [mul_assoc, ← integral_const_mul z⁻¹, mul_left_comm (W _), ← integral_const_mul (W _),
