@@ -212,7 +212,7 @@ def find_record(identity, fetcher=fetch):
 
 def blob_sha256(root, revision, name, memo):
     """SHA-256 and bytes of a file at a revision, memoised by blob id."""
-    oid = git(root, "rev-parse", "--verify", "--quiet", f"{revision}:{name}", quiet=True)
+    oid = git(root, "rev-parse", "--verify", "--quiet", f"{revision}:./{name}", quiet=True)
     if oid not in memo:
         if git(root, "cat-file", "-t", oid) != "blob" or int(git(root, "cat-file", "-s", oid)) > MAX_JSON:
             raise ValueError(f"expected a bounded file: {name} at {revision}")
@@ -222,8 +222,8 @@ def blob_sha256(root, revision, name, memo):
 
 
 def identity_at(root, revision, memo):
-    """The build inputs of a commit, from Git objects, in the form of current_identity."""
-    tree = git(root, "rev-parse", "--verify", "--quiet", f"{revision}:src", quiet=True)
+    """Read a commit's build inputs relative to the project directory."""
+    tree = git(root, "rev-parse", "--verify", "--quiet", f"{revision}:./src", quiet=True)
     if not SHA40.fullmatch(tree):
         raise ValueError(f"invalid src Git tree at {revision}")
     return {

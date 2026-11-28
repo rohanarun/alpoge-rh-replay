@@ -100,6 +100,23 @@ class Baseline(unittest.TestCase):
         with self.assertRaises(ValueError):
             cache.validated_blobs(record, identity, self.fetcher)
 
+    def test_nearest_published_ancestor_for_nested_project(self):
+        project = self.root / "grh"
+        first = commit(project, {"lakefile.toml": LAKEFILE, "lake-manifest.json": "{}\n",
+                                 "lean-toolchain": "leanprover/lean4:v4.37.0-rc1\n",
+                                 "src/A.lean": "-- published\n"}, "published nested project")
+        published = cache.current_identity(project)
+        publish(self.store, published, first)
+        older = {**published, "source_tree": "1" * 40}
+        publish(self.store, older, "2" * 40)
+        commit(project, {"src/A.lean": "-- new source\n"}, "change nested project")
+        self.pin(older)
+
+        record, baseline = cache.find_baseline(project, cache.current_identity(project), "main", 200,
+                                               self.fetcher)
+        self.assertEqual(record["candidate_head"], first)
+        self.assertEqual(baseline, published)
+
     def test_pinned_when_no_ancestor_is_published(self):
         first = self.base()
         pinned = {**cache.identity_at(self.root, first, {}), "source_tree": "1" * 40}
