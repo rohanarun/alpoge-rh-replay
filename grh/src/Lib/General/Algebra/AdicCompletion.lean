@@ -467,7 +467,7 @@ lemma exists_adic_extension (I : Ideal S) [IsAdicComplete I C] (β : F →ₗ[S]
       (Submodule.Quotient.mk_eq_zero _).1 (congrArg (·.val (n + n)) ha)
     exact calc
       g (a n) ≡ g (a (n + n)) [SMOD I ^ n • ⊤] := (a.map I g).property le_add_self
-      _ ≡ 0 [SMOD I ^ n • ⊤] := zero.2 (mem_comap.1 (h_cont n hβ))
+      _ ≡ 0 [SMOD I ^ n • ⊤] := zero.2 ((mem_comap (f := g)).mp (h_cont n hβ))
   -- `e` identifies the completion of `M` with a quotient of that of `F`; `G` is the induced map.
   let e : (AdicCompletion I F ⧸ LinearMap.ker (AdicCompletion.map I β)) ≃ₗ[AdicCompletion I S]
       AdicCompletion I M := LinearMap.quotKerEquivOfSurjective _ hsurj
