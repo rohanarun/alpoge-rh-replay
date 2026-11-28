@@ -276,8 +276,10 @@ lemma AutChar.HasWeight.apply_det_eq_charOfTamePart {ψ : (w : FinPlace E) → M
     ν.val (detFin s k.val) = 𝔪.charOfTamePart ψ (𝔪.reductionGL k).val.det := by
   -- `apply_det_eq_prod`: `ν (det k)` is the product over `w ∣ 𝔪` of `ψ w (det (k mod w))`.
   rw [hν.apply_det_eq_prod (ι := 𝔪.places) Subtype.val_injective (by simpa using hψ)]
-  simp [charOfTamePart, Matrix.det_apply, stdLevel.reduceAt, finprod_eq_prod_of_fintype,
-    reductionGL]
+  simp only [charOfTamePart_apply, finprod_eq_prod_of_fintype]
+  refine Finset.prod_congr rfl fun w _ ↦ congrArg (ψ w.val) ?_
+  rw [RingHom.map_det]
+  exact congrArg Matrix.det (Matrix.ext fun _ _ ↦ modulusResidue_reduction 𝔪 w.property _).symm
 
 namespace Exchange.IsTameFor
 
