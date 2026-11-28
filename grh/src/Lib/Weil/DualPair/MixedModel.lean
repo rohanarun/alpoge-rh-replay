@@ -357,13 +357,19 @@ lemma homTarget_zeroTerm_pairWeil (g : G E s) (g₀ : G E s₀) (m : GL p (𝔸 
     -- The determinant of `h⁻¹` is that of its matrix, by definition.
     rfl
   -- The factors `upsilonU1 (det h) ^ p` cancel, and `det g = (det m / star (det m)) * det g₀`.
-  -- ↓: map_mul and map_pow split the character values before simp unfolds the characters.
+  -- Split off the norm-one term of `chiAdelic` before unfolding it.
   have h_char : pairChar a (b * upsilonU1 ^ card p) (h, g) *
         (chiAdelic (m.det ^ card n' * Unitary.toUnits h⁻¹.det ^ card p))⁻¹ =
       ((a.spaceChar (card n')).val m.det).val * √(ideleAbs m.det) ^ card n' *
         pairChar a b (h, g₀) := by
-    simp [pairChar_apply, D.det_eq_divStar_mul g g₀ m hk hi, ↓map_mul, ↓map_pow, chiAdelic, mul_pow,
-      spaceChar, baseChange_apply_coe_toFun]
+    have ha : a.val (divStar m.det * g₀.det) = a.val (divStar m.det) * a.val g₀.det :=
+      a.val.map_mul' _ _
+    simp only [map_mul chiAdelic, map_pow chiAdelic, ↓chiAdelic_toUnits]
+    simp only [pairChar_apply, D.det_eq_divStar_mul g g₀ m hk hi, ha, Circle.coe_mul,
+      Subgroup.coe_mul, SubmonoidClass.coe_pow, ContinuousMonoidHom.mul_apply,
+      ContinuousMonoidHom.pow_apply, Circle.coe_pow, _root_.mul_inv_rev, chiAdelic, MonoidHom.coe_mk,
+      OneHom.coe_mk, mul_pow, inv_pow, map_inv, Circle.coe_inv, inv_inv, spaceChar,
+      InvMemClass.coe_inv, baseChange_apply_coe_toFun, circleChar_inv_apply]
     field_simp
   rw [pairWeil_apply, map_smul, (D.homTarget T).zeroTerm_omega (G.onHom (h, g₀)) h_onHom_iAdelic
     h_onHom_kAdelic _ h_det_M, pairWeil_apply, smul_smul, smul_smul, h_char]
