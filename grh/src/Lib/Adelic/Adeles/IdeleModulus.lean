@@ -339,9 +339,10 @@ lemma volume_map_mulVec_adele (a : GL n (𝔸 E)) :
     change LinearMap.det ((toLin' (a.val.map (RingHom.fst _ (𝔸f E)))).restrictScalars ℝ) = rInf
     rw [det_restrictScalars, det_toLin', h_norm, ← RingHom.mapMatrix_apply, ← RingHom.map_det]
     rfl
+  have h_rInf : 0 ≤ rInf := Finset.prod_nonneg fun _ _ ↦ sq_nonneg _
   have h_inf : Measure.map L.toLinearMap addHaar = ENNReal.ofReal rInf⁻¹ • addHaar := by
-    simpa [h_det, rInf, Finset.prod_pow] using
-      map_linearMap_addHaar_eq_smul_addHaar addHaar L.isUnit_det'.ne_zero
+    rw [map_linearMap_addHaar_eq_smul_addHaar addHaar L.isUnit_det'.ne_zero, h_det,
+      abs_of_nonneg (inv_nonneg.2 h_rInf)]
   have h_fin : volume.map (aFin.val *ᵥ ·) = ENNReal.ofReal rFin⁻¹ • volume := by
     simpa [rFin, aFin, finIdeleAbs, ideleAbs, GeneralLinearGroup.map_det] using
       map_mulVec_haar_finAdele volume aFin
@@ -358,7 +359,10 @@ lemma volume_map_mulVec_adele (a : GL n (𝔸 E)) :
   · -- taking components commutes with the sums that define `a *ᵥ x`
     exact Prod.ext (funext fun _ ↦ fst_sum) (funext fun _ ↦ snd_sum)
   · -- the module of `det a` is the product of the two factors
-    simp [rInf, rFin, ideleAbs, prod_smul_left, prod_smul_right, mul_smul, finprod_nonneg]
+    have h_abs : ideleAbs a.det = rInf * rFin := rfl
+    rw [prod_smul_left, prod_smul_right, ← mul_smul,
+      ← ENNReal.ofReal_mul (inv_nonneg.2 h_rInf), ← _root_.mul_inv_rev rFin rInf,
+      mul_comm rFin rInf, ← h_abs]
 
 /-- The determinant of the conjugate transpose of a matrix in GL_n of the adeles is the conjugate of
 its determinant. -/
