@@ -639,19 +639,30 @@ lemma sum_letterProj (x : L.Ambient) : ∑ i : Letter, L.letterProj i x = x := b
     have hn_lt : n < Nat.card k.Letter := by simpa using hn
     obtain ⟨i, hi⟩ : ∃ i : k.Letter, i ^ n ≠ 1 := exists_pow_ne_one_of_isCyclic hn₀ hn_lt
     -- The zeroth Witt component of `letterTeich i ^ n = 1` gives `i ^ n = 1`.
-    have h_coeff : Units.val (i ^ n : (flatFq k.f)ˣ) = ((1 : (flatFq k.f)ˣ) : flatFq k.f) := by
-      -- Elaborator: `using!`; the Teichmüller coefficient is matched only after unfolding.
-      simpa [letterTeich, algebraMap_toAlgebra, ← map_pow] using!
-        congrArg (fun s : k.S ↦ s.val.coeff 0) (DFunLike.congr_fun h_triv i⁻¹)
-    exact hi (Units.ext h_coeff)
-  suffices ∑ i : k.Letter, ∑ n ∈ Finset.range (Fintype.card k.Letter),
+    have h_pow : k.letterTeich (i ^ n) = 1 := by
+      rw [k.letterTeich.map_pow]
+      simpa only [MonoidHom.pow_apply, MonoidHom.comp_apply, invMonoidHom_apply, inv_inv,
+        MonoidHom.one_apply] using DFunLike.congr_fun h_triv i⁻¹
+    have h_coeff (u : k.Letter) :
+        (k.letterTeich u).val.coeff 0 = algebraMap (flatFq k.f) OFlat u.val := by
+      change (WittVector.map (algebraMap (flatFq k.f) OFlat)
+        (WittVector.teichmuller p u.val)).coeff 0 = _
+      rw [WittVector.map_coeff, WittVector.teichmuller_coeff_zero]
+    rw [← k.letterTeich.map_one] at h_pow
+    have h_lifts := congrArg (fun s : k.S ↦ s.val.coeff 0) h_pow
+    simp only [h_coeff] at h_lifts
+    exact hi (Units.ext ((algebraMap (flatFq k.f) OFlat).injective h_lifts))
+  suffices h_sum : ∑ i : k.Letter, ∑ n ∈ Finset.range (Fintype.card k.Letter),
       k.letterTeich i⁻¹ ^ n • (L.mulZeta.wittMap ^ n) x =
     Fintype.card k.Letter • x by
-      simpa [letterProj, letterOp, ← smul_sum, smul_pow, invOf_smul_eq_iff, Nat.cast_smul_eq_nsmul]
+      simp only [letterProj, LinearMap.smul_apply, LinearMap.coe_sum, Finset.sum_apply, ← smul_sum]
+      rw [invOf_smul_eq_iff, Nat.cast_smul_eq_nsmul]
+      simpa only [letterOp, smul_pow, LinearMap.smul_apply] using h_sum
   -- After exchanging the two sums only the term `n = 0` survives, and it equals `q • x`.
-  rw [sum_comm, sum_eq_single 0 (fun n hn hn₀ ↦ ?_) (by simp)]
-  · simp
-  · -- The scalar `0` of `S` acts here through A_inf only up to unfolding.
+  rw [sum_comm, sum_eq_single_of_mem 0 (mem_range.mpr (Fintype.card_pos (α := k.Letter)))]
+  · simp only [pow_zero, one_apply_eq_self, one_smul, sum_const, card_univ]
+  · intro n hn hn₀
+    -- The scalar `0` of `S` acts here through A_inf only up to unfolding.
     rw [← sum_smul, h_orth n hn hn₀]
     exact zero_smul ..
 
