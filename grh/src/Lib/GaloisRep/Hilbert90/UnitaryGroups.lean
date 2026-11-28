@@ -375,7 +375,11 @@ lemma exists_dvd_dvd_mul_adeleMap_eq {a b : 𝔸f L} (ha : u * adeleMap (σ : L 
   have dvd_of_le {x : 𝔸f L} (hx : ∀ w : FinPlace L, v (x w) ≤ v (c w)) : c ∣ x := by
     obtain ⟨y, -, hy⟩ := exists_eq_mul_iff_v_le.mpr hx
     exact ⟨y, hy⟩
-  have ha_le (w : FinPlace L) : v (a w) ≤ v (c w) := by grind
+  have ha_le (w : FinPlace L) : v (a w) ≤ v (c w) := by
+    rw [c_apply]
+    split_ifs with h
+    · exact le_rfl
+    · exact le_of_not_ge h
   have hb_le (w : FinPlace L) : v (b w) ≤ v (c w) := by simp [c_apply, apply_ite]
   refine ⟨c, dvd_of_le ha_le, dvd_of_le hb_le, DFunLike.ext _ _ fun w ↦ ?_⟩
   have haw : u w * adeleMap (σ : L →+* L) a w = a w := by rw [← finAdele_mul_apply, ha]
