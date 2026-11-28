@@ -532,7 +532,8 @@ lemma Space.exists_perm_natAbs_add_le {M : Set (GL n (𝔸 E))} (hM : IsCompact 
   refine ⟨σ, fun i ↦ ?_⟩
   have h_le : x (σ i) + x i ≤ ∑ j, x j + ∑ j, x j - card n * d + d := by
     simpa [sum_add_distrib, σ.sum_comp] using single_le_sum (fun j _ ↦ pair_ge j) (mem_univ i)
-  grind [pair_ge i]
+  have h_lower := pair_ge i
+  omega
 
 omit [DecidableEq n] in
 /-- The inequality of exponents behind `Space.lintegral_encard_ne_top`. Write `ν = ∑ (-x i)₊`,
