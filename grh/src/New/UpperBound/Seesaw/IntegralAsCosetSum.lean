@@ -392,6 +392,8 @@ lemma integral_quotMeasure_eq_integral_withDensity {w : G E ε → ENNReal} (hw 
     (hf_int : Integrable f Y.ratBessel.quotMeasure) (hf_supp : ∀ g : G E ε, g ∉ U → f g = 0) :
     ∫ g : G E ε, f g ∂Y.ratBessel.quotMeasure =
       ∫ t : G E ε, ∫ r : Y.besselGroup, f (r * t) ∂Y.besselMeasure ∂volume.withDensity w := by
+  have : SFinite (haar : Measure Y.besselGroup) :=
+    @instSFiniteOfSigmaFinite _ _ _ sigmaFinite_haarMeasure
   -- The map `(t, r) ↦ r * t` carries the weighted measure times Haar measure to the measure on `U`.
   have h_push : MeasurePreserving (fun p : G E ε × Y.besselGroup ↦ (p.2 : G E ε) * p.1)
       ((volume.withDensity w).prod haar) (volume.restrict U) := by
