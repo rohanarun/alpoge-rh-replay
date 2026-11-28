@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Tests of the baseline fallback of scripts/ci-cache-get.py, without network access.
+"""Tests of cache registration and the baseline fallback in scripts/ci-cache-get.py.
 
-Run as `python3 -I scripts/tests/test_ci_cache_baseline.py`. Each test builds a small Git
+Run as `python3 -I scripts/tests/test_ci_cache_baseline.py`. The baseline tests build a small Git
 repository with the project layout and a fake public cache that has records for chosen inputs.
 """
 import gzip
@@ -57,6 +57,30 @@ def publish(store, identity, head):
     store[record["map_key"]] = contents
     store[record["module_manifest_key"]] = manifest
     return record
+
+
+class Registration(unittest.TestCase):
+    def test_only_current_package_and_expected_output_count(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            project = root / "outputs" / "GRH"
+            other = root / "outputs" / "TauCeti"
+            project.mkdir(parents=True)
+            other.mkdir()
+            artifact = "0123456789abcdef.ltar"
+            entries = [(f"{n:016x}", artifact) for n in range(5)]
+            output = {"schemaVersion": "2026-02-25", "data": artifact}
+
+            def mapping(package, index):
+                return package / (entries[index][0] + ".json")
+
+            mapping(project, 0).write_text(json.dumps(output))
+            mapping(other, 1).write_text(json.dumps(output))
+            mapping(project, 2).write_text(json.dumps({**output, "scope": artifact,
+                                                       "data": "fedcba9876543210.ltar"}))
+            mapping(project, 3).write_text('{"data": "' + artifact)
+            # The fifth input has never been registered in either package.
+            self.assertEqual(cache.registered(root, "GRH", entries), {entries[0][0]})
 
 
 class Baseline(unittest.TestCase):
