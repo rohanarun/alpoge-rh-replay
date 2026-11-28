@@ -279,7 +279,8 @@ lemma modKernelBilin_stackedDetProdCoords_equivariant (j : D.LiftIndex) (i : D.R
       prod_inv_distrib, InvMemClass.coe_inv, coe_units_inv, ← mapMatrix_apply, ← map_det,
       det_nonsing_inv, Ring.inverse_eq_inv', map_inv₀, det_fromBlocks_zero₂₁, det_one, one_mul,
       mul_pow, inv_pow, ← modKernelBilin_apply, map_smul, smul_eq_mul, A, B', B, θ]
-    field_simp [prod_ne_zero_iff, GeneralLinearGroup.det_ne_zero]
+    rw [← mul_assoc, mul_mul_mul_comm, mul_inv_cancel₀, inv_mul_cancel₀] <;>
+      simp [prod_ne_zero_iff, GeneralLinearGroup.det_ne_zero]
   -- On complex conjugates `γ'⁻¹` acts by the Schur matrix of `A`.
   have h_rep (v : WeylIndex (FirstFactorIndex j) (untwistedDescentPair j).colsPlus → ℂ) :
       (stdSpace D.E (FirstFactorIndex j)).weightRep (untwistedDescentPair j).colsPlus 0 γ'⁻¹
@@ -289,8 +290,10 @@ lemma modKernelBilin_stackedDetProdCoords_equivariant (j : D.LiftIndex) (i : D.R
       RingHom.ext fun x ↦ by simp [starRingEnd_apply (R := D.E)]
     have hA : A = fun τ : D.Φ ↦
         (GeneralLinearGroup.map (Φ τ) (↑γ'⁻¹ : GL (FirstFactorIndex j) D.E)).val := rfl
-    have h_star : conj ∘ star v = v := star_star v
-    refine star_injective ((map_weightRep conj γ'⁻¹ (star v)).trans ?_)
+    have h_star (u : WeylIndex (FirstFactorIndex j) (untwistedDescentPair j).colsPlus → ℂ) :
+        conj ∘ star u = u := star_star u
+    apply (starRingEnd ℂ).injective.comp_left
+    refine (map_weightRep conj γ'⁻¹ (star v)).trans ?_
     simp [weylRep, h_conj, hA, h_star]
   have h_coords : schur (untwistedDescentPair j).colsPlus A *ᵥ θ' ∘ stackedDetProdCoords j i Y' =
       θ ∘ stackedDetProdCoords j i Y := by
