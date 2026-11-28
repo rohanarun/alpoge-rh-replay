@@ -215,8 +215,14 @@ lemma isValuationPair_Ô : IsValuationPair (Ô E) := by
       v (a w) ≤ v ((a - idem S * (a - b)) w) ∧ v (b w) ≤ v ((a - idem S * (a - b)) w) := by
     by_cases hw : v (a w) ≤ v (b w) <;> simp [S, hw, le_of_not_ge]
   refine ⟨⟨idem S, idem_mem_Ô S⟩, h_idem, ?_⟩
-  change Ô E ∙ a ⊔ Ô E ∙ b ≤ Ô E ∙ (a - idem S * (a - b))
-  simpa [exists_eq_mul_iff_v_le] using forall_and.1 h_le
+  let c := a - idem S * (a - b)
+  change Ô E ∙ a ⊔ Ô E ∙ b ≤ Ô E ∙ c
+  have h_mem {x : 𝔸f E} (hx : ∀ w : FinPlace E, v (x w) ≤ v (c w)) :
+      x ∈ Ô E ∙ c := by
+    obtain ⟨r, hr, rfl⟩ := exists_eq_mul_iff_v_le.2 hx
+    exact Submodule.mem_span_singleton.2 ⟨⟨r, hr⟩, mul_comm r c⟩
+  simp only [sup_le_iff, Submodule.span_singleton_le_iff_mem]
+  exact ⟨h_mem (fun w ↦ (h_le w).1), h_mem (fun w ↦ (h_le w).2)⟩
 
 instance [IsCMField E] : IsStarStable (Ô E) := ⟨star_mem_Ô⟩
 
